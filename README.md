@@ -50,7 +50,7 @@ npx github:weedmo/skills --yes --dry-run
 | `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Installs weed-harness's shared skills plus selected loop plugins. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
-| `antigravity` | `~/.antigravity/skills/` | Installs weed-harness's shared skills plus, from matt-loop, only the shared PR skills (`pr-babysit`, `resolving-merge-conflicts`); auto-loop is skipped. No native discovery confirmed — reference the skill files yourself. Antigravity receives work as a `direct` handoff from design-map (all-`[default]` specs), not as a matt-auto worker. |
+| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus, from matt-loop, only the shared PR skills (`pr-babysit`, `resolving-merge-conflicts`); auto-loop is skipped. No native discovery confirmed — reference the skill files yourself. Antigravity receives work as a `direct` handoff from design-map (all-`[default]` specs), not as a matt-auto worker. |
 | `orca` | `~/.agents/skills/` | Universal agent-skills directory; Orca exposes these skills to every agent it drives. Skip this platform if you installed the plugins natively via Claude/Codex (see [Orca](#orca) below) to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,

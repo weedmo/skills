@@ -363,12 +363,13 @@ In order:
    inside an Orca terminal (`ORCA_*` env) or off Linux try `orca` then `orca-ide`;
    otherwise only `orca-ide` (bare `orca` on Linux is the GNOME screen reader,
    never run it). `<bin> status --json` failing → no Orca → print the line. Else
-   `<bin> terminal create --worktree path:<repo> --command <codex|opencode|antigravity> --json`;
+   `<bin> terminal create --worktree path:<repo> --command <codex|opencode|agy> --json`;
    on `selector_not_found` run `<bin> repo add --path <repo> --json` and retry
    once; any other failure → print the line. Poll
    `<bin> terminal read --terminal <handle> --screen --json` until the CLI's
-   input prompt is on screen (Codex: `› Ask Codex`; Antigravity: its idle prompt
-   as recorded on the first probe, otherwise any screen change; up to 60 s, else print the
+   input prompt is on screen (Codex: `› Ask Codex`; Antigravity `agy`: first its folder-trust
+   dialog — send Enter on `Yes, I trust this folder` — then its input prompt,
+   or any screen change after the dialog; up to 60 s, else print the
    line), then `<bin> terminal send --terminal <handle> --text "<handoff line>" --enter --json`,
    poll again until `Working (` appears, and stop there. 이 세션에서 계속: invoke
    the Claude edition right here — `matt-loop:matt-auto` with `--spec <path>`

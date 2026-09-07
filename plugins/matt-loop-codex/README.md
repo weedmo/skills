@@ -54,7 +54,10 @@ max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; d
 - `service_tier` in `config.toml` is global. If a Codex version ignores the
   role files' `service_tier`, the choice is "priority everywhere" (your session
   and every worker at fast-mode prices) or "standard everywhere" — there is no
-  per-worker fallback.
+  per-worker fallback. Verified on Codex 0.153.4 (2026-09-07): `--strict-config`
+  loads the role files with `service_tier`, `model_verbosity`, and `xhigh`
+  without complaint and a `matt-default` spawn runs on `gpt-5.6-terra`; whether
+  tier and verbosity are applied is not visible in session logs — check the bill.
 - Not adopted: a `gpt-5.6-luna` tier for mechanical tickets (10× cheaper than
   terra). Kept as an autocode experiment candidate — metric: cost per passed
   ticket — because a luna failure costs a terra retry.
