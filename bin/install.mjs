@@ -9,7 +9,7 @@
 //
 // weed-harness (the shared loop runtime: loop-report, model-routing,
 // loop-gates) is always installed on every selected platform; its Claude
-// Code-only skills (setup, design-map) are skipped elsewhere. Loop plugins
+// Code-only setup is skipped elsewhere; design-map also ships to Codex. Loop plugins
 // are opt-in and available on every platform. The unlazy skill the loops
 // verify with is ensured via `npx skills add` unless --no-unlazy is given.
 
@@ -55,14 +55,16 @@ const PLUGINS = {
     required: true,
     src: path.join(ROOT, "skills"),
     desc: "shared loop runtime (loop-report, model-routing, loop-gates) + Claude Code setup",
-    // Only meaningful on Claude Code: the HUD/hooks setup and the Artifact-based design flow.
-    claudeOnlySkills: ["setup", "design-map"],
+    skillPlatforms: {
+      setup: ["claude-code"],
+      "design-map": ["claude-code", "codex"],
+    },
   },
   // Loop plugins ship two roots: plugins/<name>-claude (Claude Code edition,
   // built on Workflow / Agent / Artifact) and plugins/<name>-codex (Codex,
   // OpenCode, gemini-cli, Orca edition). The platform picks the root.
   // restrictSkills: per-platform allow-list. An empty list skips the plugin on
-  // that platform; an absent key installs every skill (after claudeOnlySkills).
+  // that platform; an absent key leaves the skillPlatforms filter unchanged.
   "matt-loop": {
     src: (platform) => path.join(ROOT, "plugins", `matt-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
     desc: "matt-auto + vendored Matt Pocock skills (human-in-the-loop conducted Matt flow)",
@@ -273,9 +275,11 @@ for (const platform of platforms) {
   const dest = PLATFORMS[platform].dir(HOME);
   const platformPlugins = ["weed-harness", ...plugins];
   console.log(`[${platform}] ${dest} (${platformPlugins.join(", ") || "cleanup only"})`);
-  const legacySkills = platform === "claude-code"
-    ? LEGACY_SKILLS
-    : [...LEGACY_SKILLS, "setup", "design-map"];
+  const legacySkills = [
+    ...LEGACY_SKILLS,
+    ...(platform === "claude-code" ? [] : ["setup"]),
+    ...(platform === "claude-code" || platform === "codex" ? [] : ["design-map"]),
+  ];
   const legacyDirs = platform === "opencode"
     ? [dest, path.join(HOME, ".config", "opencode", "skill")]
     : [dest];
@@ -298,7 +302,7 @@ for (const platform of platforms) {
     }
   }
   for (const plugin of platformPlugins) {
-    const { claudeOnlySkills = [], restrictSkills = {} } = PLUGINS[plugin];
+    const { skillPlatforms = {}, restrictSkills = {} } = PLUGINS[plugin];
     const allowed = restrictSkills[platform];
     if (Array.isArray(allowed) && allowed.length === 0) {
       console.log(`  ! ${plugin}: skipped for ${platform}`);
@@ -307,7 +311,7 @@ for (const platform of platforms) {
     const src = pluginSrc(plugin, platform);
     const skills = skillDirs(src).filter(
       (skill) =>
-        (platform === "claude-code" || !claudeOnlySkills.includes(skill)) &&
+        (!skillPlatforms[skill] || skillPlatforms[skill].includes(platform)) &&
         (!allowed || allowed.includes(skill)),
     );
     if (skills.length === 0) {

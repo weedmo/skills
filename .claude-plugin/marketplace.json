@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "weed-plugins",
   "description": "Weed's Claude Code harness - one repo, per-loop plugins",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "owner": {
     "name": "weedmo"
   },
@@ -10,8 +10,8 @@
     {
       "name": "weed-harness",
       "source": "./",
-      "description": "Shared loop runtime every weed loop plugin builds on - loop-report (live progress page; Artifact on Claude Code, Orca delivery elsewhere), interview-report and autocode-board (page views), model-routing (Codex-side model/effort tiers), loop-gates (unlazy completion discipline) - plus the Claude Code HUD and opt-in hooks",
-      "version": "5.3.0",
+      "description": "Visual design on Claude Code and Codex plus the shared loop runtime: progress-page delivery, model routing with independent Sol review, completion gates, and Claude Code hooks",
+      "version": "5.4.0",
       "author": {
         "name": "weedmo"
       },
@@ -27,7 +27,7 @@
       "name": "matt-loop",
       "source": "./plugins/matt-loop-claude",
       "description": "Matt loop, Claude Code edition - matt-auto on the built-ins (fork delegate, plugin agents, Workflow or /batch, /code-review, /loop, Artifact page) with an execution plan gate, PR babysitting, conflict resolution, and the vendored Matt Pocock skills. Requires weed-harness 5.0+",
-      "version": "3.2.0",
+      "version": "3.3.0",
       "author": {
         "name": "weedmo"
       },
