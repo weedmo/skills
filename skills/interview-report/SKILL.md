@@ -93,7 +93,7 @@ contract. The view's own keys:
 - `stages` in the order the pipeline ran them. Use matt-auto's own stages (Interview, Size branch,
   Spec, Tickets, Confirm, Implement, Ship); drop stages that never applied — except skipped ones,
   which stay visible with `"status": "skipped"` and a `note` saying why (`"small path"`,
-  `"autonomous"`).
+  `"autonomous"`, `"design-map spec"`).
 - `status`: `done` / `in-progress` / `pending` / `skipped`. Optional explicit `percent`; else done
   is 100, pending 0, an in-progress implement stage follows its tickets.
 - **`design` stage — only on a `matt-auto --spec` run**, and then first: `id: "design"`,

@@ -372,7 +372,7 @@ In order:
    the Claude edition right here — `matt-loop:matt-auto` with `--spec <path>`
    (or `auto-loop:autocode init --spec <path>`); it has no
    `disable-model-invocation`, its delegate is a fork of this conversation, and
-   its interview asks only what the spec leaves open. `/fork` 배경 세션: a session
+   its interview is skipped — the spec was it. `/fork` 배경 세션: a session
    cannot fork itself — print `/fork /matt-loop:matt-auto --spec <path>` for the
    user to type, then stop. 명령만 받기: print the line. The lines: Codex
    `use $matt-auto --spec <path>`, OpenCode `/matt-auto --spec <path>`, Claude

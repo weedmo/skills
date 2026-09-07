@@ -43,6 +43,7 @@ flowchart LR
 | D3 | meta prompt는 누가 쓰나 | 받는 세션이 spec에서 자기 실행 프롬프트를 먼저 써서 보여준 뒤 실행 | design-map이 자유 작문하면 spec과 두 벌이 된다. 계획이 보이는 체크포인트가 grill log와 같은 역할. 루프 밖이라 Astra `ultra` 위임도 쓸 수 있다 |
 | D4 | 단계별 모델은 누가 정하나 | design-map이 구현 순서에 `[deep]` / `[default]` 태그, matt-auto `--spec`은 태그를 티어로 읽음 | `--spec`이 인터뷰를 미리 채우듯 티켓 분류도 미리 채운다. 태그 수가 추천의 근거가 된다 |
 | D5 | 경계값 | 1–2 / 3–6 / 7+ 단계 | 출발점. 같은 spec을 두 경로로 돌려 본 뒤 조정한다 |
+| D6 | matt-auto `--spec`이 인터뷰를 다시 하나 | 하지 않는다. design-map의 self-grill과 사용자 확정이 인터뷰였고, 인터뷰 게이트는 spec으로 자동 통과(`--confirm`만 복원) | 같은 질문을 두 번 묻는 건 고정비만 늘린다. 남은 질문은 to-spec · to-tickets 단계에서 위임자에게 가고, spec 결정을 뒤집는 것만 `design override`로 에스컬레이션 |
 
 ## 구현 순서
 
@@ -50,3 +51,4 @@ flowchart LR
 2. `[default]` `skills/design-map/SKILL.md` — `loop: direct`, 추천 표, 단계 태그, direct handoff 라인. verify: `grep -c direct` > 0, 8단계 문장 읽기.
 3. `[default]` matt-auto 두 에디션 · pr-babysit(Codex) — 태그를 티어로 읽는 한 문장, Default 스폰 모델 terra. verify: `node bin/check-words.mjs`.
 4. `[default]` README · SKILL_MAP · diet-b 대조표 후기. verify: `npm test`.
+5. `[default]` matt-auto 두 에디션 4단계 — `--spec`이면 인터뷰와 게이트 생략, `⏭️ design-map spec`; interview-report note 예시. verify: `node bin/check-words.mjs`.
