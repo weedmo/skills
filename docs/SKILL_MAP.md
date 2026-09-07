@@ -130,7 +130,7 @@ On top of it, two loops with different graphs:
   workers; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
   resolves an active merge/rebase on the Deep tier
 - **auto-loop** (`plugins/auto-loop-claude/skills/` on Claude Code, `plugins/auto-loop-codex/skills/` elsewhere): **autocode** runs a hypothesis-driven parallel
-  improvement loop (`init --spec` pre-fills it from a design-map spec), publishing its
+  improvement loop (`init --spec` replaces its interview with a design-map spec), publishing its
   experiment board through loop-report and ending in a PR of the kept changes (one squash
   commit each, on a worktree branch; `run --pr <base>` / `--no-pr`)
 - **graphify** (`graphify install --platform codex`) stays a standalone install

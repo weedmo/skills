@@ -20,7 +20,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 | Command | Action | User Confirmation |
 |---|---|---|
-| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` pre-fills the interview from a confirmed design-map spec | Reuse prior answers and approval; ask for unresolved choices |
+| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` replaces the interview with a confirmed design-map spec | Reuse prior answers and approval; ask for unresolved choices |
 | `/autocode run [--parallel N] [--on <env>] [--pr <base> \| --no-pr]` | Run the loop until budget, target, or exhaustion; then open the PR of kept changes | None (autonomous) |
 | `/autocode status` | Frontier, running experiments, best metric, routing tally | None |
 | `/autocode resume` | Continue from `state.json` after interruption | None |
@@ -45,9 +45,9 @@ Scan the repo before asking anything: language and build system, test command, e
 
 ### 2B: Interview (one question at a time, dynamic follow-ups)
 
-Reuse user, spec, and reconnaissance answers. Ask only unresolved choices affecting the outcome, using Codex's available clarification tool (e.g. `request_user_input_async`) or chat; `AskUserQuestion` requires a platform exposing it. Continue independent work while required answers are pending. Fields and defaults: `target_files`, `metric_name`, `metric_command` (last line: one number), `metric_direction` (lower), `guard_command` (detected tests), `worktree_setup`, `scope` (module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (current branch; `none` disables PR). Wording, spec keys, and follow-ups are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
+Reuse user and reconnaissance answers. Ask only unresolved choices affecting the outcome, using Codex's available clarification tool (e.g. `request_user_input_async`) or chat; `AskUserQuestion` requires a platform exposing it. Continue independent work while required answers are pending. Fields and defaults: `target_files`, `metric_name`, `metric_command` (last line: one number), `metric_direction` (lower), `guard_command` (detected tests), `worktree_setup`, `scope` (module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (current branch; `none` disables PR). Wording, spec keys, and follow-ups are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
-With `--spec`, the frontmatter `metric` block answers `metric_name`, `metric_command`, `metric_direction`, `performance_target`, `target_files`, `guard_command`, and `forbidden_zones` (key per field in § Interview fields). A pre-filled value is an answer; evaluate follow-ups against the same context and ask only what remains unresolved.
+With `--spec` skip the interview: design-map's self-grill and the user's confirmation were it; the `metric` block fills its keys (§ Interview fields), the rest and the follow-ups take recon or defaults; nothing is asked.
 
 ### 2C: Difficulty classification (strategist tier)
 
@@ -74,7 +74,7 @@ Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines neve
 
 ### 2F: Approval
 
-Present `program.md` with difficulty, tier, scope, budget, and PR destination. Reuse prior approval covering these choices; otherwise request it through the platform's permitted approval flow, not a clarification-only tool. Silence is not approval; initialization alone does not authorize a run.
+Present `program.md` with difficulty, tier, scope, budget, and PR destination. Reuse prior approval covering these choices (a confirmed `--spec` is prior approval); otherwise request it through the platform's permitted approval flow, not a clarification-only tool. Silence is not approval; initialization alone does not authorize a run.
 
 ---
 

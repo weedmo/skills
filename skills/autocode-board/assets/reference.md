@@ -6,7 +6,8 @@ at the point where each one is needed; nothing here changes the procedure.
 ## Interview fields (2B)
 
 Use the calling skill's platform-specific question flow. Reuse answers from the user,
-spec, and reconnaissance; propose defaults and ask only about unresolved choices.
+spec, and reconnaissance; propose defaults and ask only about unresolved choices. With a
+confirmed `--spec` nothing is asked: spec keys fill their fields, the rest take the defaults.
 
 | Field | Question | Default | `--spec` key |
 |---|---|---|---|

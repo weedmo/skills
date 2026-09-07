@@ -20,7 +20,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 | Command | Action | User Confirmation |
 |---|---|---|
-| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` pre-fills the interview from a confirmed design-map spec | Required (interview + approval) |
+| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` replaces the interview with a confirmed design-map spec | Required (interview + approval; `--spec` supplies both) |
 | `/autocode run [--parallel N] [--pr <base> \| --no-pr]` | Run the loop until budget, target, or exhaustion; then open the PR of kept changes | None (autonomous) |
 | `/autocode status` | Frontier, running experiments, best metric, routing tally | None |
 | `/autocode resume` | Continue from `state.json` after interruption | None |
@@ -47,7 +47,7 @@ Scan the repo before asking anything: language and build system, test command, e
 
 Ask with `AskUserQuestion`, one question at a time, proposing the recon-derived answer as the recommended option; loop until every required field is filled. The fields — `target_files`, `metric_name`, `metric_command` (prints the metric as a single number on the last line), `metric_direction` (default lower), `guard_command` (default: detected test command), `worktree_setup`, `scope` (function / module / system, default module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (default: the current branch; `none` = no PR) — with their wording, defaults, and the five follow-ups (hot-path files, interface compatibility, external systems, typecheck/lint in the guard, optional `screen_command` when the metric runs > 60 s) are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
-With `--spec`, the frontmatter `metric` block answers `metric_name`, `metric_command`, `metric_direction`, `performance_target`, `target_files`, `guard_command`, and `forbidden_zones` (key per field in § Interview fields); ask the primary question only for fields it leaves empty. A pre-filled value is an answer: its follow-ups still run.
+With `--spec` there is no interview — design-map's self-grill and the user's confirmation were it: the `metric` block fills its keys (§ Interview fields), the rest take their defaults, follow-ups are answered from recon or left at default, nothing is asked.
 
 ### 2C: Difficulty classification (strategist tier)
 
@@ -74,7 +74,7 @@ Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines neve
 
 ### 2F: Approval
 
-Present `program.md` (including the difficulty classification and strategist tier) via `AskUserQuestion`: **[Approve and save] [Edit and regenerate] [Start over]**.
+Present `program.md` (including the difficulty classification and strategist tier) via `AskUserQuestion`: **[Approve and save] [Edit and regenerate] [Start over]**. With `--spec`, skip the question — the confirmed spec is the approval; show the same summary in one line and continue.
 
 ---
 
