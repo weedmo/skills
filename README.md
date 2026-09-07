@@ -129,7 +129,7 @@ workflow guidance.
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the loops use the upstream unlazy skill: ledger per unit of work, coordinator-side `--reverify`, two retries then handoff, boundaries with Orca |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code | Visual-first design flow on an Artifact diagram, ending in a spec file with a frontmatter the loops read; the handoff commits the spec on a branch and hands it to `matt-auto --spec` / `autocode init --spec` on Codex or OpenCode (Orca terminal when reachable, else a line to paste) |
+| `/design-map` | Claude Code | Visual-first design flow on an Artifact diagram — the design is grilled against a fork delegate (design tree, frontier rounds, `ESCALATE` for the user) before the first publish, and the decisions plus the grill log sit on the page — ending in a spec file with a frontmatter the loops read; the handoff commits the spec on a branch and hands it to `matt-auto --spec` / `autocode init --spec` on Codex or OpenCode (Orca terminal when reachable, else a line to paste) |
 
 ### matt-loop
 

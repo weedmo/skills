@@ -1,6 +1,6 @@
 ---
 name: design-map
-description: Visual-first design flow. Explore the codebase, present the design as a diagram Artifact (not prose), iterate until the user says the design is understood and settled, then write a local spec file and gate it with code-review. No GitHub issues are filed. Ends ready-to-implement. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or when the user wants to design a structure visually before implementing.
+description: Visual-first design flow. Explore the codebase, grill the design against a fork delegate before drawing it, present it as a diagram Artifact (not prose) with the decisions and the grill log on the page, iterate until the user says the design is understood and settled, then write a local spec file and gate it with code-review. No GitHub issues are filed. Ends ready-to-implement. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or when the user wants to design a structure visually before implementing.
 ---
 
 # design-map
@@ -17,7 +17,7 @@ Hard rules:
   descriptions, decision tables) and the spec document. Identifiers that refer to
   real code — module/function/file names, diagram node names, commands — stay in
   English as they appear in the codebase.
-- Never hand the user a link before the render check (step 3) has passed on the
+- Never hand the user a link before the render check (step 4) has passed on the
   version that is live. A diagram with clipped, overflowing, or overlapping text is
   not a deliverable, even if the design behind it is right.
 
@@ -44,13 +44,52 @@ details (exact signatures, all callers) against the real source before drawing t
 Collect real names (modules, functions, tables) — diagrams built from real names,
 never placeholders.
 
-### 3. Diagram the design
+### 3. Self-grill
+The first page the user sees must already be a design that has been argued
+with, not a first guess. Before drawing, interview the design the way
+matt-auto's interview does — but the answerer is a **decision delegate**, not
+the user. This step is self-contained (the `grilling` skill is not installed
+everywhere; do not invoke it):
+- **Spawn the delegate** once: `Agent` with `subagent_type: "fork"` — it
+  inherits the scope and survey, so no summary is needed. Keep it alive across
+  rounds with `SendMessage`. Its brief: answer with senior-engineer judgment,
+  prefer the recommended answer unless it sees a concrete flaw, reply with the
+  decision plus a one-line rationale, and never decide — replying
+  `ESCALATE: <why>` — on security, data meaning or migration, destructive
+  operations, externally visible interface changes, or anything that
+  contradicts the scope the user gave.
+- **Work a design tree in rounds.** Every decision branches into the decisions
+  that hang off it. The frontier is every question whose prerequisites are
+  settled; send the whole frontier in one round, each question numbered with
+  the options and your recommended answer. A question that depends on one still
+  open in this round belongs to the next round. Settled answers push the
+  frontier outward; recompute and send the next round.
+- **Facts are found, never asked.** A question that needs something from the
+  codebase (does X call Y, what does this table hold, where is the boundary) is
+  answered from step 2's graph or the source, not put to the delegate. Only
+  decisions go to the delegate.
+- **Stop** when the frontier is empty or after the third round, whichever
+  comes first. Questions still open at the cap stay open on the page.
+- **Keep the log**: question → options → decision → rationale → what it changed
+  in the design. This log is the source of step 4's decision list; its
+  `ESCALATE` entries are the questions the user must answer.
+One line in chat when it ends: how many questions, how many settled, how many
+escalated. The design that gets drawn is the one the log left standing — a
+tree that changed nothing means the questions were not hard enough.
+
+### 4. Diagram the design
 Load the `artifact-diagramming` skill first, then build one Artifact page containing:
 - **Current structure** — how it is wired today (only if something exists already).
 - **Proposed structure** — the design. When a real fork in the road exists, show
   two alternatives side by side (design-it-twice) with a short tradeoff table and
   a recommendation; otherwise one proposal is fine.
-- **Decision list** — each open question as a row: question / options / your pick / why.
+- **Decision list** — one row per step-3 log entry: question / options / pick /
+  why. `ESCALATE` rows come first, marked 사용자 결정 필요, with the
+  recommended answer as the pick; the user's answer settles them.
+- **Self-grill log** (collapsed by default, `<details>`) — the step-3 log as a
+  table: 질문 · 결정 · 이유 · 설계에 미친 변화. It is data in the page state
+  like the decision list, so the user can open it and see what was tried,
+  without prose in chat.
 Every diagram on the page is hand-drawn inline SVG under the drawing rules
 below — from the first round, not only after confirmation. Mermaid appears
 only in the spec's 확정 구조 (the source the implementing loops read), never
@@ -192,7 +231,7 @@ local file looks like proves nothing — check the live page.
    path, and run the check again. Repeat until it comes back `OK` in both
    themes. Report in one line what the check covered and which browser it ran in.
 
-### 4. Understanding loop
+### 5. Understanding loop
 Feedback arrives three ways; treat all of them as design input:
 - **Chat** — as before.
 - **Artifact comments** — the user selects part of the page and comments.
@@ -205,13 +244,17 @@ Feedback arrives three ways; treat all of them as design input:
   (`action: "read"`), merge its state into your file, and build every later
   update on top of it. A publish conflict is the same signal — merge onto the
   handed-back version, never force.
+A user answer to a 사용자 결정 필요 row settles it: drop the mark, record
+the answer as the pick. A change that reopens a settled decision goes back
+through the delegate for the decisions that hung off it before the diagram
+changes.
 Each round: apply feedback to the same Artifact (same file path → same URL),
-run the render check from step 3 on the republished page, answer questions by
+run the render check from step 4 on the republished page, answer questions by
 pointing at the diagram, keep decision-list rows updated.
 Repeat until the user confirms the design is understood and settled. If they go
 quiet mid-loop, the design is NOT confirmed — wait or ask, don't advance.
 
-### 5. Spec
+### 6. Spec
 Before writing, re-read the live artifact (`action: "read"`) — the user may have
 edited decisions in place since your last publish; the live version is the
 source of truth. Then write the spec as a local markdown file (Korean prose,
@@ -260,7 +303,7 @@ changes structure *and* then moves a number is `loop: matt-auto` with
 `followup: autocode` and the metric block filled. Do NOT publish it anywhere — no
 issues, no PRs.
 
-### 6. Review gate
+### 7. Review gate
 Run the `code-review` skill with the spec file as the path target (low effort).
 If findings come back, fix the spec and update the Artifact to match. If the
 code-review skill is unavailable in the session, spawn one general-purpose agent to
@@ -268,9 +311,9 @@ adversarially review the spec (contradictions, missing edge cases, steps that ca
 be verified) and apply what survives.
 
 Any spec change from here on edits the mermaid and the Artifact's SVG
-together, then republishes and runs the step-3 render check.
+together, then republishes and runs the step-4 render check.
 
-### 7. Handoff
+### 8. Handoff
 The spec crosses to the implementing CLI as a committed file — nothing else
 does; a receiving Codex or OpenCode session never sees this conversation. On
 Claude Code with the matt-loop Claude edition installed, this session itself
