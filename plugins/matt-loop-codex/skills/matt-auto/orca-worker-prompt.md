@@ -1,4 +1,4 @@
-# Orca worker prompt (matt-auto `--orca`)
+# Orca worker prompt (matt-auto parallel waves)
 
 Append these lines to the per-ticket implementation prompt when the worker is an Orca dispatch. The first paragraph is the same prompt matt-auto uses in-session.
 

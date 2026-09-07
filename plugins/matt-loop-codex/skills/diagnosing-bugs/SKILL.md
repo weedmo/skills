@@ -17,7 +17,7 @@ If the redacted output is not enough to diagnose the bug, say so and ask the use
 
 ## Phase 1: Build a feedback loop
 
-**This is the skill.** Everything else is mechanical. If you have a **tight** pass/fail signal for the bug (one that goes red on _this_ bug), you will find the cause; bisection, hypothesis-testing, and instrumentation all just consume it. If you don't have one, no amount of staring at code will save you.
+**This is the skill.** Everything else is mechanical. If you have a **tight** pass/fail signal for the bug (one that goes red on _this_ bug), you will find the cause; bisection, hypothesis-testing, and instrumentation all just consume it. Use code and log analysis to discover a runnable signal when one is not yet available.
 
 Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
 
@@ -52,7 +52,7 @@ The goal is not a clean repro but a **higher reproduction rate**. Loop the trigg
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+Use available code, logs, traces, and history to form provisional, falsifiable hypotheses and identify a feasible reproduction. Label what is observed versus inferred; absence of a repro limits confidence, not read-only investigation. If further progress requires unavailable evidence or access, list what you tried and ask for the specific missing environment or redacted artifact. Production instrumentation requires authorization. Do not claim a reproduced or verified fix without evidence.
 
 ### Completion criterion: a tight loop that goes red
 
@@ -63,7 +63,7 @@ Phase 1 is done when the loop is **tight** and **red-capable**: you can name **o
 - [ ] **Fast**: seconds, not minutes.
 - [ ] **Agent-runnable**: you can run it unattended; a human in the loop only via `scripts/hitl-loop.template.sh`.
 
-If you catch yourself reading code to build a theory before this command exists, **stop: jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.
+Read code and logs as needed to discover the trigger and build this command. Move between provisional hypotheses and reproduction attempts; test predictions as soon as a runnable signal exists. The checklist is the target for a strong reproduction, not a prerequisite for inspecting evidence.
 
 ## Phase 2: Reproduce + minimise
 
@@ -83,7 +83,7 @@ Why bother: a minimal repro shrinks the hypothesis space in Phase 3 (fewer movin
 
 Done when **every remaining element is load-bearing**: removing any one of them makes the loop go green.
 
-Do not proceed until you have reproduced **and** minimised.
+Minimise enough to distinguish the leading hypotheses. When reproduction remains unavailable, continue evidence-based diagnosis with that limitation explicit; do not present a provisional cause as experimentally confirmed.
 
 ## Phase 3: Hypothesise
 

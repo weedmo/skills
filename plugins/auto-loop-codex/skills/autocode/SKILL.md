@@ -20,7 +20,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 | Command | Action | User Confirmation |
 |---|---|---|
-| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` pre-fills the interview from a confirmed design-map spec | Required (interview + approval) |
+| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` pre-fills the interview from a confirmed design-map spec | Reuse prior answers and approval; ask for unresolved choices |
 | `/autocode run [--parallel N] [--on <env>] [--pr <base> \| --no-pr]` | Run the loop until budget, target, or exhaustion; then open the PR of kept changes | None (autonomous) |
 | `/autocode status` | Frontier, running experiments, best metric, routing tally | None |
 | `/autocode resume` | Continue from `state.json` after interruption | None |
@@ -45,9 +45,9 @@ Scan the repo before asking anything: language and build system, test command, e
 
 ### 2B: Interview (one question at a time, dynamic follow-ups)
 
-Ask with `AskUserQuestion`, one question at a time, proposing the recon-derived answer as the recommended option; loop until every required field is filled. The fields — `target_files`, `metric_name`, `metric_command` (prints the metric as a single number on the last line), `metric_direction` (default lower), `guard_command` (default: detected test command), `worktree_setup`, `scope` (function / module / system, default module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (default: the current branch; `none` = no PR) — with their wording, defaults, and the five follow-ups (hot-path files, interface compatibility, external systems, typecheck/lint in the guard, optional `screen_command` when the metric runs > 60 s) are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
+Reuse user, spec, and reconnaissance answers. Ask only unresolved choices affecting the outcome, using Codex's available clarification tool (e.g. `request_user_input_async`) or chat; `AskUserQuestion` requires a platform exposing it. Continue independent work while required answers are pending. Fields and defaults: `target_files`, `metric_name`, `metric_command` (last line: one number), `metric_direction` (lower), `guard_command` (detected tests), `worktree_setup`, `scope` (module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (current branch; `none` disables PR). Wording, spec keys, and follow-ups are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
-With `--spec`, the frontmatter `metric` block answers `metric_name`, `metric_command`, `metric_direction`, `performance_target`, `target_files`, `guard_command`, and `forbidden_zones` (key per field in § Interview fields); ask the primary question only for fields it leaves empty. A pre-filled value is an answer: its follow-ups still run.
+With `--spec`, the frontmatter `metric` block answers `metric_name`, `metric_command`, `metric_direction`, `performance_target`, `target_files`, `guard_command`, and `forbidden_zones` (key per field in § Interview fields). A pre-filled value is an answer; evaluate follow-ups against the same context and ask only what remains unresolved.
 
 ### 2C: Difficulty classification (strategist tier)
 
@@ -60,7 +60,7 @@ Classify **hard** when any of: scope is system-wide; the target spans more than 
 
 ### 2D: Generate `program.md`
 
-Template: `<autocode-board's dir>/assets/reference.md` § program.md (Target, Metric, Guard, Worktree, Constraints, Budget — including `pr_base` — Routing, Plateau — `consecutive_discard_threshold: 5`, `window: 8`, `unlazy_gates` — Strategy Hints); fill every field from 2B/2C. With `--spec`, set the template's `spec` line to the path and put the spec's `## 큰 틀` and `## 결정` table under Strategy Hints. Create `results.tsv` with header `seq\thypothesis\troute\tcommit\tmetric\tdelta\tstatus\tnote`, the directories from Step 0, and add `.autocode/` to `.gitignore` (ask first; worktrees live under it and must never be committed).
+Template: `<autocode-board's dir>/assets/reference.md` § program.md (Target, Metric, Guard, Worktree, Constraints, Budget — including `pr_base` — Routing, Plateau — `consecutive_discard_threshold: 5`, `window: 8`, `unlazy_gates` — Strategy Hints); fill every field from 2B/2C. With `--spec`, set the template's `spec` line to the path and put the spec's `## 큰 틀` and `## 결정` table under Strategy Hints. Create `results.tsv` with header `seq\thypothesis\troute\tcommit\tmetric\tdelta\tstatus\tnote`, the directories from Step 0, and add `.autocode/` to `.gitignore` as part of the requested initialization (preserve existing entries; worktrees live under it and must never be committed).
 
 ### 2E: Runnable completion gates (unlazy, optional)
 
@@ -70,11 +70,11 @@ Follow `$loop-gates`: locate unlazy once; if missing, ask once whether to instal
 - `verify-metric.mjs` — re-runs the metric inside `.autocode/worktrees/best` and asserts it is at least as good as `best_metric` in `state.json` within the noise band; prints `autocode gate passed: metric`. It re-measures; it never trusts the recorded number.
 - `verify-target.mjs` — only with `performance_target`; re-measures and asserts the target is met; prints `autocode gate passed: target`.
 
-Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines never change and one approval keeps the loop autonomous. Show the user `GATES.md` and every script, then with explicit consent approve the ledger once (`gate-check.mjs --approve`). The coordinator re-verifies it at termination (3F); the retry bound, the handoff on unmet gates, and the Orca boundaries are loop-gates'. Do not install unlazy's Stop hook.
+Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines never change and one approval keeps the loop autonomous. Read every check and approve the coordinator-authored ledger once (`gate-check.mjs --approve`) as specified by `$loop-gates`, provided its commands stay within the user's authorized scope. New external or destructive actions still require authorization. The coordinator re-verifies it at termination (3F); the retry bound, the handoff on unmet gates, and the Orca boundaries are loop-gates'. Do not install unlazy's Stop hook.
 
 ### 2F: Approval
 
-Present `program.md` (including the difficulty classification and strategist tier) via `AskUserQuestion`: **[Approve and save] [Edit and regenerate] [Start over]**.
+Present `program.md` with difficulty, tier, scope, budget, and PR destination. Reuse prior approval covering these choices; otherwise request it through the platform's permitted approval flow, not a clarification-only tool. Silence is not approval; initialization alone does not authorize a run.
 
 ---
 
@@ -99,7 +99,7 @@ Write `state.json` (`<autocode-board's dir>/assets/reference.md` § state.json: 
 
 ### 3C: Spawn the strategist (persistent)
 
-Spawn one strategist for the whole run (`auto-loop:strategist` on Claude Code; on Codex the Deep pair, or `reasoning_effort: "max"` when `program.md` says hard; see 3H). Keep its agent id in `state.json` and continue the same conversation with `SendMessage` for every result — never respawn per event; its accumulated context is what makes replanning cheap.
+Spawn one persistent strategist (`auto-loop:strategist` on Claude Code; Codex Deep, or `max` for hard; see 3H). Keep its id in `state.json`. Codex: `send_message` while running, `followup_task` after completion. Other platforms use their continuation tool. Follow `$model-routing` for fallbacks and effort-changing handoffs; preserve context except on escalation or session loss.
 
 Its first prompt carries the **strategist brief** (`<autocode-board's dir>/assets/reference.md` § Strategist brief, verbatim), `program.md`, the baseline and noise band, the lessons, the target file paths, and the hypothesis schema (§ Hypothesis: id, claim, experiment, expected_delta, touches, depends_on, difficulty default|deep, if_confirmed, if_refuted, priority, status), and asks for the **initial frontier**: at least `2 × parallel` hypotheses, preferring disjoint `touches`. Hypothesis `status` moves `pending → running → measured → keep | discard | crash | conflict | interaction | cancelled`. On every result event the strategist replies with a frontier delta — `add`, `cancel`, `reprioritize`, `escalate`, `note` (§ Strategist reply) — never a new plan.
 

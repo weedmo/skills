@@ -5,8 +5,8 @@ at the point where each one is needed; nothing here changes the procedure.
 
 ## Interview fields (2B)
 
-Ask with `AskUserQuestion`, one question at a time, proposing the reconnaissance-derived
-answer as the recommended option. Loop until every required field is filled.
+Use the calling skill's platform-specific question flow. Reuse answers from the user,
+spec, and reconnaissance; propose defaults and ask only about unresolved choices.
 
 | Field | Question | Default | `--spec` key |
 |---|---|---|---|
