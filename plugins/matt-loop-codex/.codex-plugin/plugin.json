@@ -1,6 +1,6 @@
 {
   "name": "matt-loop",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Codex packaging for matt-auto, PR babysitting, routed conflict resolution, automatic Codex model/effort routing, and the vendored Matt Pocock skills.",
   "author": {
     "name": "weedmo",
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "matt-loop",
     "shortDescription": "Matt Pocock's full engineering flow with a decision delegate and one final confirm",
-    "longDescription": "Install matt-loop in Codex to get matt-auto, a conductor that drives Matt Pocock's main flow end to end \u2014 grilling interview, spec, tracer-bullet tickets, per-ticket implementation \u2014 with a decision delegate answering implementation-level questions, immediate escalation of material decisions, and a single human confirm before tickets publish.",
+    "longDescription": "Install matt-loop in Codex to get matt-auto, a conductor that drives Matt Pocock's main flow end to end — grilling interview, spec, tracer-bullet tickets, per-ticket implementation — with a decision delegate answering implementation-level questions, immediate escalation of material decisions, and a single human confirm before tickets publish.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [
