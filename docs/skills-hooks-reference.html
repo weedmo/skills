@@ -219,7 +219,7 @@
   <div class="callout">
     <span class="ico">💡</span>
     <div>
-      <p><strong>스킬은 3계층으로 나뉩니다.</strong> ① 이 저장소의 <code>skills/</code> — 모든 플랫폼에 설치되는 weed-harness 공통 루프 런타임(loop-report · model-routing · loop-gates)과 Claude Code 전용 setup·design-map, ② <code>~/.claude/skills/</code> — 플러그인과 무관하게 로컬에 직접 설치된 스킬, ③ superpowers·unlazy 등 다른 플러그인이 제공하는 스킬(이 문서 범위 밖).</p>
+      <p><strong>스킬은 3계층으로 나뉩니다.</strong> ① 이 저장소의 <code>skills/</code> — weed-harness 공통 루프 런타임과 Claude Code·Codex 공용 design-map(단 setup은 Claude 전용), ② <code>~/.claude/skills/</code> — 플러그인과 무관하게 로컬에 직접 설치된 스킬, ③ superpowers·unlazy 등 다른 플러그인이 제공하는 스킬(이 문서 범위 밖).</p>
       <p>훅은 이 저장소의 <code>hooks/</code>에 스크립트로 보관되고, <code>settings.json</code>(사용자 전역)과 <code>hooks.json</code>(플러그인)에 이벤트별로 등록되어 실행됩니다.</p>
     </div>
   </div>
@@ -249,14 +249,14 @@
   </table>
   </div>
 
-  <h3>📝 Claude Code 전용 (weed-harness)</h3>
+  <h3>📝 설계·설정 (weed-harness)</h3>
   <div class="tablewrap">
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">setup</td><td><span class="tag orange">유지관리</span></td>
       <td>Claude Code 전용. 터미널 UI + 기본 설정만 담당 — statusLine HUD 설치, 커스텀 훅(language-rule, auto-update) 등록. 스킬 설치는 하지 않으며 멱등이라 반복 실행해도 안전.</td></tr>
     <tr><td class="name">design-map</td><td><span class="tag orange">설계</span></td>
-      <td>Claude Code 전용. 코드베이스를 탐색해 설계를 다이어그램 Artifact로 제시하고, 합의될 때까지 반복한 뒤 로컬 spec 파일로 남기고 code-review로 게이트. handoff에서 브랜치를 만들어 spec을 단독 커밋하고, Codex·OpenCode의 <code>matt-auto --spec</code> / <code>autocode init --spec</code>에 넘긴다(Orca 터미널 자동, 아니면 붙여넣을 한 줄).</td></tr>
+      <td>Claude Code·Codex 공용. Claude는 Artifact, Codex는 Orca 링크·탭 또는 로컬 HTML로 설계 페이지를 유지한다. 확정된 Codex direct spec은 deep이면 Astra, 그 외에는 Grok이 구현하고 Sol이 독립 리뷰한다. Antigravity는 조사·문서·기계적 보조 작업에 사용한다.</td></tr>
   </table>
   </div>
 

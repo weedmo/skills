@@ -21,8 +21,8 @@ keeps it, graphify, superpowers, and the three plugins up to date once present.
 ## Install (recommended): npx installer
 
 One command installs skill packs to any combination of the supported
-platforms. `weed-harness` is always installed (its Claude Code-only `setup`
-and `design-map` skills are skipped elsewhere); the loop plugins are opt-in.
+platforms. `weed-harness` is always installed (`setup` is Claude-only;
+`design-map` ships to Claude Code and Codex); the loop plugins are opt-in.
 Unless `--no-unlazy` is given, the installer also ensures the unlazy skill.
 
 ```bash
@@ -46,11 +46,11 @@ npx github:weedmo/skills --yes --dry-run
 
 | Platform | Skill directory | Notes |
 |----------|-----------------|-------|
-| `claude-code` | `~/.claude/skills/` | Installs weed-harness (shared runtime + Claude-only `setup` / `design-map`) plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
-| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Installs weed-harness's shared skills plus selected loop plugins. Restart Codex after install. |
+| `claude-code` | `~/.claude/skills/` | Installs weed-harness, including Artifact-backed `design-map` and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
+| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route Astra or Grok implementation through independent Sol review. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
-| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus, from matt-loop, only the shared PR skills (`pr-babysit`, `resolving-merge-conflicts`); auto-loop is skipped. No native discovery confirmed — reference the skill files yourself. Antigravity receives work as a `direct` handoff from design-map (all-`[default]` specs), not as a matt-auto worker. |
+| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. In Codex design execution it may handle discovery, docs, fixtures, and mechanical support while Astra/Grok owns implementation and Sol owns review. |
 | `orca` | `~/.agents/skills/` | Universal agent-skills directory; Orca exposes these skills to every agent it drives. Skip this platform if you installed the plugins natively via Claude/Codex (see [Orca](#orca) below) to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,
@@ -125,12 +125,12 @@ workflow guidance.
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
 | `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): Orca artifact link, or the Orca built-in browser tab when links are unavailable, or the path — route kept stable per run; `npm test` runs its tests against a fake Orca CLI |
-| `model-routing` | Codex · OpenCode · Orca | The Default / Deep tier table with the exact model and reasoning-effort pair per platform (Codex `spawn_agent`, Claude Code agents, OpenCode, Orca `worker-start` flags), dispatch rules, and the escalation ladder |
+| `model-routing` | Codex · OpenCode · Orca | The Default / Deep tier table, dispatch rules, escalation ladder, and Codex's independent Sol review reservation |
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the loops use the upstream unlazy skill: ledger per unit of work, coordinator-side `--reverify`, two retries then handoff, boundaries with Orca |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code | Visual-first design flow on an Artifact diagram — the design is grilled against a fork delegate (design tree, frontier rounds, `ESCALATE` for the user) before the first publish, and the decisions plus the grill log sit on the page — ending in a spec file with a frontmatter the loops read — every 구현 순서 step tagged `[deep]` / `[default]` (matt-auto reads the tag as the ticket's tier) and a `loop` recommended from the spec's size (`direct` = one strong-model session on a meta prompt, `matt-auto` = many cheap-tier tickets, `autocode`, `implement`); the handoff commits the spec on a branch and hands it to the loop on Codex or OpenCode (Orca terminal when reachable, else a line to paste) |
+| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution selects Astra for deep work or Grok otherwise, uses Antigravity for suitable support, and requires independent Sol review before completion. |
 
 ### matt-loop
 
@@ -138,7 +138,7 @@ Two editions of the same flow, one per plugin root. `plugins/matt-loop-claude` (
 
 | Skill | Description |
 |-------|-------------|
-| `matt-auto` | Conductor for Matt Pocock's main flow (interview → spec → tickets → implementation) with a decision delegate, one interview gate, and automatic model/effort routing via `model-routing`; publishes its decision graph and live ticket board through `interview-report` → `loop-report`; `--spec <path>` takes a confirmed design-map spec (its decisions become a read-only design stage, the interview asks only what is left open, its `[deep]` / `[default]` step tags fix the ticket tiers); `--dev` / `--main` / `--pr <base>` also opens a PR and shepherds it to merge-ready via pr-babysit; independent tickets run in parallel as Orca-orchestrated workers when Orca is reachable |
+| `matt-auto` | Conductor for interview → spec → tickets → implementation with automatic model routing, Orca worker waves, and a live decision graph. A confirmed design-map spec fixes ticket tiers; after implementation Codex runs both code-review axes on the Sol-only reviewer before optional PR shipping. |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
 | `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
 | vendored Matt Pocock skills | The remaining upstream skills matt-auto conducts: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `code-review`, `setup-matt-pocock-skills` |

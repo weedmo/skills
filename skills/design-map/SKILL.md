@@ -1,23 +1,29 @@
 ---
 name: design-map
-description: Visual-first design flow. Explore the codebase, grill the design against a fork delegate before drawing it, present it as a diagram Artifact (not prose) with the decisions and the grill log on the page, iterate until the user says the design is understood and settled, then write a local spec file and gate it with code-review. No GitHub issues are filed. Ends ready-to-implement. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or when the user wants to design a structure visually before implementing.
+description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec can continue through Astra or Grok implementation followed by independent Sol review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
 ---
 
 # design-map
 
 Design through diagrams, not walls of text. The deliverable of every round is an
-updated Artifact the user can look at; prose in chat stays to a few sentences.
+updated design page the user can look at; prose in chat stays to a few sentences.
+
+Claude Code uses its Artifact route. Codex reads
+[references/codex-delivery.md](references/codex-delivery.md) for its delegate,
+HTML delivery, and feedback differences. When Codex receives an already
+confirmed spec for implementation, skip design steps and follow
+[references/codex-execution.md](references/codex-execution.md).
 
 Hard rules:
 - Never file GitHub issues or use any external tracker. The spec is a local file.
 - The user's explicit confirmation ("확정", "이해됐어", "이걸로 가자") is the only
   thing that moves the flow from design to spec. Do not self-declare the design done.
-- One Artifact URL for the whole session — republish the same file, never fork a new one.
-- All deliverables are written in Korean: the Artifact page (headings, labels,
+- One page route for the whole session — republish the same file, never fork a new one.
+- All deliverables are written in Korean: the design page (headings, labels,
   descriptions, decision tables) and the spec document. Identifiers that refer to
   real code — module/function/file names, diagram node names, commands — stay in
   English as they appear in the codebase.
-- Never hand the user a link before the render check (step 4) has passed on the
+- Never hand the user a page before the render check (step 4) has passed on the
   version that is live. A diagram with clipped, overflowing, or overlapping text is
   not a deliverable, even if the design behind it is right.
 
@@ -50,9 +56,9 @@ with, not a first guess. Before drawing, interview the design the way
 matt-auto's interview does — but the answerer is a **decision delegate**, not
 the user. This step is self-contained (the `grilling` skill is not installed
 everywhere; do not invoke it):
-- **Spawn the delegate** once: `Agent` with `subagent_type: "fork"` — it
-  inherits the scope and survey, so no summary is needed. Keep it alive across
-  rounds with `SendMessage`. Its brief: answer with senior-engineer judgment,
+- **Spawn the delegate** once. On Claude Code use `Agent` with
+  `subagent_type: "fork"` and keep it alive with `SendMessage`; on Codex use
+  the delegate route in `references/codex-delivery.md`. Its brief: answer with senior-engineer judgment,
   prefer the recommended answer unless it sees a concrete flaw, reply with the
   decision plus a one-line rationale, and never decide — replying
   `ESCALATE: <why>` — on security, data meaning or migration, destructive
@@ -78,7 +84,8 @@ escalated. The design that gets drawn is the one the log left standing — a
 tree that changed nothing means the questions were not hard enough.
 
 ### 4. Diagram the design
-Load the `artifact-diagramming` skill first, then build one Artifact page containing:
+On Claude Code load `artifact-diagramming`; on Codex load the delivery reference
+above. Build one design page containing:
 - **Current structure** — how it is wired today (only if something exists already).
 - **Proposed structure** — the design. When a real fork in the road exists, show
   two alternatives side by side (design-it-twice) with a short tradeoff table and
@@ -140,7 +147,7 @@ and never hardcode text/stroke colors in diagrams (SVG included) that assume one
 background — that is the dark-background-with-black-text bug. Scan the stylesheet
 for this before publishing.
 
-Make the page itself editable (load the `artifact-capabilities` skill first —
+On Claude Code, make the page itself editable (load `artifact-capabilities` first —
 it is the authority; declare only what its roster serves):
 - Declare `capabilities: {artifact: {}}` on the first publish.
 - Decision-list cells and description blocks are editable in place: keep the
@@ -159,15 +166,16 @@ labels (`A["라벨"]`), keep them to roughly 12 Hangul characters, break longer
 ones with `<br/>` — mermaid estimates CJK width badly.
 
 Publish, then run the render check below. Only when it passes, hand the user
-the link and tell them the three ways to respond: chat, selecting any part of
-the page and commenting, or editing the text directly and pressing 저장.
+the route. On Claude Code explain chat, comments, and in-page 저장; on Codex
+ask for feedback in chat and republish the same delivered HTML.
 
 Render check (MANDATORY after every publish that touches a diagram or layout):
 the host lays the page out with its own fonts, so what the
 local file looks like proves nothing — check the live page.
-1. Open the published URL in a browser that carries the user's claude.ai login
-   (the `claude-in-chrome` tools; new tab, never one the user is working in).
-   Fallback when no logged-in browser is reachable: serve a scratch copy of
+1. Open the published route in a browser. On Claude Code use a browser carrying
+   the user's claude.ai login (new tab, never one the user is working in).
+   On Codex use the in-app browser or the tab returned by `deliver.py`.
+   Fallback when the delivered route is unreachable: serve a scratch copy of
    the file with `python3 -m http.server <port>` and open it over
    `http://localhost` with the playwright or chrome-devtools tools (`file://`
    is blocked there). Say in the handoff that the check ran on a local render.
@@ -234,12 +242,12 @@ local file looks like proves nothing — check the live page.
 ### 5. Understanding loop
 Feedback arrives three ways; treat all of them as design input:
 - **Chat** — as before.
-- **Artifact comments** — the user selects part of the page and comments.
+- **Artifact comments (Claude Code)** — the user selects part of the page and comments.
   Threads sent to Claude wake this session (the publish arms auto-replies);
   plain comments don't, so also check `Artifact(action: "comments")` when the
   user says they left notes. Apply the feedback to the diagram, reply briefly
   with what changed, and resolve the threads you handled.
-- **In-page edits** — the user's 저장 publishes a new version. A republish
+- **In-page edits (Claude Code)** — the user's 저장 publishes a new version. A republish
   notification means the local file is behind: re-read the live version
   (`action: "read"`), merge its state into your file, and build every later
   update on top of it. A publish conflict is the same signal — merge onto the
@@ -248,16 +256,15 @@ A user answer to a 사용자 결정 필요 row settles it: drop the mark, record
 the answer as the pick. A change that reopens a settled decision goes back
 through the delegate for the decisions that hung off it before the diagram
 changes.
-Each round: apply feedback to the same Artifact (same file path → same URL),
+Each round: apply feedback to the same page route,
 run the render check from step 4 on the republished page, answer questions by
 pointing at the diagram, keep decision-list rows updated.
 Repeat until the user confirms the design is understood and settled. If they go
 quiet mid-loop, the design is NOT confirmed — wait or ask, don't advance.
 
 ### 6. Spec
-Before writing, re-read the live artifact (`action: "read"`) — the user may have
-edited decisions in place since your last publish; the live version is the
-source of truth. Then write the spec as a local markdown file (Korean prose,
+Before writing, re-read the live Artifact on Claude Code or the embedded page
+state on Codex; that version is the source of truth. Then write the spec as a local markdown file (Korean prose,
 English code identifiers), default
 `docs/design/<topic>.md` in the repo (create the directory if needed; if the repo
 has an existing spec/docs convention, follow it instead). The file is the bridge
@@ -275,8 +282,12 @@ followup: autocode       # optional: a second loop to run after `loop` finishes
 status: confirmed        # draft while iterating; confirmed only after the user's confirmation
 artifact: <this session's artifact URL>
 branch: <filled at handoff>
-handoff:                 # filled at handoff — one line per platform (direct: the same direct line on all three)
-  codex: "use $matt-auto --spec docs/design/<topic>.md"
+execution:                # direct/implement on Codex; omit for matt-auto/autocode
+  implementer: grok       # astra | grok
+  reviewer: sol           # fixed: independent implementation review
+  support: antigravity    # optional discovery/docs/mechanical supporting work
+handoff:                 # filled at handoff — one line per receiving platform
+  codex: "use $design-map to execute the confirmed spec docs/design/<topic>.md"
   opencode: "/matt-auto --spec docs/design/<topic>.md"
   claude: "/matt-loop:matt-auto --spec docs/design/<topic>.md"
 metric:                  # required when loop or followup is autocode; allowed otherwise
@@ -312,25 +323,27 @@ ledger) buys more than it costs here:
 
 | Signal | `loop` |
 |---|---|
-| 1–2 steps, one file | `implement` |
-| 3–6 steps, few tests | `direct` — one live session plans and builds the whole spec; any `[deep]` step → Astra / Fable, all `[default]` (mechanical or doc-only) → Antigravity; cheaper workers would not repay matt-auto's fixed cost |
+| 1–2 steps, one file | `implement` — on Codex use the same Astra/Grok → Sol execution protocol; elsewhere use the platform's one-file implementation skill |
+| 3–6 steps, few tests | `direct` — Codex coordinates one primary implementer plus review; any `[deep]` step → Astra, otherwise Grok; Sol reviews either; Antigravity may take independent support work |
 | 7+ steps, or steps that can run in parallel, mostly `[default]` | `matt-auto` — many tickets on the cheap tier, each verified by the coordinator; the coordinator and delegate stay Deep |
 | `kind: optimize` | `autocode`; structure first and then a number → `loop: matt-auto` with `followup: autocode` and the metric block filled |
 
-The thresholds are starting points — move them after a few runs. A spec that
+For a Codex `direct` or `implement` spec, fill `execution` using the rule above and read
+`references/codex-execution.md`; `reviewer` stays `sol`. The thresholds are starting points — move them after a few runs. A spec that
 mixes `[deep]` and `[default]` steps is `matt-auto` with the tags doing the
 model split, never direct plus matt-auto. Write the recommendation's reason in
 one line under the frontmatter (`추천: matt-auto — 9단계, deep 2 · default 7`)
 and repeat it in the step-8 question.
 
 ### 7. Review gate
-Run the `code-review` skill with the spec file as the path target (low effort).
-If findings come back, fix the spec and update the Artifact to match. If the
-code-review skill is unavailable in the session, spawn one general-purpose agent to
-adversarially review the spec (contradictions, missing edge cases, steps that can't
-be verified) and apply what survives.
+On Claude Code, run `code-review` with the spec path as before. On Codex, spawn `matt-reviewer` with
+`fork_turns: "none"` to read the spec file directly and adversarially check
+contradictions, missing edge cases, unverifiable steps, and drift from the
+confirmed page; role missing → direct `gpt-5.6-sol`/`high`, reported once. This
+is a file review, not `$code-review`'s Git-diff interface. Apply valid findings
+to the spec and design page.
 
-Any spec change from here on edits the mermaid and the Artifact's SVG
+Any spec change from here on edits the mermaid and the page's SVG
 together, then republishes and runs the step-4 render check.
 
 ### 8. Handoff
@@ -346,12 +359,13 @@ In order:
    machines, so continuing here is an option only where it is installed
    (`direct` needs no loop skill and can always continue here).
 2. **One question** (AskUserQuestion, one round): the loop (recommend the
-   frontmatter's `loop` with its one-line reason); where it runs — 이 세션에서 계속 (recommended when the
-   Claude edition is installed here) / `/fork` 배경 세션 / Codex / OpenCode /
-   Antigravity (recommended for `direct` when every step is `[default]`) /
-   명령만 받기; the base branch (recommend the current one when it is `main` or
-   `dev`, else `main`); the branch name (recommend `feat/<slug>`, or stay on the
-   base).
+   frontmatter's `loop` with its one-line reason); where it runs — 이 세션에서 계속
+   / `/fork` 배경 세션 / Codex / OpenCode / 명령만 받기; for Codex `direct`
+   or `implement`,
+   the primary implementer (recommend Astra when any step is `[deep]`, otherwise
+   Grok; Sol review is fixed and Antigravity support is automatic when useful);
+   the base branch (recommend current when `main` or `dev`, else `main`); and the
+   branch name (recommend `feat/<slug>`, or stay on the base).
 3. **Commit the spec alone.** If `git status --porcelain` shows tracked changes
    other than the spec, do not switch branches — ask once (commit on the current
    branch / stop). Otherwise `git checkout -b <name> <base>` (skip when staying),
@@ -363,13 +377,11 @@ In order:
    inside an Orca terminal (`ORCA_*` env) or off Linux try `orca` then `orca-ide`;
    otherwise only `orca-ide` (bare `orca` on Linux is the GNOME screen reader,
    never run it). `<bin> status --json` failing → no Orca → print the line. Else
-   `<bin> terminal create --worktree path:<repo> --command <codex|opencode|agy> --json`;
+   `<bin> terminal create --worktree path:<repo> --command <codex|opencode> --json`;
    on `selector_not_found` run `<bin> repo add --path <repo> --json` and retry
    once; any other failure → print the line. Poll
    `<bin> terminal read --terminal <handle> --screen --json` until the CLI's
-   input prompt is on screen (Codex: `› Ask Codex`; Antigravity `agy`: first its folder-trust
-   dialog — send Enter on `Yes, I trust this folder` — then its input prompt,
-   or any screen change after the dialog; up to 60 s, else print the
+   input prompt is on screen (Codex: `› Ask Codex`; up to 60 s, else print the
    line), then `<bin> terminal send --terminal <handle> --text "<handoff line>" --enter --json`,
    poll again until `Working (` appears, and stop there. 이 세션에서 계속: invoke
    the Claude edition right here — `matt-loop:matt-auto` with `--spec <path>`
@@ -377,26 +389,21 @@ In order:
    `disable-model-invocation`, its delegate is a fork of this conversation, and
    its interview is skipped — the spec was it. `/fork` 배경 세션: a session
    cannot fork itself — print `/fork /matt-loop:matt-auto --spec <path>` for the
-   user to type, then stop. 명령만 받기: print the line. The lines: Codex
+   user to type, then stop. 명령만 받기: print the line. The loop lines: Codex
    `use $matt-auto --spec <path>`, OpenCode `/matt-auto --spec <path>`, Claude
    Code `/matt-loop:matt-auto --spec <path>` (autocode: `… init --spec <path>`;
-   implement: `use $implement on <path>`, no flag, no gate — on Claude Code that
-   is the one-file path: one question, then build it here). `direct` is one
-   line on every platform, a meta prompt — the receiver writes its own execution
-   prompt from the spec before touching code, so the plan is visible before the
-   work, the way the grill log is visible before the diagram:
+   implement: `use $implement on <path>` outside Codex). Codex `direct` and
+   `implement` both use:
    ```
-   Read <path>. First write your own execution prompt from it — goal, constraints,
-   the verify of each 구현 순서 step, definition of done — and show it. Then
-   implement the steps in order, run each step's verify, run the tests, and open a
-   PR against <base>. Report open decisions instead of guessing.
+   use $design-map to execute the confirmed spec <path>; follow its Codex
+   execution protocol (implementer from frontmatter, independent Sol review)
    ```
-   On Codex it goes into a fresh Astra session (the same terminal flow); 이 세션에서
-   계속 means following that protocol right here — this session is the strong
-   model, no loop skill and no fork is needed; `/fork` 배경 세션 prints
-   `/fork <the direct line>`.
+   A Codex session receiving that line reads `references/codex-execution.md` and
+   owns the Astra/Grok → Sol loop through completion. In a Codex design session,
+   이 세션에서 계속 runs that protocol here. On other platforms, retain the
+   self-contained meta prompt with the spec's goal, checks, and definition of done.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,
-   Artifact link, `base → branch`, where it went (terminal handle — Codex, OpenCode, or Antigravity — or
+   design-page route, `base → branch`, where it went (terminal handle or
    "붙여넣기") and the handoff line. Do not watch the run — from here its own
    loop-report page is the window. 이 세션에서 계속: report the same facts in one
    line and go on as the loop.

@@ -115,13 +115,16 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 
 - **loop-report** — the live progress page of a run and its delivery (Orca artifact link →
   Orca browser tab → path); each loop plugs in its own view
-- **model-routing** — Codex · OpenCode · Orca only: the one table of Default / Deep tiers with the model and
+- **model-routing** — Codex · OpenCode · Orca only: the Default / Deep task tiers plus Codex's Sol review reservation, with the model and
   reasoning-effort pair per platform (Codex `spawn_agent` by role name — the roles live in
   `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, Orca
   `worker-start` flags) and the escalation ladder (`matt-deep-max` / `strategist-max` as the one
   `max` rung)
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
+- **design-map** — Claude Code and Codex visual design. Codex delivers the page through
+  Orca/HTML and routes confirmed direct specs to Astra or Grok implementation, independent
+  Sol review, and optional Antigravity support.
 
 On top of it, two loops with different graphs:
 
@@ -129,7 +132,7 @@ On top of it, two loops with different graphs:
   (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
   starts from a confirmed design-map spec whose step tags fix the ticket tiers), publishing
   its decision graph through loop-report and running independent tickets as parallel Orca
-  workers; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
+  workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
   resolves an active merge/rebase on the Deep tier
 - **auto-loop** (`plugins/auto-loop-claude/skills/` on Claude Code, `plugins/auto-loop-codex/skills/` elsewhere): **autocode** runs a hypothesis-driven parallel
   improvement loop (`init --spec` replaces its interview with a design-map spec), publishing its
