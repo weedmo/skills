@@ -1,6 +1,6 @@
 {
   "name": "matt-loop",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Matt loop, Claude Code edition - matt-auto on Claude Code's built-ins (fork delegate, plugin agents, Workflow or /batch for parallel waves, /code-review \u00b7 /simplify \u00b7 /security-review, /loop, Artifact page) with an execution plan gate, plus pr-babysit, resolving-merge-conflicts, and the vendored Matt Pocock skills it conducts.",
   "author": {
     "name": "weedmo"
