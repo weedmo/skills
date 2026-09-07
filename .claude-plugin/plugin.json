@@ -1,6 +1,6 @@
 {
   "name": "weed-harness",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "Shared runtime for long-running delegated loops (loop-report progress page, interview-report and autocode-board views, model-routing tier table for the Codex editions, unlazy-backed loop-gates) plus the Claude Code statusLine HUD and opt-in hooks",
   "author": {
     "name": "weedmo"

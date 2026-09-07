@@ -1,6 +1,6 @@
 {
   "name": "auto-loop",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "Autonomous code improvement loop, Claude Code edition - autocode: hypothesis-driven parallel experiments with in-session experimenters routed by the plugin agents, a live experiment board published as an Artifact, unlazy-backed termination gates, and kept changes collected as one squash commit each on a worktree branch that ends in a PR.",
   "author": {
     "name": "weedmo"
