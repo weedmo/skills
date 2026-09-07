@@ -40,6 +40,10 @@ const PLATFORMS = {
     dir: (home) => path.join(home, ".gemini", "skills"),
     note: "no native skill discovery - reference the skill files from ~/.gemini/GEMINI.md yourself.",
   },
+  antigravity: {
+    dir: (home) => path.join(home, ".antigravity", "skills"),
+    note: "no native skill discovery confirmed - reference the skill files yourself; the loop plugins install only the shared PR skills here (pr-babysit, resolving-merge-conflicts).",
+  },
   orca: {
     dir: (home) => path.join(home, ".agents", "skills"),
     note: "universal agent-skills directory; Orca exposes these skills to every agent it drives. Orca also auto-discovers plugins installed via Claude (/plugin install) and Codex (codex plugin add) - skip this platform if you use those to avoid duplicate skills.",
@@ -57,13 +61,17 @@ const PLUGINS = {
   // Loop plugins ship two roots: plugins/<name>-claude (Claude Code edition,
   // built on Workflow / Agent / Artifact) and plugins/<name>-codex (Codex,
   // OpenCode, gemini-cli, Orca edition). The platform picks the root.
+  // restrictSkills: per-platform allow-list. An empty list skips the plugin on
+  // that platform; an absent key installs every skill (after claudeOnlySkills).
   "matt-loop": {
     src: (platform) => path.join(ROOT, "plugins", `matt-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
     desc: "matt-auto + vendored Matt Pocock skills (human-in-the-loop conducted Matt flow)",
+    restrictSkills: { antigravity: ["pr-babysit", "resolving-merge-conflicts"] },
   },
   "auto-loop": {
     src: (platform) => path.join(ROOT, "plugins", `auto-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
     desc: "autocode (hypothesis-driven parallel code improvement loop)",
+    restrictSkills: { antigravity: [] },
   },
 };
 
@@ -72,6 +80,8 @@ const pluginSrc = (plugin, platform) => {
   return typeof src === "function" ? src(platform) : src;
 };
 
+// Per-platform companion files copied next to the skills: OpenCode's routing
+// agents and Codex's routing agent roles (~/.codex/agents/*.toml).
 const OPENCODE_ASSETS = {
   "matt-loop": [
     {
@@ -81,6 +91,25 @@ const OPENCODE_ASSETS = {
     },
   ],
 };
+
+const CODEX_ASSETS = {
+  "matt-loop": [
+    {
+      src: path.join(ROOT, "plugins", "matt-loop-codex", "codex", "agents"),
+      dir: (home) => path.join(home, ".codex", "agents"),
+      desc: "routing agent roles",
+    },
+  ],
+  "auto-loop": [
+    {
+      src: path.join(ROOT, "plugins", "auto-loop-codex", "codex", "agents"),
+      dir: (home) => path.join(home, ".codex", "agents"),
+      desc: "routing agent roles",
+    },
+  ],
+};
+
+const PLATFORM_ASSETS = { opencode: OPENCODE_ASSETS, codex: CODEX_ASSETS };
 
 const LEGACY_SKILLS = [
   // vendored Matt skills dropped in matt-loop 2.0.0 (harness diet B)
@@ -269,10 +298,17 @@ for (const platform of platforms) {
     }
   }
   for (const plugin of platformPlugins) {
-    const { claudeOnlySkills = [] } = PLUGINS[plugin];
+    const { claudeOnlySkills = [], restrictSkills = {} } = PLUGINS[plugin];
+    const allowed = restrictSkills[platform];
+    if (Array.isArray(allowed) && allowed.length === 0) {
+      console.log(`  ! ${plugin}: skipped for ${platform}`);
+      continue;
+    }
     const src = pluginSrc(plugin, platform);
     const skills = skillDirs(src).filter(
-      (skill) => platform === "claude-code" || !claudeOnlySkills.includes(skill),
+      (skill) =>
+        (platform === "claude-code" || !claudeOnlySkills.includes(skill)) &&
+        (!allowed || allowed.includes(skill)),
     );
     if (skills.length === 0) {
       console.log(`  ! ${plugin}: no skills found at ${src}`);
@@ -301,10 +337,15 @@ for (const platform of platforms) {
       }
     }
   }
-  if (platform === "opencode" && !DRY) {
+  const platformAssets = PLATFORM_ASSETS[platform];
+  if (platformAssets) {
     for (const plugin of platformPlugins) {
-      for (const assets of OPENCODE_ASSETS[plugin] || []) {
+      for (const assets of platformAssets[plugin] || []) {
         if (!fs.existsSync(assets.src)) continue;
+        if (DRY) {
+          console.log(`  ✓ ${plugin}/${assets.desc}`);
+          continue;
+        }
         const assetDest = assets.dir(HOME);
         try {
           fs.mkdirSync(assetDest, { recursive: true });
@@ -318,22 +359,19 @@ for (const platform of platforms) {
           failures++;
         }
       }
+    }
+  }
+  if (platform === "opencode") {
+    for (const plugin of platformPlugins) {
+      if (DRY) {
+        if (plugin === "matt-loop") console.log(`  ✓ ${plugin}/skill slash commands`);
+        continue;
+      }
       try {
         installOpenCodeCommands(plugin, HOME);
       } catch (err) {
         console.log(`  ✗ ${plugin}/skill slash commands: ${err.message}`);
         failures++;
-      }
-    }
-  } else if (platform === "opencode") {
-    for (const plugin of platformPlugins) {
-      for (const assets of OPENCODE_ASSETS[plugin] || []) {
-        if (fs.existsSync(assets.src)) {
-          console.log(`  ✓ ${plugin}/${assets.desc}`);
-        }
-      }
-      if (plugin === "matt-loop") {
-        console.log(`  ✓ ${plugin}/skill slash commands`);
       }
     }
   }

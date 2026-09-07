@@ -313,7 +313,7 @@ ledger) buys more than it costs here:
 | Signal | `loop` |
 |---|---|
 | 1–2 steps, one file | `implement` |
-| 3–6 steps whose core is `[deep]` work, few tests | `direct` — one strong-model session (Astra / Fable) plans and builds the whole spec; cheaper workers would not repay matt-auto's fixed cost |
+| 3–6 steps, few tests | `direct` — one live session plans and builds the whole spec; any `[deep]` step → Astra / Fable, all `[default]` (mechanical or doc-only) → Antigravity; cheaper workers would not repay matt-auto's fixed cost |
 | 7+ steps, or steps that can run in parallel, mostly `[default]` | `matt-auto` — many tickets on the cheap tier, each verified by the coordinator; the coordinator and delegate stay Deep |
 | `kind: optimize` | `autocode`; structure first and then a number → `loop: matt-auto` with `followup: autocode` and the metric block filled |
 
@@ -348,6 +348,7 @@ In order:
 2. **One question** (AskUserQuestion, one round): the loop (recommend the
    frontmatter's `loop` with its one-line reason); where it runs — 이 세션에서 계속 (recommended when the
    Claude edition is installed here) / `/fork` 배경 세션 / Codex / OpenCode /
+   Antigravity (recommended for `direct` when every step is `[default]`) /
    명령만 받기; the base branch (recommend the current one when it is `main` or
    `dev`, else `main`); the branch name (recommend `feat/<slug>`, or stay on the
    base).
@@ -362,11 +363,13 @@ In order:
    inside an Orca terminal (`ORCA_*` env) or off Linux try `orca` then `orca-ide`;
    otherwise only `orca-ide` (bare `orca` on Linux is the GNOME screen reader,
    never run it). `<bin> status --json` failing → no Orca → print the line. Else
-   `<bin> terminal create --worktree path:<repo> --command <codex|opencode> --json`;
+   `<bin> terminal create --worktree path:<repo> --command <codex|opencode|agy> --json`;
    on `selector_not_found` run `<bin> repo add --path <repo> --json` and retry
    once; any other failure → print the line. Poll
    `<bin> terminal read --terminal <handle> --screen --json` until the CLI's
-   input prompt is on screen (Codex: `› Ask Codex`; up to 60 s, else print the
+   input prompt is on screen (Codex: `› Ask Codex`; Antigravity `agy`: first its folder-trust
+   dialog — send Enter on `Yes, I trust this folder` — then its input prompt,
+   or any screen change after the dialog; up to 60 s, else print the
    line), then `<bin> terminal send --terminal <handle> --text "<handoff line>" --enter --json`,
    poll again until `Working (` appears, and stop there. 이 세션에서 계속: invoke
    the Claude edition right here — `matt-loop:matt-auto` with `--spec <path>`
@@ -393,7 +396,7 @@ In order:
    model, no loop skill and no fork is needed; `/fork` 배경 세션 prints
    `/fork <the direct line>`.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,
-   Artifact link, `base → branch`, where it went (terminal handle, or
+   Artifact link, `base → branch`, where it went (terminal handle — Codex, OpenCode, or Antigravity — or
    "붙여넣기") and the handoff line. Do not watch the run — from here its own
    loop-report page is the window. 이 세션에서 계속: report the same facts in one
    line and go on as the loop.
