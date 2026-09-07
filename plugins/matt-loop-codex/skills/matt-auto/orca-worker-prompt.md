@@ -2,6 +2,8 @@
 
 Append these lines to the per-ticket implementation prompt when the worker is an Orca dispatch. The first paragraph is the same prompt matt-auto uses in-session.
 
+Order the routed prompt with the stable part first — the skill text and this preamble — and the ticket-specific tail last; the prefix is what the 30-minute prompt cache reuses across a wave.
+
 ```
 Read ticket <ref>, then use $implement to build it. Report open decisions back instead of guessing.
 

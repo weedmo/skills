@@ -71,7 +71,7 @@ flowchart LR
 
 | id | 질문 | 선택 | 이유 |
 |---|---|---|---|
-| E1 | Orca가 antigravity CLI를 터미널로 구동할 수 있나? | 지원 가정 — `<bin> terminal create --command antigravity` 시도, 실패 시 명령만 출력. 7단계에서 probe하고 프롬프트 문자열을 기록 | Orca의 드라이버 지원 목록은 이 저장소에서 확인 불가 |
+| E1 | Orca가 antigravity CLI를 터미널로 구동할 수 있나? | **probe 결과(2026-09-07)**: `orca terminal create --worktree path:<repo> --command antigravity --json`·`read --screen`·`close` 모두 성공 — 매커니즘은 검증됨. 그러나 이 머신에는 `antigravity` 바이너리가 PATH에 없어 화면에 `Command 'antigravity' not found, but can be installed with: sudo snap install antigravity`가 찍혔다. idle 프롬프트 문자열은 미기록; design-map 8단계는 "첫 probe에서 기록한 프롬프트, 없으면 60초 안의 화면 변화" 폴백으로 둔다. 실제 CLI 이름·설치 경로는 사용자 확인 필요 | Orca 쪽은 확인됐고, antigravity 쪽 CLI 존재가 미확인 |
 | E2 | Antigravity가 프로젝트 지침 파일을 자동으로 읽나? | gemini-cli처럼 네이티브 discovery 없음으로 가정, `~/.antigravity/skills`에 설치하고 note에 수동 참조를 적음 | 설정 파일 규칙이 확인되지 않음 |
 | E3 | `service_tier`의 standard 값, 역할 파일의 키 지원, priority 배수는? | 역할 파일에 standard tier를 시도하고 3단계 probe로 검증. 못 받으면 키를 빼고, config.toml은 전역이라 "어디서나 priority / 어디서나 standard" 트레이드오프를 README에 적음 | 검증된 2×는 fast 기준, priority 배수와 키 지원은 문서에 없음 |
 | E4 | `model_verbosity`를 역할 파일이 존중하고 terra가 지원하나? | Default 역할에만 `low`, 3단계 probe로 검증, 안 되면 빼고 기록 | 문서는 "GPT-5 Responses API verbosity"라고만 적음 |

@@ -1,6 +1,6 @@
 {
   "name": "weed-plugins",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "weedmo's AI-CLI skill packs - Claude Code setup plus matt-loop and auto-loop for supported coding agents",
   "type": "module",
   "bin": {

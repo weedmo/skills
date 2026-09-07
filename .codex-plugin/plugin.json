@@ -1,6 +1,6 @@
 {
   "name": "weed-harness",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "Codex packaging for the shared loop runtime every weed loop plugin builds on: loop-report (the live progress page and its Orca delivery), interview-report and autocode-board (the loops' page views), model-routing (the shared model/effort tier table), and loop-gates (unlazy-backed completion discipline). Required by matt-loop and auto-loop.",
   "author": {
     "name": "weedmo",

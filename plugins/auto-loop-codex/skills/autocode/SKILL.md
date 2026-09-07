@@ -54,7 +54,7 @@ With `--spec` skip the interview: design-map's self-grill and the user's confirm
 Classify the problem from the recon and the answers, and show the classification in the approval step so the user can override it:
 
 - **standard** → strategist on the Deep route (`strategist`).
-- **hard** → on Codex, the same `strategist` spawned with `reasoning_effort: "max"` from the start; on Claude Code and OpenCode the Deep `strategist` with `escalated = true` recorded at init (Deep is their ceiling). Either way the escalation budget (3E) is spent.
+- **hard** → on Codex, the `strategist-max` role from the start; on Claude Code and OpenCode the Deep `strategist` with `escalated = true` recorded at init (Deep is their ceiling). Either way the escalation budget (3E) is spent.
 
 Classify **hard** when any of: scope is system-wide; the target spans more than three modules; the metric is already within a known bound (prior optimization attempts plateaued); concurrency, distributed state, or numerical stability is involved; or the user says it is hard. Otherwise **standard**. With `--spec`, the reach of its 확정 구조 is evidence.
 
@@ -99,7 +99,7 @@ Write `state.json` (`<autocode-board's dir>/assets/reference.md` § state.json: 
 
 ### 3C: Spawn the strategist (persistent)
 
-Spawn one persistent strategist (`auto-loop:strategist` on Claude Code; Codex Deep, or `max` for hard; see 3H). Keep its id in `state.json`. Codex: `send_message` while running, `followup_task` after completion. Other platforms use their continuation tool. Follow `$model-routing` for fallbacks and effort-changing handoffs; preserve context except on escalation or session loss.
+Spawn one persistent strategist (`auto-loop:strategist` on Claude Code; Codex `strategist`, or `strategist-max` for hard; see 3H). Keep its id in `state.json`. Codex: `send_message` while running, `followup_task` after completion. Other platforms use their continuation tool. Follow `$model-routing` for fallbacks and effort-changing handoffs; preserve context except on escalation or session loss.
 
 Its first prompt carries the **strategist brief** (`<autocode-board's dir>/assets/reference.md` § Strategist brief, verbatim), `program.md`, the baseline and noise band, the lessons, the target file paths, and the hypothesis schema (§ Hypothesis: id, claim, experiment, expected_delta, touches, depends_on, difficulty default|deep, if_confirmed, if_refuted, priority, status), and asks for the **initial frontier**: at least `2 × parallel` hypotheses, preferring disjoint `touches`. Hypothesis `status` moves `pending → running → measured → keep | discard | crash | conflict | interaction | cancelled`. On every result event the strategist replies with a frontier delta — `add`, `cancel`, `reprioritize`, `escalate`, `note` (§ Strategist reply) — never a new plan.
 
@@ -173,7 +173,7 @@ Apply the delta: write new hypothesis files, mark cancelled ones (a cancelled hy
 Plateau when `consecutive_discards ≥ 5` **or** no `keep` in the last 8 measured results.
 
 1. Ask the strategist for a retrospective → `$RETRO_DIR/retro_{n}.md` (metric trend, effective patterns, refuted directions, remaining opportunities).
-2. If not yet `escalated`: on Codex, respawn `strategist` with `reasoning_effort: "max"` and the retrospective, `program.md`, `results.tsv`, and the lessons, replacing `strategist_agent_id`; on Claude Code and OpenCode, hand the same retrospective to the existing `strategist` (Deep is the ceiling). Set `escalated = true`; request a fresh frontier. Once per run.
+2. If not yet `escalated`: on Codex, spawn `strategist-max` with the retrospective, `program.md`, `results.tsv`, and the lessons, replacing `strategist_agent_id`; on Claude Code and OpenCode, hand the same retrospective to the existing `strategist` (Deep is the ceiling). Set `escalated = true`; request a fresh frontier. Once per run.
 3. If already `escalated` (or the strategist itself replied `escalate: true` while escalated): ask it for one final frontier; if that also yields no keep, terminate with `plateau`.
 
 ### 3F: Termination
@@ -212,11 +212,11 @@ Tiers, pairs, dispatch mechanics, and the escalation ladder live in the shared *
 | autocode role | Tier | Claude Code agent | Use when |
 |---|---|---|---|
 | Strategist | Deep | `auto-loop:strategist` | Default strategist tier |
-| Strategist (escalated) | Deep, Codex effort `max` | `auto-loop:strategist` | `problem_difficulty: hard`, or escalation in 3E — the only role that uses the Codex `max` retry |
+| Strategist (escalated) | Codex `strategist-max` | `auto-loop:strategist` | `problem_difficulty: hard`, or escalation in 3E — the only role on the `max` rung; role missing → the table's pair, reported once |
 | Experimenter default | Default | `auto-loop:experimenter-default` | One-site or multi-site change inside a module: constant/flag tuning, API swap, new helper, data-structure swap, loop restructuring |
 | Experimenter deep | Deep | `auto-loop:experimenter-deep` | Algorithm replacement, cross-module restructuring, concurrency, invariants |
 
-- The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters**; the Codex `max` retry is reserved for the strategist.
+- The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters**; `strategist-max` is the strategist's alone.
 - Orca workers take the tier's `worker-start` flags from `$model-routing`'s Orca table.
 - With neither named agents nor model overrides, use the platform's normal subagent for every role, name the intended tier in the prompt, and say so once at start.
 

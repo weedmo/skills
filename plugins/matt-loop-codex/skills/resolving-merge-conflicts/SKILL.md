@@ -7,7 +7,7 @@ description: "Use when you need to resolve an in-progress git merge/rebase confl
 
 When this skill is invoked directly, delegate the entire workflow before inspecting or editing conflicts:
 
-- On Codex use `spawn_agent` with `model: "gpt-6-astra"`, `reasoning_effort: "high"`, and `fork_turns: "none"`; include all merge/rebase state needed by the fresh-context worker.
+- On Codex `spawn_agent` the `matt-deep` role with `fork_turns: "none"` (role missing → the tier's pair from `$model-routing`, reported once); include all merge/rebase state needed by the fresh-context worker.
 - On OpenCode use `matt-deep`; on Claude Code use `matt-loop:matt-deep` without an additional model override.
 - Use `matt-free` instead when the user explicitly requested free-only models. If that agent is unavailable, stop and report the blocker; never fall back to a potentially paid model.
 - Include the user's request, merge/rebase state, repository path, and the exact instruction: `ROUTED_EXECUTION=1; use $resolving-merge-conflicts and complete the conflict resolution.`
