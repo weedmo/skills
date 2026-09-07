@@ -125,7 +125,7 @@ On top of it, two loops with different graphs:
 
 - **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere): **matt-auto** conducts Matt Pocock's main flow
   (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
-  starts from a confirmed design-map spec), publishing
+  starts from a confirmed design-map spec whose step tags fix the ticket tiers), publishing
   its decision graph through loop-report and running independent tickets as parallel Orca
   workers; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
   resolves an active merge/rebase on the Deep tier

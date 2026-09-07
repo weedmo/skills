@@ -15,3 +15,7 @@
 - "How a loop uses this" 절을 서문과 red flag로 합쳤다(역할→티어 표, missing 메시지 그대로).
 - Red flags 6개 → 5개: "Deep because it sounds important"와 "own pairs"를 한 줄로.
 - `wc -w` 700 (목표 ≤ 700 충족).
+
+## 이후 변경
+
+- 2026-09-07 (`docs/design/design-map-route-recommend.md` D2): Codex Default 페어를 gpt-6-astra/medium에서 gpt-5.6-terra/medium으로. D1의 "Codex는 모델 하나, 티어는 effort"라는 근거는 여기서 뒤집혔고, 두 티어(Default/Deep)라는 결정 자체는 유지된다.

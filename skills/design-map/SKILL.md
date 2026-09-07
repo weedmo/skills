@@ -270,12 +270,12 @@ this conversation — so keep the shape exactly:
 design-map: 1
 slug: <topic>
 kind: feature            # feature | optimize
-loop: matt-auto          # matt-auto | autocode | implement
+loop: matt-auto          # matt-auto | autocode | direct | implement — recommended by the rule below
 followup: autocode       # optional: a second loop to run after `loop` finishes
 status: confirmed        # draft while iterating; confirmed only after the user's confirmation
 artifact: <this session's artifact URL>
 branch: <filled at handoff>
-handoff:                 # filled at handoff — one line per platform
+handoff:                 # filled at handoff — one line per platform (direct: the same direct line on all three)
   codex: "use $matt-auto --spec docs/design/<topic>.md"
   opencode: "/matt-auto --spec docs/design/<topic>.md"
   claude: "/matt-loop:matt-auto --spec docs/design/<topic>.md"
@@ -293,15 +293,35 @@ metric:                  # required when loop or followup is autocode; allowed o
 ## 목표 / ## 비목표
 ## 확정 구조   — mermaid source transcribed from the confirmed SVG (same nodes, same arrows)
 ## 결정        — table: id · 질문 · 선택 · 이유 (from the decision list)
-## 구현 순서   — numbered steps, each with a verify check
+## 구현 순서   — numbered steps, each tagged `[deep]` or `[default]`, each with a verify check
 ```
 
 `kind` is `optimize` when the design exists to move a measured number, `feature`
-otherwise. `loop` follows it — `autocode` for optimize, `matt-auto` for feature,
-`implement` when the whole thing is one file under thirty minutes. A design that
-changes structure *and* then moves a number is `loop: matt-auto` with
-`followup: autocode` and the metric block filled. Do NOT publish it anywhere — no
-issues, no PRs.
+otherwise. Do NOT publish the spec anywhere — no issues, no PRs.
+
+**Tag every step** of 구현 순서 with `[deep]` — core logic, invariants,
+concurrency, an interface other steps depend on — or `[default]` — tests,
+fixtures, docs, mechanical edits, copies of an existing pattern. `matt-auto
+--spec` reads the tag as the ticket's tier (model-routing's Deep / Default,
+on Codex astra / terra), so the tags are what put each part of the work on the
+model it needs; their count is also the evidence for the `loop` recommendation.
+
+**Recommend `loop`** from the spec — scaffolding shrinks as the model gets
+stronger, so the question is whether matt-auto's fixed cost (interview, board,
+ledger) buys more than it costs here:
+
+| Signal | `loop` |
+|---|---|
+| 1–2 steps, one file | `implement` |
+| 3–6 steps whose core is `[deep]` work, few tests | `direct` — one strong-model session (Astra / Fable) plans and builds the whole spec; cheaper workers would not repay matt-auto's fixed cost |
+| 7+ steps, or steps that can run in parallel, mostly `[default]` | `matt-auto` — many tickets on the cheap tier, each verified by the coordinator; the coordinator and delegate stay Deep |
+| `kind: optimize` | `autocode`; structure first and then a number → `loop: matt-auto` with `followup: autocode` and the metric block filled |
+
+The thresholds are starting points — move them after a few runs. A spec that
+mixes `[deep]` and `[default]` steps is `matt-auto` with the tags doing the
+model split, never direct plus matt-auto. Write the recommendation's reason in
+one line under the frontmatter (`추천: matt-auto — 9단계, deep 2 · default 7`)
+and repeat it in the step-8 question.
 
 ### 7. Review gate
 Run the `code-review` skill with the spec file as the path target (low effort).
@@ -323,9 +343,10 @@ In order:
 1. **Facts.** `git branch --show-current`, `git remote -v`, `git status --porcelain`.
    Note which loop skills this session can see — the Claude edition
    (`/matt-loop:matt-auto`, `/auto-loop:autocode`) is deliberately absent on some
-   machines, so continuing here is an option only where it is installed.
+   machines, so continuing here is an option only where it is installed
+   (`direct` needs no loop skill and can always continue here).
 2. **One question** (AskUserQuestion, one round): the loop (recommend the
-   frontmatter's `loop`); where it runs — 이 세션에서 계속 (recommended when the
+   frontmatter's `loop` with its one-line reason); where it runs — 이 세션에서 계속 (recommended when the
    Claude edition is installed here) / `/fork` 배경 세션 / Codex / OpenCode /
    명령만 받기; the base branch (recommend the current one when it is `main` or
    `dev`, else `main`); the branch name (recommend `feat/<slug>`, or stay on the
@@ -357,7 +378,20 @@ In order:
    `use $matt-auto --spec <path>`, OpenCode `/matt-auto --spec <path>`, Claude
    Code `/matt-loop:matt-auto --spec <path>` (autocode: `… init --spec <path>`;
    implement: `use $implement on <path>`, no flag, no gate — on Claude Code that
-   is the one-file path: one question, then build it here).
+   is the one-file path: one question, then build it here). `direct` is one
+   line on every platform, a meta prompt — the receiver writes its own execution
+   prompt from the spec before touching code, so the plan is visible before the
+   work, the way the grill log is visible before the diagram:
+   ```
+   Read <path>. First write your own execution prompt from it — goal, constraints,
+   the verify of each 구현 순서 step, definition of done — and show it. Then
+   implement the steps in order, run each step's verify, run the tests, and open a
+   PR against <base>. Report open decisions instead of guessing.
+   ```
+   On Codex it goes into a fresh Astra session (the same terminal flow); 이 세션에서
+   계속 means following that protocol right here — this session is the strong
+   model, no loop skill and no fork is needed; `/fork` 배경 세션 prints
+   `/fork <the direct line>`.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,
    Artifact link, `base → branch`, where it went (terminal handle, or
    "붙여넣기") and the handoff line. Do not watch the run — from here its own

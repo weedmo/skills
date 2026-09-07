@@ -63,7 +63,7 @@ Tiers, pairs, dispatch, and the ladder live in **`$model-routing`**. matt-loop's
 | `matt-large-context` | Large context | chunk via `matt-deep` | Gemini on OpenCode; chunked Deep elsewhere |
 | `matt-free` / `matt-free-fast` | free-only (OpenCode) | — | `--free` only; never mix a paid route in |
 
-Classify each ticket from what it needs, lowest clearly sufficient tier; `matt-default` reporting the task beyond it → retry once on `matt-deep`; `matt-deep` reporting the same → Codex retries once at `max` effort using the replacement-agent handoff in `$model-routing`, other platforms stop the ticket as a handoff. Use that skill's running-message versus idle-follow-up rules for persistent roles. An unavailable agent falls back to the platform's normal subagent, reported — never a silent switch.
+A `--spec` step tagged `[deep]` / `[default]` fixes its ticket's tier; otherwise classify each ticket from what it needs, lowest clearly sufficient tier; `matt-default` reporting the task beyond it → retry once on `matt-deep`; `matt-deep` reporting the same → Codex retries once at `max` effort using the replacement-agent handoff in `$model-routing`, other platforms stop the ticket as a handoff. Use that skill's running-message versus idle-follow-up rules for persistent roles.
 
 ## Delegate brief and escalation
 

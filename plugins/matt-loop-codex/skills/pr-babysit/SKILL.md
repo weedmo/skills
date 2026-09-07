@@ -32,7 +32,7 @@ You authored these commands, so approve the ledger yourself (`gate-check.mjs --a
 
 ## Standalone routing (Codex, OpenCode, Claude Code)
 
-When invoked directly, delegate the whole coordinator workflow to the Default route before inspecting or modifying the PR. On Codex, use `spawn_agent` with `model: "gpt-6-astra"`, `reasoning_effort: "medium"`, and `fork_turns: "none"`. On OpenCode use `matt-default`; on Claude Code use `matt-loop:matt-default` without an additional model override. In free-only OpenCode mode use `matt-free`. Include the user request, repository path, PR reference, and: `ROUTED_EXECUTION=1; use $pr-babysit and shepherd this PR to merge-ready.` Wait for the routed coordinator and do not duplicate its work.
+When invoked directly, delegate the whole coordinator workflow to the Default route before inspecting or modifying the PR. On Codex, use `spawn_agent` with `model: "gpt-5.6-terra"`, `reasoning_effort: "medium"`, and `fork_turns: "none"`. On OpenCode use `matt-default`; on Claude Code use `matt-loop:matt-default` without an additional model override. In free-only OpenCode mode use `matt-free`. Include the user request, repository path, PR reference, and: `ROUTED_EXECUTION=1; use $pr-babysit and shepherd this PR to merge-ready.` Wait for the routed coordinator and do not duplicate its work.
 
 If `ROUTED_EXECUTION=1` is already present, execute the workflow and route fresh-context subtasks as follows:
 
