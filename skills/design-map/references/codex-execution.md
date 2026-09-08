@@ -9,21 +9,28 @@ The spec selects the primary implementation engine under `execution`:
 
 ```yaml
 execution:
-  implementer: grok       # astra | grok
+  implementer: gemini     # astra | gemini; grok only as token fallback
   reviewer: sol           # fixed
   support: antigravity    # optional supporting work
 ```
 
 Recommend `astra` for `[deep]` work: architecture, public seams, migrations,
-algorithms, concurrency, or invariants. Recommend `grok` for a clear, bounded
+algorithms, concurrency, or invariants. Recommend `gemini` via Antigravity for a clear, bounded
 feature whose steps are mostly `[default]`. The user may override the
-recommendation at handoff. Sol is mandatory and independent in both cases.
+recommendation at handoff. Grok is only a fallback when Gemini credentials are
+absent or its token quota is exhausted, confirmed by provider status or an
+explicit authentication/quota error. Do not infer this from a missing API-key
+environment variable (OAuth may be available), a missing CLI, a timeout,
+temporary rate limiting, or an implementation failure. Record the fallback
+reason without exposing credentials. Legacy `implementer: grok` specs must
+resolve to Gemini unless this condition holds. Sol is mandatory for every route.
 
 Antigravity may handle independent discovery, documentation, fixture work,
 test/log triage, or other mechanical preparation. Give it explicit files and a
 verification target through an Orca `agy` terminal when that shortens the run.
-Its output is input to the primary implementer or coordinator; it never owns a
-core invariant, performs the final implementation, or replaces Sol review.
+When Gemini is the primary implementer, Antigravity runs that implementation;
+otherwise its output supports the primary implementer. Core invariants remain
+on Astra, and Antigravity never replaces Sol review.
 
 ## Run
 
@@ -32,10 +39,16 @@ core invariant, performs the final implementation, or replaces Sol review.
    step's verify command, and definition of done. Show the prompt before work.
 2. For `astra`, use the current session only when it is Astra; otherwise spawn
    `matt-deep` with `fork_turns: "none"` (role missing: direct
-   `gpt-6-astra`/`high`). Give it the prompt and branch. For `grok`, write the
+   `gpt-6-astra`/`high`). Give it the prompt and branch. For `gemini`, read the
+   available `orca-cli` skill and use an Orca `agy` terminal in the repo with
+   Gemini selected. Send the execution prompt, retain the terminal handle, and
+   follow its output through completion. If the token fallback condition above
+   occurs, end Gemini's write ownership and give Grok the prompt plus current
+   diff and verification state. Other unavailable-route errors use Astra,
+   reported once; they do not enable Grok. For eligible `grok`, write the
    prompt to a temporary file. First require `command -v grok` and confirm
    `grok models` lists `grok-4.6`; if either fails, report it and use the Astra
-   route (stop instead when the user explicitly required Grok). Otherwise run:
+   route. Otherwise run:
 
    ```bash
    grok --cwd <repo> --model grok-4.6 --reasoning-effort high \
@@ -47,7 +60,8 @@ core invariant, performs the final implementation, or replaces Sol review.
    already-authorized branch, stay within the spec, run every verify command,
    avoid push/force/delete operations, and report open material decisions.
 3. Run every verify command yourself. A failure returns to the same implementer
-   with the exact output; allow two fix attempts. For Grok, resume the captured
+   with the exact output; allow two fix attempts. For Gemini, send the fix prompt
+   to the retained Antigravity terminal. For Grok, resume the captured
    session with `--resume <sessionId> -p <fix-prompt>` and the same safety flags.
    When verification passes, stage only the explicit files belonging to the spec
    and commit the review candidate. Never stage pre-existing user changes.

@@ -47,10 +47,10 @@ npx github:weedmo/skills --yes --dry-run
 | Platform | Skill directory | Notes |
 |----------|-----------------|-------|
 | `claude-code` | `~/.claude/skills/` | Installs weed-harness, including Artifact-backed `design-map` and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
-| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route Astra or Grok implementation through independent Sol review. Restart Codex after install. |
+| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted) through independent Sol review. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
-| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. In Codex design execution it may handle discovery, docs, fixtures, and mechanical support while Astra/Grok owns implementation and Sol owns review. |
+| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. In Codex design execution it runs Gemini for bounded implementation and may handle discovery, docs, fixtures, and mechanical support; Astra owns deep implementation and Sol owns review. Grok is only a fallback when Gemini credentials are absent or token quota is exhausted. |
 | `orca` | `~/.agents/skills/` | Universal agent-skills directory; Orca exposes these skills to every agent it drives. Skip this platform if you installed the plugins natively via Claude/Codex (see [Orca](#orca) below) to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,
@@ -130,7 +130,7 @@ workflow guidance.
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the loops use the upstream unlazy skill: ledger per unit of work, coordinator-side `--reverify`, two retries then handoff, boundaries with Orca |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution selects Astra for deep work or Grok otherwise, uses Antigravity for suitable support, and requires independent Sol review before completion. |
+| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution selects Astra for deep work or Gemini via Antigravity otherwise (Grok only when Gemini credentials are absent or token quota is exhausted), uses Antigravity for suitable support, and requires independent Sol review before completion. |
 
 ### matt-loop
 

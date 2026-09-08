@@ -5,7 +5,7 @@ description: "Codex · OpenCode · Orca routing reference: Default and Deep task
 
 # Model routing (shared)
 
-Classify from the actual task, not keywords; take the lowest tier that is clearly sufficient. A loop's SKILL.md maps its *roles* to a tier here, plus any cap or reservation; pairs, dispatch, and the ladder live only here, so a rename is one edit.
+Use the lowest sufficient tier for the actual task. Loops map roles here with caps or reservations; pairs, dispatch, and the ladder live here.
 
 ## Tiers
 
@@ -17,7 +17,8 @@ Classify from the actual task, not keywords; take the lowest tier that is clearl
 
 - Codex: Default is terra, Deep and `max` astra. Design decisions never go below Deep.
 - OpenCode lacks gpt-6-astra; its Deep is sol.
-- **Review.** Codex reserves `matt-reviewer` (gpt-5.6-sol / high) for Astra and Grok output. Missing role → use that pair and report once. It never implements fixes.
+- **Review.** Codex reserves `matt-reviewer` (gpt-5.6-sol / high) for independent implementation review. Missing role → use that pair, reported once. Never implements fixes.
+- **Grok.** Fallback only for absent Gemini credentials or exhausted token quota; see design-map's execution reference.
 - Both plausible → Default; a persistent whole-run role → Deep.
 - **Ladder.** Default reaches a concrete reasoning limit → Deep once; Deep reaches its limit → `matt-deep-max` / `strategist-max` once, otherwise handoff. A loop may reserve `max` for one role. Tier changes require a replacement `spawn_agent`, carrying the brief, findings, attempts, state paths, and constraints. End the previous role's ownership first and record the new id; messages cannot change effort.
 - **No `ultra` in a loop.** Astra's `ultra` delegates inside the worker, outside the loop's worktrees, measurement, and re-verification. `max` is the ceiling; `ultra` is the user's own.

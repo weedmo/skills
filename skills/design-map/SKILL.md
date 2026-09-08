@@ -1,6 +1,6 @@
 ---
 name: design-map
-description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec can continue through Astra or Grok implementation followed by independent Sol review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
+description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec can continue through Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted) followed by independent Sol review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
 ---
 
 # design-map
@@ -283,7 +283,7 @@ status: confirmed        # draft while iterating; confirmed only after the user'
 artifact: <this session's artifact URL>
 branch: <filled at handoff>
 execution:                # direct/implement on Codex; omit for matt-auto/autocode
-  implementer: grok       # astra | grok
+  implementer: gemini     # astra | gemini; grok only as token fallback
   reviewer: sol           # fixed: independent implementation review
   support: antigravity    # optional discovery/docs/mechanical supporting work
 handoff:                 # filled at handoff — one line per receiving platform
@@ -323,8 +323,8 @@ ledger) buys more than it costs here:
 
 | Signal | `loop` |
 |---|---|
-| 1–2 steps, one file | `implement` — on Codex use the same Astra/Grok → Sol execution protocol; elsewhere use the platform's one-file implementation skill |
-| 3–6 steps, few tests | `direct` — Codex coordinates one primary implementer plus review; any `[deep]` step → Astra, otherwise Grok; Sol reviews either; Antigravity may take independent support work |
+| 1–2 steps, one file | `implement` — on Codex use the same Astra/Gemini → Sol execution protocol, with Grok only when Gemini credentials are absent or token quota is exhausted; elsewhere use the platform's one-file implementation skill |
+| 3–6 steps, few tests | `direct` — any `[deep]` step → Astra, otherwise Gemini via Antigravity; Grok only when Gemini credentials are absent or token quota is exhausted; Sol reviews every route |
 | 7+ steps, or steps that can run in parallel, mostly `[default]` | `matt-auto` — many tickets on the cheap tier, each verified by the coordinator; the coordinator and delegate stay Deep |
 | `kind: optimize` | `autocode`; structure first and then a number → `loop: matt-auto` with `followup: autocode` and the metric block filled |
 
@@ -363,7 +363,8 @@ In order:
    / `/fork` 배경 세션 / Codex / OpenCode / 명령만 받기; for Codex `direct`
    or `implement`,
    the primary implementer (recommend Astra when any step is `[deep]`, otherwise
-   Grok; Sol review is fixed and Antigravity support is automatic when useful);
+   Gemini via Antigravity; Grok only when Gemini credentials are absent or token
+   quota is exhausted, per the execution reference; Sol review is fixed);
    the base branch (recommend current when `main` or `dev`, else `main`); and the
    branch name (recommend `feat/<slug>`, or stay on the base).
 3. **Commit the spec alone.** If `git status --porcelain` shows tracked changes
@@ -399,7 +400,7 @@ In order:
    execution protocol (implementer from frontmatter, independent Sol review)
    ```
    A Codex session receiving that line reads `references/codex-execution.md` and
-   owns the Astra/Grok → Sol loop through completion. In a Codex design session,
+   owns the Astra/Gemini → Sol loop (Grok only as token fallback) through completion. In a Codex design session,
    이 세션에서 계속 runs that protocol here. On other platforms, retain the
    self-contained meta prompt with the spec's goal, checks, and definition of done.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,
