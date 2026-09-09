@@ -42,6 +42,12 @@ def validate(d):
             b = tk.get("blocker") or {}
             if not b.get("reason") or not b.get("detail"):
                 errors.append("blocked ticket %s needs blocker.reason and blocker.detail" % tk.get("id"))
+    # blockedBy is drawn as a dependency edge, so a dangling id is a missing
+    # edge nobody would notice on the page.
+    for tk in d.get("tickets", []) or []:
+        for dep in tk.get("blockedBy", []) or []:
+            if dep not in ticket_ids:
+                errors.append("ticket %s is blockedBy unknown ticket %s" % (tk.get("id"), dep))
     plan = d.get("plan")
     if plan:
         for w in plan.get("waves", []) or []:
