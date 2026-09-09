@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review committed changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards and originating-spec fidelity. Runs both reviews in parallel sub-agents and reports them side by side. Use for a branch, PR, or requests to review since a fixed point; commit a review candidate first."
+description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 ---
 
 Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
@@ -8,7 +8,7 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 - **Standards**: does the code conform to this repo's documented coding standards?
 - **Spec**: does the code faithfully implement the originating issue / spec?
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings. On Codex, both use the Sol-only `matt-reviewer` role so implementation and review never share a model prior.
+Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
 
 The issue tracker should have been provided to you. If `docs/agents/issue-tracker.md` is missing, tell the user to run `/setup-matt-pocock-skills`.
 
@@ -56,13 +56,6 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
 ### 4. Spawn both sub-agents in parallel
-
-On Codex, spawn one `matt-reviewer` per axis with `fork_turns: "none"`. Include
-`ROUTED_EXECUTION=1`, the repository path, fixed point, spec path, standards
-sources, and the complete axis prompt below. If the role is missing, use
-`gpt-5.6-sol` at `high` directly and report the fallback once. On other
-platforms use their normal parallel sub-agents. Reviewers never edit; the
-caller owns fixes and verification.
 
 **Standards sub-agent prompt** should include:
 
