@@ -162,6 +162,16 @@
   .disclosure .dcount { margin-left: auto; font-weight: 400; font-size: 12px; color: var(--muted-foreground); }
   #decisions-body { padding-top: 4px; max-width: 1040px; }
   #decisions-body[hidden] { display: none; }
+
+  /* ── dependency edges drawn over the wave columns ───────────── */
+  /* The columns already say *when* a ticket runs; the edges say *why* it
+     waits. The layer sits under the nodes so a curve never covers text,
+     and an edge whose endpoint is collapsed is simply not drawn. */
+  .flow { position: relative; }
+  .dep-edges { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
+  .dep-edges path { fill: none; stroke: var(--muted-foreground); stroke-width: 1.5; opacity: 0.4; }
+  .dep-edges .dep-arrow { fill: var(--muted-foreground); opacity: 0.4; }
+  .wcol, .conn { position: relative; z-index: 1; }
 </style>
 <script>
 window.LoopView = (function () {
@@ -390,6 +400,8 @@ window.LoopView = (function () {
 
   function renderTicketNode(tk, ctx) {
     var node = el("div", "tnode " + (tk.status || "pending"));
+    // The edge layer finds both ends of a dependency by this attribute.
+    if (tk.id) node.setAttribute("data-tid", tk.id);
     var head = el("div", "nhead");
     head.appendChild(el("span", "ndot"));
     head.appendChild(el("span", "nid", tk.id || ""));
@@ -497,6 +509,56 @@ window.LoopView = (function () {
     return lane;
   }
 
+  // A wave column says *when* a ticket runs; an edge says *why* it waits.
+  // `blockedBy` is the DAG edge (`blocker` is a different thing: a ticket that
+  // is stuck). Both ends must be rendered — a collapsed wave hides its nodes,
+  // so its edges drop out and the columns still read on their own.
+  var SVG_NS = "http://www.w3.org/2000/svg";
+
+  function makeEdgeLayer(flow, tickets) {
+    var pairs = [];
+    tickets.forEach(function (tk) {
+      (tk.blockedBy || []).forEach(function (from) { pairs.push([from, tk.id]); });
+    });
+    if (!pairs.length) return null;
+
+    var svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("class", "dep-edges");
+    svg.setAttribute("aria-hidden", "true");
+
+    function redraw() {
+      svg.textContent = "";
+      var fr = flow.getBoundingClientRect();
+      if (!fr.width) return;
+      svg.setAttribute("width", flow.scrollWidth);
+      svg.setAttribute("height", flow.scrollHeight);
+      var rects = {};
+      Array.prototype.forEach.call(flow.querySelectorAll(".tnode[data-tid]"), function (n) {
+        rects[n.getAttribute("data-tid")] = n.getBoundingClientRect();
+      });
+      pairs.forEach(function (p) {
+        var a = rects[p[0]], b = rects[p[1]];
+        if (!a || !b) return;
+        var x1 = a.right - fr.left, y1 = a.top - fr.top + a.height / 2;
+        var x2 = b.left - fr.left, y2 = b.top - fr.top + b.height / 2;
+        // Same column, or a plan that puts a ticket before what it waits on:
+        // there is no readable curve to draw, so draw none.
+        if (x2 - x1 < 8) return;
+        var bend = Math.max(16, (x2 - x1) * 0.45);
+        var line = document.createElementNS(SVG_NS, "path");
+        line.setAttribute("d", "M" + x1 + "," + y1 + " C" + (x1 + bend) + "," + y1 +
+          " " + (x2 - bend) + "," + y2 + " " + (x2 - 5) + "," + y2);
+        svg.appendChild(line);
+        var arrow = document.createElementNS(SVG_NS, "path");
+        arrow.setAttribute("class", "dep-arrow");
+        arrow.setAttribute("d", "M" + x2 + "," + y2 + " L" + (x2 - 6) + "," + (y2 - 3.5) +
+          " L" + (x2 - 6) + "," + (y2 + 3.5) + " Z");
+        svg.appendChild(arrow);
+      });
+    }
+    return { svg: svg, redraw: redraw };
+  }
+
   // Tickets are nodes, waves are columns, and the run reads left to right —
   // the same shape the coordinator actually executes.
   function renderFlow(host, ctx) {
@@ -535,9 +597,12 @@ window.LoopView = (function () {
     var wrap = el("div", "flow-wrap");
     var flow = el("div", "flow");
     wrap.appendChild(flow);
+    var edges = makeEdgeLayer(flow, tickets);
 
     function draw() {
       flow.textContent = "";
+      // First child, so the columns paint over the curves rather than under.
+      if (edges) flow.appendChild(edges.svg);
       var liveCol = null;
       waves.forEach(function (w, i) {
         if (i) {
@@ -566,6 +631,9 @@ window.LoopView = (function () {
             col.classList.remove("collapsed");
             col.removeChild(stub);
             tks.forEach(function (tk) { col.appendChild(renderTicketNode(tk, ctx)); });
+            // The nodes this column just revealed are the ends of edges that
+            // were dropped; the flow's own box may not change, so ask directly.
+            if (edges) requestAnimationFrame(edges.redraw);
           });
           col.appendChild(stub);
         } else {
@@ -589,6 +657,8 @@ window.LoopView = (function () {
           wrap.scrollLeft = Math.max(0, liveCol.offsetLeft - flow.offsetLeft - 12);
         });
       }
+      // The nodes need to be laid out before an edge can be measured.
+      if (edges) requestAnimationFrame(edges.redraw);
     }
     btnAll.addEventListener("click", function () {
       expandAll = !expandAll;
@@ -597,6 +667,9 @@ window.LoopView = (function () {
     });
     draw();
     host.appendChild(wrap);
+    // Expanding a collapsed wave and resizing the window both change the flow's
+    // box; either way the measured edges have to be taken again.
+    if (edges && window.ResizeObserver) new ResizeObserver(edges.redraw).observe(flow);
     if (plan.note) host.appendChild(el("p", "why", plan.note));
   }
 

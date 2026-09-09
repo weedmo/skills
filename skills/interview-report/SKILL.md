@@ -134,7 +134,10 @@ contract. The view's own keys:
 ```
 
   - Ticket `status`: `done` / `in-progress` / `blocked` / `pending` / `skipped`. `blockedBy` lists
-    the ticket ids it waits on — a DAG edge, not a blocker.
+    the ticket ids it waits on — a DAG edge, not a blocker. The board **draws** those edges over
+    the columns, so fill it on every ticket that waits: the column says when a ticket runs, the
+    edge says why it waits. `validate.py` refuses an id no ticket carries; an edge whose end is
+    inside a collapsed wave is simply not drawn.
   - **`blocker` is required on every `blocked` ticket**: `reason` is one of `gate` / `escalation`
     / `ci` / `conflict` / `dependency` / `worker` / `review` / `other`; `detail` is the checkable
     fact — the unmet gate id with expected-vs-actual, the failing check, the open question.
