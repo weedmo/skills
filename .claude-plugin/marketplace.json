@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "weed-plugins",
   "description": "Weed's Claude Code harness - one repo, per-loop plugins",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "owner": {
     "name": "weedmo"
   },
@@ -11,7 +11,7 @@
       "name": "weed-harness",
       "source": "./",
       "description": "Visual design on Claude Code and Codex plus the shared loop runtime: progress-page delivery, model routing with independent Sol review, completion gates, and Claude Code hooks",
-      "version": "5.4.1",
+      "version": "5.4.2",
       "author": {
         "name": "weedmo"
       },
