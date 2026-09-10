@@ -6,7 +6,7 @@
 name = "strategist-max"
 description = "The escalated autocode strategist: spawned from the start for hard problems, or once per run as the replacement after the Deep strategist plateaus, carrying the retrospective, program, results, and lessons. Dispatched by autocode, not for direct invocation."
 model = "gpt-6-astra"
-# Top effort Codex advertises for this model; adjust if the CLI rejects it.
+# Extra high is the allowed Astra ceiling; never substitute max or ultra.
 model_reasoning_effort = "xhigh"
 service_tier = "default"
 developer_instructions = """

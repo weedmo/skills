@@ -3,7 +3,7 @@
 name = "experimenter-deep"
 description = "Implements a single high-difficulty autocode hypothesis inside its own worktree — algorithm replacement, cross-module restructuring, concurrency, changes that touch invariants. Dispatched by autocode, not for direct invocation."
 model = "gpt-6-astra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 service_tier = "default"
 developer_instructions = """
 You implement exactly one hypothesis in the worktree you are given, with

@@ -1,0 +1,13 @@
+# Latency-sensitive work: PR operations, simple edits, mechanical conflicts.
+name = "matt-fast"
+description = "Handles trivial edits and mechanical transformations with Luna low. Dispatched by matt-loop; not for direct invocation."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+model_verbosity = "low"
+service_tier = "default"
+developer_instructions = """
+Complete the scoped task with direct tools and the narrowest relevant checks.
+If correctness requires reasoning you cannot establish, report the concrete
+limit so the caller can select a sufficient route. Do not guess or spawn agents.
+Report completed work and verification, not a plan or promise.
+"""

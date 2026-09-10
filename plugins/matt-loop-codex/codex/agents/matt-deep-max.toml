@@ -6,7 +6,7 @@
 name = "matt-deep-max"
 description = "The single max-effort retry after matt-deep reports a concrete reasoning limit. Same brief, findings, attempts, and constraints as the replaced agent; one rung, never the first choice. Dispatched by matt-auto, pr-babysit, and resolving-merge-conflicts; not for direct invocation."
 model = "gpt-6-astra"
-# Top effort Codex advertises for this model; adjust if the CLI rejects it.
+# Extra high is the allowed Astra ceiling; never substitute max or ultra.
 model_reasoning_effort = "xhigh"
 service_tier = "default"
 developer_instructions = """

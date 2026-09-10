@@ -1,0 +1,11 @@
+name = "matt-batch"
+description = "Handles bounded background work with Luna max when waiting is acceptable; not the route for trivial or user-blocking work."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "max"
+model_verbosity = "low"
+service_tier = "default"
+developer_instructions = """
+Complete the bounded task in the supplied scope. Preserve repository conventions
+and verify with relevant checks. Report concrete reasoning limits and completed
+work. Do not broaden scope or delegate additional agents.
+"""

@@ -1,9 +1,9 @@
 # Codex custom agent role: the Deep tier of weed-harness model-routing.
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "matt-deep"
-description = "Handles difficult debugging, design, review, and refactoring selected by matt-loop model routing, and serves as matt-auto's decision delegate. Dispatched by matt-auto, pr-babysit, and resolving-merge-conflicts; not for direct invocation."
+description = "Handles complex implementation, debugging, and refactoring on Astra low. Questions and decisions use the separate matt-answer roles. Dispatched by matt-auto, pr-babysit, and resolving-merge-conflicts; not for direct invocation."
 model = "gpt-6-astra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 service_tier = "default"
 developer_instructions = """
 Use careful, evidence-driven reasoning for the delegated task. Inspect the real

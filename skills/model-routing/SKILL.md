@@ -1,42 +1,42 @@
 ---
 name: model-routing
-description: "Codex · OpenCode · Orca routing reference: Default and Deep task tiers, the Sol review reservation, platform pairs, dispatch, and the one-step ladder. Never invoked standalone."
+description: "Codex · OpenCode · Orca routing: cost/time-efficient pairs, Astra question answering, independent review, dispatch, and escalation. Never invoked standalone."
 ---
 
 # Model routing (shared)
 
-Use the lowest sufficient tier for the actual task. Loops map roles here with caps or reservations; pairs, dispatch, and the ladder live here.
+Minimize tokens, elapsed time, retries, and dispatch overhead. Classify the actual work, not the skill name.
 
-## Tiers
+## Execution tiers
 
-| Tier | Codex `spawn_agent` | Claude Code agent | OpenCode | Use when |
-|---|---|---|---|---|
-| Default | gpt-5.6-terra / medium | opus / medium | gpt-5.6-terra / medium | Feature work, tests, moderate refactors, small fixes, mechanical edits |
-| Deep | gpt-6-astra / high | fable / high | gpt-5.6-sol / high | Hard debugging, architecture, migrations, algorithms, concurrency, invariants, demanding review, whole-run decisions |
-| Large context | chunk via Deep | chunk via Deep | Gemini | Repository-scale discovery; large documents, logs, media |
+| Tier | Codex / OpenCode | Claude Code | Use |
+|---|---|---|---|
+| Fast | gpt-5.6-luna / low | opus / medium | Trivial edits, mechanical transformations |
+| Default | gpt-5.6-luna / medium | opus / medium | Small fixes, tests, mechanical conflicts |
+| Background | gpt-5.6-luna / max | opus / medium | Bounded work where waiting is acceptable |
+| Standard | gpt-5.6-sol / low | opus / medium | Moderate reasoning with latency constraints |
+| Deep | gpt-6-astra / low | fable / high | Complex implementation, debugging, architecture |
+| Escalated / review | gpt-6-astra / xhigh | Deep | Difficult unresolved reasoning; independent review |
 
-- Codex: Default is terra, Deep and `max` astra. Design decisions never go below Deep.
-- OpenCode lacks gpt-6-astra; its Deep is sol.
-- **Review.** Codex reserves `matt-reviewer` (gpt-5.6-sol / high) for independent implementation review. Missing role → use that pair, reported once. Never implements fixes.
-- **Grok.** Fallback only for absent Gemini credentials or exhausted token quota; see design-map's execution reference.
-- Both plausible → Default; a persistent whole-run role → Deep.
-- **Ladder.** Default reaches a concrete reasoning limit → Deep once; Deep reaches its limit → `matt-deep-max` / `strategist-max` once, otherwise handoff. A loop may reserve `max` for one role. Tier changes require a replacement `spawn_agent`, carrying the brief, findings, attempts, state paths, and constraints. End the previous role's ownership first and record the new id; messages cannot change effort.
-- **No `ultra` in a loop.** Astra's `ultra` delegates inside the worker, outside the loop's worktrees, measurement, and re-verification. `max` is the ceiling; `ultra` is the user's own.
-- **Large context.** Chunk the material, summarize each chunk with source references on the routed agent, synthesize on Deep. OpenCode does the same when its Gemini agent cannot start; Gemini CLI is never needed.
+- **Gemini priority.** For design-map implementation/support and OpenCode large-context slots, read [Gemini priority](references/gemini-priority.md): strongest available Gemini, maximum supported thinking/budgets, Codex continuation on quota exhaustion. Answers/review stay Astra.
+- **Allowed Codex pairs.** Only the six above for Codex execution, including Orca and fallback. Claude Code retains native pairs. Astra `xhigh` means extra high; legacy `-max` roles never mean Astra's literal `max`.
+- **Answering is separate.** Matt-loop questions/decisions use only `matt-answer` (Astra low) or `matt-answer-deep` (Astra xhigh). Choose per question: low for explanations and local choices; xhigh for interacting constraints, uncertain causal analysis, or architectural tradeoffs. Clear hard questions start xhigh; reevaluate the next question and return to low when sufficient. Never put simple implementation on Astra just because its answer was discussed there.
+- **Latency.** PR creation/status and deterministic commands use tools directly. No extra agent for each command. Background is opt-in by workload, not the default for trivial work. Measure completion time, passing checks, and total retry cost; these routes are starting preferences.
+- **Review.** `matt-reviewer` is a separate read-only Astra xhigh agent. It inspects source independently and never fixes it; PR metadata/status operations need no implementation review.
+- **Execution ladder.** A concrete reasoning limit → next sufficient tier once, skipping Background when waiting is costly. Deep → `matt-deep-max` once, then handoff. Loops may cap roles or start hard strategists escalated. Do not walk every tier mechanically.
+- **Context.** Changing effort requires another role/agent, carrying scope, findings, attempts, decisions, and constraints. Stop previous ownership; messages never change effort. Chunk oversized evidence on allowed pairs, then synthesize on Deep.
 
-## Dispatch per platform
+## Dispatch
 
-- **Codex** — `spawn_agent` by role (`matt-default` / `matt-deep` / `matt-deep-max` / `matt-reviewer`; autocode `experimenter-default` / `experimenter-deep` / `strategist` / `strategist-max`), `fork_turns: "none"`, with required context and `ROUTED_EXECUTION=1`. Role files fix model and effort; missing role → the named pair, reported once. Use messages for a running role and follow-up for an idle one.
-- **Claude Code** — the loop's agents fix model and effort (`matt-loop:matt-default` / `matt-deep`, `auto-loop:experimenter-default` / `experimenter-deep` / `strategist`). Spawn by name, no `model` override.
-- **OpenCode** — the packaged subagents (`matt-default` / `matt-deep` under `~/.config/opencode/agents/`); without them, the normal subagent, tier named in the prompt.
-- **Orca workers** (`orca orchestration worker-start`) — Codex `--agent codex --model <tier model> --effort medium|high`; `--effort max` only with `--retry-of <dispatch>` after Deep reported its limit. Claude Code `--agent claude --model opus --effort medium` (Default), `--agent claude --model claude-fable-5-1 --effort high` (Deep). OpenCode `--agent opencode` with `ROUTED_EXECUTION=1; use <tier agent>` in the prompt (no model flags reach opencode). Rejected pair → retry without `--effort`; rejected flags → start without them, tier in the prompt; note it on the board. Orca workers keep the user's tier.
-- **Other platforms or unavailable route** — the normal subagent, tier in the prompt, fallback reported once.
-- **Free-only mode** — only the loop's free set (matt-loop's `matt-free` / `matt-free-fast` on OpenCode); a missing free agent stops the run rather than paying. Elsewhere, say it has no route and route normally.
+- **Codex** — `spawn_agent` by pinned role (`matt-fast/default/batch/standard/deep/deep-max/reviewer/answer/answer-deep`; autocode `experimenter-default/deep`, `strategist/strategist-max`), `fork_turns: "none"`, required context and `ROUTED_EXECUTION=1`. Verify installed roles match the table; missing/stale roles require the explicit allowed pair, reported once. Message running agents; follow up idle ones.
+- **Claude Code** — named loop agents pin model/effort; no model override. Fast/Default/Background/Standard map to its Default agent; Deep maps to its Deep agent.
+- **OpenCode** — packaged roles under `~/.config/opencode/agents/`; verify provider support for the exact pair. Missing roles may use another mechanism enforcing that pair; otherwise stop dispatch.
+- **Orca** — `worker-start --agent codex --model <exact model> --effort <exact effort>` from the table. Use `--retry-of <dispatch>` for reasoning retries; initial hard questions need no failed retry. Claude: `--agent claude --model opus --effort medium` or `--model claude-fable-5-1 --effort high`. OpenCode: `--agent opencode`, role and `ROUTED_EXECUTION=1` in prompt.
+- **Unavailable route** — stop and report if no mechanism enforces the required pair. Never omit rejected flags, inherit defaults, or switch providers silently.
+- **Explicit free-only mode** retains OpenCode `matt-free/free-fast`; missing agents stop rather than pay.
 
 ## Red flags
 
-- Asking the user for an effort → routing is automatic.
-- A `model` override on a Claude Code routing agent → the agent already fixes both.
-- Two retries on a rung, or Codex `max` after a Default failure → one step at a time.
-- A routed role on `ultra`, Deep because the task sounds important, a loop with its own pairs → the loop owns orchestration; classify from need; map roles to tiers.
-- Guessing pairs when this skill is missing → say `model-routing unavailable — using the platform's normal subagent for every role` once and continue.
+- Asking the user for effort, escalating merely because a task says “conflict,” or keeping xhigh for the next easy question.
+- Astra for trivial implementation; unlisted Codex pairs; Gemini outside its designated slots; Grok fallback.
+- Claiming a skill changed the parent session's model: routing selects workers/answer delegates, not the parent UI model.

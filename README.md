@@ -166,10 +166,10 @@ npx github:weedmo/skills --yes --dry-run
 | Platform | Skill directory | Notes |
 |----------|-----------------|-------|
 | `claude-code` | `~/.claude/skills/` | Installs weed-harness, including Artifact-backed `design-map` and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
-| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted) through independent Sol review. Restart Codex after install. |
+| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route cost/time-aware Luna, Sol, or Astra implementation through independent Astra extra-high review. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
-| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. In Codex design execution it runs Gemini for bounded implementation and may handle discovery, docs, fixtures, and mechanical support; Astra owns deep implementation and Sol owns review. Grok is only a fallback when Gemini credentials are absent or token quota is exhausted. |
+| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. Eligible Codex design implementation/support prioritizes the strongest Gemini with maximum supported thinking; exhausted quota falls back to Codex. |
 | `orca` | `~/.agents/skills/` | Universal agent-skills directory; Orca exposes these skills to every agent it drives. Skip this platform if you installed the plugins natively via Claude/Codex (see [Orca](#orca) below) to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,
@@ -244,12 +244,12 @@ workflow guidance.
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
 | `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): Orca artifact link, or the Orca built-in browser tab when links are unavailable, or the path — route kept stable per run; `npm test` runs its tests against a fake Orca CLI |
-| `model-routing` | Codex · OpenCode · Orca | The Default / Deep tier table, dispatch rules, escalation ladder, and Codex's independent Sol review reservation |
+| `model-routing` | Codex · OpenCode · Orca | Gemini-priority slots with Codex quota fallback, six cost/time-aware Codex pairs, Astra low/xhigh question routing, dispatch rules, escalation ladder, and Codex's independent Astra extra-high review reservation |
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the loops use the upstream unlazy skill: ledger per unit of work, coordinator-side `--reverify`, two retries then handoff, boundaries with Orca |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution selects Astra for deep work or Gemini via Antigravity otherwise (Grok only when Gemini credentials are absent or token quota is exhausted), uses Antigravity for suitable support, and requires independent Sol review before completion. |
+| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution classifies implementation by scope, difficulty, and latency, and requires independent Astra extra-high review before completion. |
 
 ### matt-loop
 
@@ -257,7 +257,7 @@ Two editions of the same flow, one per plugin root. `plugins/matt-loop-claude` (
 
 | Skill | Description |
 |-------|-------------|
-| `matt-auto` | Conductor for interview → spec → tickets → implementation with automatic model routing, Orca worker waves, and a live decision graph. A confirmed design-map spec fixes ticket tiers; after implementation Codex runs both code-review axes on the Sol-only reviewer before optional PR shipping. |
+| `matt-auto` | Conductor for interview → spec → tickets → implementation with automatic model routing, Orca worker waves, and a live decision graph. A confirmed design-map spec fixes ticket tiers; after implementation Codex runs both code-review axes on the Astra extra-high reviewer before optional PR shipping. |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
 | `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
 | vendored Matt Pocock skills | The remaining upstream skills matt-auto conducts: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `code-review`, `setup-matt-pocock-skills` |

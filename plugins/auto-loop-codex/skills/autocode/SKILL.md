@@ -213,12 +213,12 @@ Tiers, pairs, dispatch mechanics, and the escalation ladder live in the shared *
 |---|---|---|---|
 | Strategist | Deep | `auto-loop:strategist` | Default strategist tier |
 | Strategist (escalated) | Codex `strategist-max` | `auto-loop:strategist` | `problem_difficulty: hard`, or escalation in 3E — the only role on the `max` rung; role missing → the table's pair, reported once |
-| Experimenter default | Default | `auto-loop:experimenter-default` | One-site or multi-site change inside a module: constant/flag tuning, API swap, new helper, data-structure swap, loop restructuring |
+| Experimenter default | Background | `auto-loop:experimenter-default` | One-site or multi-site change inside a module: constant/flag tuning, API swap, new helper, data-structure swap, loop restructuring |
 | Experimenter deep | Deep | `auto-loop:experimenter-deep` | Algorithm replacement, cross-module restructuring, concurrency, invariants |
 
 - The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters**; `strategist-max` is the strategist's alone.
 - Orca workers take the tier's `worker-start` flags from `$model-routing`'s Orca table.
-- With neither named agents nor model overrides, use the platform's normal subagent for every role, name the intended tier in the prompt, and say so once at start.
+- Without an enforceable allowed pair, stop dispatch and report the unavailable route; never inherit the platform's default model or effort.
 
 ### 3I: The experiment board
 

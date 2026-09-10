@@ -1,80 +1,57 @@
 # Codex execution after design-map
 
-Read this file when Codex receives a confirmed design-map spec for execution,
-or when a Codex design-map session continues directly into implementation.
+Read this when Codex receives a confirmed design-map spec for execution,
+or a design session continues into implementation. Read `$model-routing`;
+read its `references/gemini-priority.md` for eligible Gemini work and quota fallback.
 
 ## Contract
 
-The spec selects the primary implementation engine under `execution`:
-
 ```yaml
 execution:
-  implementer: gemini     # astra | gemini; grok only as token fallback
-  reviewer: sol           # fixed
-  support: antigravity    # optional supporting work
+  implementer: gemini    # bounded Default work; astra for Deep work
+  support: antigravity   # eligible independent preparation
+  fallback: codex       # on confirmed quota exhaustion
+  reviewer: astra        # independent extra-high review
 ```
 
-Recommend `astra` for `[deep]` work: architecture, public seams, migrations,
-algorithms, concurrency, or invariants. Recommend `gemini` via Antigravity for a clear, bounded
-feature whose steps are mostly `[default]`. The user may override the
-recommendation at handoff. Grok is only a fallback when Gemini credentials are
-absent or its token quota is exhausted, confirmed by provider status or an
-explicit authentication/quota error. Do not infer this from a missing API-key
-environment variable (OAuth may be available), a missing CLI, a timeout,
-temporary rate limiting, or an implementation failure. Record the fallback
-reason without exposing credentials. Legacy `implementer: grok` specs must
-resolve to Gemini unless this condition holds. Sol is mandatory for every route.
+Route trivial edits to `matt-fast`, small changes to `matt-default`, moderate
+time-sensitive work to `matt-standard`, bounded background work to `matt-batch`,
+and architecture, public seams, migrations, algorithms, concurrency, or invariants to
+`matt-deep`. Escalate only by model-routing's ladder.
+These Codex tiers apply to Deep work and quota fallbacks. Prefer Gemini via
+Antigravity for bounded Default implementation and independent discovery,
+documentation, fixtures and test/log triage. Pin the strongest available model
+and maximum supported thinking/budgets using the shared Gemini reference.
 
-Antigravity may handle independent discovery, documentation, fixture work,
-test/log triage, or other mechanical preparation. Give it explicit files and a
-verification target through an Orca `agy` terminal when that shortens the run.
-When Gemini is the primary implementer, Antigravity runs that implementation;
-otherwise its output supports the primary implementer. Core invariants remain
-on Astra, and Antigravity never replaces Sol review.
+Legacy `implementer: routed` selects Gemini for eligible work, Codex otherwise;
+`astra` selects Deep. Replace legacy Grok fallback with Codex continuation.
+Legacy `reviewer: sol` becomes Astra xhigh. Preserve `support: antigravity`.
 
 ## Run
 
 1. Record `baseline=$(git rev-parse HEAD)`, confirm the spec is `confirmed`,
-   and make the execution prompt from its goal, constraints, decisions, every
-   step's verify command, and definition of done. Show the prompt before work.
-2. For `astra`, use the current session only when it is Astra; otherwise spawn
-   `matt-deep` with `fork_turns: "none"` (role missing: direct
-   `gpt-6-astra`/`high`). Give it the prompt and branch. For `gemini`, read the
-   available `orca-cli` skill and use an Orca `agy` terminal in the repo with
-   Gemini selected. Send the execution prompt, retain the terminal handle, and
-   follow its output through completion. If the token fallback condition above
-   occurs, end Gemini's write ownership and give Grok the prompt plus current
-   diff and verification state. Other unavailable-route errors use Astra,
-   reported once; they do not enable Grok. For eligible `grok`, write the
-   prompt to a temporary file. First require `command -v grok` and confirm
-   `grok models` lists `grok-4.6`; if either fails, report it and use the Astra
-   route. Otherwise run:
-
-   ```bash
-   grok --cwd <repo> --model grok-4.6 --reasoning-effort high \
-     --always-approve --deny 'Bash(git push*)' --deny 'Bash(git reset --hard*)' \
-     --deny 'Bash(rm -rf*)' --output-format json --prompt-file <prompt-file>
-   ```
-
-   Save the returned `sessionId`. The prompt tells Grok to implement on the
-   already-authorized branch, stay within the spec, run every verify command,
-   avoid push/force/delete operations, and report open material decisions.
-3. Run every verify command yourself. A failure returns to the same implementer
-   with the exact output; allow two fix attempts. For Gemini, send the fix prompt
-   to the retained Antigravity terminal. For Grok, resume the captured
-   session with `--resume <sessionId> -p <fix-prompt>` and the same safety flags.
-   When verification passes, stage only the explicit files belonging to the spec
-   and commit the review candidate. Never stage pre-existing user changes.
-4. Run `$code-review <baseline> <spec-path>` against that committed candidate.
-   Its Codex route assigns both axes
-   to independent `matt-reviewer` agents on `gpt-5.6-sol`/`high`. If that skill
-   is unavailable, refuses because issue-tracker setup is absent, or the role is
-   missing, spawn two Sol agents directly: one for repository standards and one
-   for spec fidelity. Reviewers are read-only.
-5. Send confirmed findings back to the same implementer, rerun affected verify
-   commands, commit the explicit fix files, then repeat Sol review. Stop after
-   two review/fix cycles and report
-   unresolved findings instead of declaring completion. A clean Sol review and
-   passing verification are both required.
-6. Confirm every reviewed change is committed, then follow the user's requested
-   ship mode. Never let the implementation agent approve its own work.
+   and make the execution prompt from its goal, constraints, decisions,
+   every verify command, and definition of done. Show the prompt before work.
+2. For Gemini, follow the shared priority reference: dispatch the explicitly
+   pinned Antigravity worker with the prompt and authorized branch. On confirmed
+   quota exhaustion, checkpoint and continue with Codex; never overlap writers.
+   For Codex, spawn the selected implementation role with `fork_turns: "none"`,
+   `ROUTED_EXECUTION=1`, the prompt, and the authorized branch.
+   Reuse the current session only when its exact model and effort are known
+   to match that role. Missing or stale roles require an explicit allowed
+   pair; if it cannot be enforced, report the unavailable route and stop.
+3. Run every verify command yourself. Return failures to the same implementer
+   with exact output; allow two fix attempts. When verification passes,
+   stage only files belonging to the spec and commit the review candidate.
+   Never stage pre-existing user changes.
+4. Run `$code-review <baseline> <spec-path>` against that candidate.
+   Both axes use fresh read-only `matt-reviewer` agents (Astra xhigh).
+   If the skill is unavailable or issue-tracker setup is absent, dispatch
+   those reviewers directly, one for standards and one for spec fidelity.
+   Missing roles follow model-routing's allowed-pair fallback.
+5. Return confirmed findings to the implementer, rerun affected checks,
+   commit the explicit fix files, and repeat independent review. Stop after
+   two review/fix cycles with unresolved findings. Completion requires clean
+   independent review and passing verification.
+6. Confirm every reviewed change is committed, then follow the requested
+   ship mode. The implementer never approves its own work.

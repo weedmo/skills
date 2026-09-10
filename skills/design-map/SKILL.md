@@ -1,6 +1,6 @@
 ---
 name: design-map
-description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec can continue through Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted) followed by independent Sol review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
+description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec uses Gemini-priority implementation with cost/time-aware Codex fallback and independent Astra extra-high review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
 ---
 
 # design-map
@@ -283,9 +283,10 @@ status: confirmed        # draft while iterating; confirmed only after the user'
 artifact: <this session's artifact URL>
 branch: <filled at handoff>
 execution:                # direct/implement on Codex; omit for matt-auto/autocode
-  implementer: gemini     # astra | gemini; grok only as token fallback
-  reviewer: sol           # fixed: independent implementation review
-  support: antigravity    # optional discovery/docs/mechanical supporting work
+  implementer: gemini    # bounded Default work; astra for Deep
+  support: antigravity   # strongest available Gemini, maximum supported thinking
+  fallback: codex       # quota exhaustion
+  reviewer: astra         # fixed: independent extra-high review
 handoff:                 # filled at handoff — one line per receiving platform
   codex: "use $design-map to execute the confirmed spec docs/design/<topic>.md"
   opencode: "/matt-auto --spec docs/design/<topic>.md"
@@ -314,7 +315,7 @@ otherwise. Do NOT publish the spec anywhere — no issues, no PRs.
 concurrency, an interface other steps depend on — or `[default]` — tests,
 fixtures, docs, mechanical edits, copies of an existing pattern. `matt-auto
 --spec` reads the tag as the ticket's tier (model-routing's Deep / Default,
-on Codex astra / terra), so the tags are what put each part of the work on the
+on Codex Astra low / Luna medium), so the tags are what put each part of the work on the
 model it needs; their count is also the evidence for the `loop` recommendation.
 
 **Recommend `loop`** from the spec — scaffolding shrinks as the model gets
@@ -323,13 +324,13 @@ ledger) buys more than it costs here:
 
 | Signal | `loop` |
 |---|---|
-| 1–2 steps, one file | `implement` — on Codex use the same Astra/Gemini → Sol execution protocol, with Grok only when Gemini credentials are absent or token quota is exhausted; elsewhere use the platform's one-file implementation skill |
-| 3–6 steps, few tests | `direct` — any `[deep]` step → Astra, otherwise Gemini via Antigravity; Grok only when Gemini credentials are absent or token quota is exhausted; Sol reviews every route |
+| 1–2 steps, one file | `implement` — on Codex use the allowed-pair execution protocol with independent Astra xhigh review; elsewhere use the platform's one-file implementation skill |
+| 3–6 steps, few tests | `direct` — any `[deep]` step → Deep, otherwise Gemini first, Codex on quota exhaustion; independent Astra xhigh review |
 | 7+ steps, or steps that can run in parallel, mostly `[default]` | `matt-auto` — many tickets on the cheap tier, each verified by the coordinator; the coordinator and delegate stay Deep |
 | `kind: optimize` | `autocode`; structure first and then a number → `loop: matt-auto` with `followup: autocode` and the metric block filled |
 
 For a Codex `direct` or `implement` spec, fill `execution` using the rule above and read
-`references/codex-execution.md`; `reviewer` stays `sol`. The thresholds are starting points — move them after a few runs. A spec that
+`references/codex-execution.md`; `reviewer` stays `astra`. The thresholds are starting points — move them after a few runs. A spec that
 mixes `[deep]` and `[default]` steps is `matt-auto` with the tags doing the
 model split, never direct plus matt-auto. Write the recommendation's reason in
 one line under the frontmatter (`추천: matt-auto — 9단계, deep 2 · default 7`)
@@ -339,7 +340,7 @@ and repeat it in the step-8 question.
 On Claude Code, run `code-review` with the spec path as before. On Codex, spawn `matt-reviewer` with
 `fork_turns: "none"` to read the spec file directly and adversarially check
 contradictions, missing edge cases, unverifiable steps, and drift from the
-confirmed page; role missing → direct `gpt-5.6-sol`/`high`, reported once. This
+confirmed page; role missing → direct `gpt-6-astra`/`xhigh`, reported once. This
 is a file review, not `$code-review`'s Git-diff interface. Apply valid findings
 to the spec and design page.
 
@@ -362,9 +363,8 @@ In order:
    frontmatter's `loop` with its one-line reason); where it runs — 이 세션에서 계속
    / `/fork` 배경 세션 / Codex / OpenCode / 명령만 받기; for Codex `direct`
    or `implement`,
-   the primary implementer (recommend Astra when any step is `[deep]`, otherwise
-   Gemini via Antigravity; Grok only when Gemini credentials are absent or token
-   quota is exhausted, per the execution reference; Sol review is fixed);
+   state the route (Deep for `[deep]`, otherwise Gemini first with Codex quota fallback;
+   independent Astra xhigh review is fixed);
    the base branch (recommend current when `main` or `dev`, else `main`); and the
    branch name (recommend `feat/<slug>`, or stay on the base).
 3. **Commit the spec alone.** If `git status --porcelain` shows tracked changes
@@ -397,10 +397,10 @@ In order:
    `implement` both use:
    ```
    use $design-map to execute the confirmed spec <path>; follow its Codex
-   execution protocol (implementer from frontmatter, independent Sol review)
+   execution protocol (implementer from frontmatter, independent Astra xhigh review)
    ```
    A Codex session receiving that line reads `references/codex-execution.md` and
-   owns the Astra/Gemini → Sol loop (Grok only as token fallback) through completion. In a Codex design session,
+   owns the Gemini-priority/Codex-fallback implementation and independent review loop through completion. In a Codex design session,
    이 세션에서 계속 runs that protocol here. On other platforms, retain the
    self-contained meta prompt with the spec's goal, checks, and definition of done.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,

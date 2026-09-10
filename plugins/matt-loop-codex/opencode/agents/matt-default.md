@@ -1,7 +1,7 @@
 ---
-description: Handles ordinary implementation and analysis selected by matt-loop model routing.
+description: Handles small fixes, tests, and mechanical conflicts on Luna medium.
 mode: subagent
-model: openai/gpt-5.6-terra
+model: openai/gpt-5.6-luna
 variant: medium
 ---
 

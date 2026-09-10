@@ -1,0 +1,11 @@
+name = "matt-standard"
+description = "Handles moderate implementation and analysis with Sol low when Luna is insufficient and latency matters."
+model = "gpt-5.6-sol"
+model_reasoning_effort = "low"
+model_verbosity = "low"
+service_tier = "default"
+developer_instructions = """
+Complete the assigned task from repository evidence. Preserve stated constraints,
+keep edits scoped, and run relevant verification. Report a concrete reasoning
+limit if the task needs deeper analysis instead of guessing or over-testing.
+"""

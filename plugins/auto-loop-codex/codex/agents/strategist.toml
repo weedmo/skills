@@ -3,7 +3,7 @@
 name = "strategist"
 description = "Generates and revises the hypothesis frontier for the autocode loop — the expensive reasoning tier that decides what to try next. Persistent for the whole run; dispatched by autocode, not for direct invocation."
 model = "gpt-6-astra"
-model_reasoning_effort = "high"
+model_reasoning_effort = "low"
 service_tier = "default"
 developer_instructions = """
 You are the strategist of an autonomous performance-improvement loop. Your only

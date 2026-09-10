@@ -1,7 +1,7 @@
 {
   "name": "weed-harness",
-  "version": "5.4.2",
-  "description": "Codex packaging for design-map plus the shared loop runtime: visual design with Astra or Gemini implementation and Sol review, progress-page delivery, model routing, and completion gates. Grok is used only when Gemini credentials are absent or token quota is exhausted. Required by matt-loop and auto-loop.",
+  "version": "5.4.3",
+  "description": "Codex packaging for design-map plus the shared loop runtime: visual design with Gemini-priority implementation with cost/time-aware Codex quota fallback and independent Astra extra-high review, progress-page delivery, model routing, and completion gates. Required by matt-loop and auto-loop.",
   "author": {
     "name": "weedmo",
     "url": "https://github.com/weedmo"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "weed-harness",
     "shortDescription": "Visual design plus shared progress, routing, and completion runtime",
-    "longDescription": "Install weed-harness in Codex to design through a delivered diagram page, execute confirmed specs with Astra or Gemini, and require independent Sol review. Grok is only a fallback when Gemini credentials are absent or token quota is exhausted. It also provides the progress-page delivery, model routing, and completion gates shared by matt-loop and auto-loop. The Claude Code-only setup skill is not part of the Codex package.",
+    "longDescription": "Install weed-harness in Codex to design through a delivered diagram page, execute eligible confirmed specs with strongest-Gemini priority and cost/time-aware Codex quota fallback, and require independent Astra extra-high review. It also provides the progress-page delivery, model routing, and completion gates shared by matt-loop and auto-loop. The Claude Code-only setup skill is not part of the Codex package.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [

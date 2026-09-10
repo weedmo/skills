@@ -2,8 +2,8 @@
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "experimenter-default"
 description = "Implements a single medium-difficulty autocode hypothesis inside its own worktree — multi-site changes within a module, new helpers, data-structure swaps, loop restructuring. Dispatched by autocode, not for direct invocation."
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "max"
 model_verbosity = "low"
 service_tier = "default"
 developer_instructions = """

@@ -57,6 +57,10 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
+On Codex, read `$model-routing` and use fresh read-only `matt-reviewer`
+agents (Astra `xhigh`) for both axes. Missing or stale roles require the same
+explicit allowed pair; if unavailable, stop dispatch rather than inherit a default.
+
 **Standards sub-agent prompt** should include:
 
 - The full diff command and commit list.

@@ -5,7 +5,7 @@ Read this file only when `design-map` runs on Codex.
 ## Delegate
 
 Run the self-grill on one persistent Astra delegate. Prefer the installed
-`matt-deep` role; otherwise use `spawn_agent` with `gpt-6-astra`, `high`, and
+`matt-deep` role; otherwise use `spawn_agent` with `gpt-6-astra`, `low`, and
 `fork_turns: "none"`, supplying the scope, survey, settled decisions, and every
 frontier round. Keep the same agent with `send_message` while it runs and
 `followup_task` after it finishes. The delegate never edits files.
