@@ -18,6 +18,125 @@ skill are referenced, not vendored: the installer ensures unlazy with
 `npx skills add Leonxlnx/unlazy -g`, and the `auto-update.sh` SessionStart hook
 keeps it, graphify, superpowers, and the three plugins up to date once present.
 
+## Architecture — weed-harness 5.4.2
+
+Snapshot: [`main @ e6db271`](https://github.com/weedmo/skills/tree/e6db271).
+The diagram and counts below describe that revision; they are not live status indicators.
+
+[![weed-harness architecture: two editions per loop share one view, rendered by the common runtime](docs/architecture.svg)](docs/architecture.svg)
+
+### 1. Runtime and loops
+
+The repository root **is the `weed-harness` plugin**. It owns the shared page
+renderer, views, delivery helpers, model routing, and completion gates.
+`matt-loop` and `auto-loop` each have separate Claude and Codex plugin roots,
+because their agent orchestration and delivery capabilities differ.
+
+Each loop family nevertheless has **one shared `view.html`**:
+
+| Loop editions | Shared view | What it displays |
+|---------------|-------------|------------------|
+| `matt-loop-claude` + `matt-loop-codex` | [`interview-report/assets/view.html`](skills/interview-report/assets/view.html) | Decisions, stages, ticket waves, review and PR lanes |
+| `auto-loop-claude` + `auto-loop-codex` | [`autocode-board/assets/view.html`](skills/autocode-board/assets/view.html) | Hypotheses, experiments, metric trends and kept changes |
+
+A graph-edge fix in either shared view therefore reaches both editions of
+that loop when their runtime installation is updated and the page regenerated.
+
+### 2. Page pipeline
+
+Loops write `<slug>.data.json`; the page implementation lives in the runtime.
+[`render.py`](skills/loop-report/assets/render.py) checks the common data
+contract and the selected view's sibling `validate.py`, then combines the
+JSON, `shell.html`, and the selected `view.html` into one HTML page.
+This separates loop execution from page presentation: changing graph layout
+does not require duplicating changes in the two orchestration editions.
+
+Claude uses its Artifact tool for delivery. On the other delivery route,
+[`deliver.py`](skills/loop-report/assets/deliver.py) probes capabilities and
+falls back from **Orca artifact link → built-in browser tab → local path**.
+The selected route is kept stable for the run.
+
+### 3. Repository layout
+
+```text
+skills/                               # repository root = weed-harness plugin
+├── .claude-plugin/
+│   ├── plugin.json                   # Claude runtime package manifest
+│   └── marketplace.json              # Claude catalog → root + Claude loop roots
+├── .codex-plugin/plugin.json          # Codex runtime package manifest
+├── .agents/plugins/marketplace.json   # Codex catalog → root + Codex loop roots
+├── skills/
+│   ├── loop-report/assets/           # shell.html, render.py, deliver.py
+│   ├── interview-report/assets/      # matt-auto view.html + validator
+│   ├── autocode-board/assets/        # autocode view.html + validator + reference
+│   ├── model-routing/                # model / effort / review policies
+│   ├── loop-gates/                   # completion evidence via upstream unlazy
+│   ├── design-map/                   # visual design → confirmed spec
+│   └── setup/                        # Claude setup, hooks and HUD
+├── plugins/
+│   ├── matt-loop-claude/              # Claude orchestration + native manifest
+│   ├── matt-loop-codex/               # Codex orchestration + native manifest
+│   ├── auto-loop-claude/              # Claude experiments + native manifest
+│   └── auto-loop-codex/               # Codex experiments + native manifest
+├── bin/                              # installer, version and word-budget checks
+├── hooks/                            # Claude SessionStart update hook
+├── commands/release.md               # release procedure
+└── .github/workflows/                # CI, release and upstream sync
+```
+
+The three metadata directories serve different consumers: Claude's package
+and catalog, Codex's package, and Codex's catalog. They point to shared
+runtime files and the appropriate loop edition; they are not three runtime copies.
+
+### 4. Distribution and updates
+
+Two channels deliver the same source: native Claude/Codex marketplaces install
+plugin packages; [`bin/install.mjs`](bin/install.mjs) copies selected skill
+packs into the [six platform directories listed below](#where-skills-are-installed).
+Choose one channel per platform to avoid duplicate discovery.
+
+Once registered in Claude, the
+[`SessionStart` update hook](hooks/auto-update.sh) refreshes supported existing
+installs: Claude plugins, native Codex plugins, OpenCode through the installer,
+and legacy Codex skill copies when native Codex plugins are absent. It also
+maintains external graphify, superpowers, and unlazy dependencies. This is a
+Claude-triggered, best-effort update path, not a startup hook on all six platforms.
+The daily upstream-sync workflow separately vendors Matt Pocock skills into
+both matt-loop editions; subsequent local updates bring those changes down.
+
+### 5. Structural checks and word budgets
+
+Run `npm test` before committing a release. At this snapshot it checks plugin
+version agreement, skill word budgets, and delivery behavior against a fake
+Orca CLI. [Push/PR CI](.github/workflows/test.yml) checks version agreement,
+delivery tests, both view render fixtures, and strict YAML frontmatter.
+**The word-budget check currently runs in `npm test`, but is not wired into
+that CI workflow.**
+
+| Skill / read chain | Words | Cap | Remaining |
+|--------------------|------:|----:|----------:|
+| `model-routing` | 688 | 700 | 12 |
+| `loop-gates` | 693 | 700 | 7 |
+| Codex `matt-auto` | 3,785 | 3,800 | 15 |
+| Codex `autocode` | 4,242 | 4,250 | 8 |
+| Claude `matt-auto` | 4,171 | 4,200 | 29 |
+| Claude `pr-babysit` | 1,018 | 1,100 | 82 |
+| Claude `autocode` | 4,084 | 4,200 | 116 |
+| Codex matt-auto read chain | 8,694 | 8,700 | 6 |
+
+Counts come from [`bin/check-words.mjs`](bin/check-words.mjs), using
+whitespace-separated words. The chain includes Codex `matt-auto`,
+`interview-report`, `loop-report`, `model-routing`, and `loop-gates`.
+With only six words left in the chain, additions usually require trimming
+existing instructions within the applicable budgets.
+
+The [release procedure](commands/release.md) synchronizes four runtime version
+files: `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
+`.claude-plugin/marketplace.json` (root and runtime entry), and `package.json`.
+At this revision, [`check-versions.mjs`](bin/check-versions.mjs) checks the
+plugin manifests and Claude marketplace entries, **but does not check
+`package.json`**. Keep that release requirement distinct from automated coverage.
+
 ## Install (recommended): npx installer
 
 One command installs skill packs to any combination of the supported

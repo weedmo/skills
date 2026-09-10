@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="890" viewBox="0 0 1200 890" role="img" aria-labelledby="title desc">
+  <title id="title">weed-harness — shared runtime, two loop families</title>
+  <desc id="desc">Claude and Codex editions of matt-loop share the interview-report view. Both auto-loop editions share autocode-board. Loop data, the selected view and shell feed render.py. Delivery uses Claude Artifact or the Orca artifact, browser and local-path fallback. Native marketplaces and the installer distribute the runtime and loops.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101a30"/><stop offset="1" stop-color="#172943"/></linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8" fill="none" stroke="#91a8c6" stroke-width="1.5"/></marker>
+    <style>
+      text{font-family:DejaVu Sans,Arial,sans-serif;fill:#edf3fc} .muted{fill:#acbdd4;font-size:16px} .label{font-size:13px;font-weight:700;letter-spacing:2px} .heading{font-size:22px;font-weight:700} .body{font-size:17px} .edge{fill:none;stroke:#91a8c6;stroke-width:2;marker-end:url(#arrow)} .card{fill:#1c2d47;stroke:#3b5272} .pill{fill:#263b58} .teal{fill:#7de4d0} .violet{fill:#c5b0ff}
+    </style>
+  </defs>
+  <rect width="1200" height="890" rx="24" fill="url(#bg)"/>
+  <text x="48" y="48" class="label teal">WEED-PLUGINS / ARCHITECTURE</text>
+  <text x="48" y="94" font-size="38" font-weight="700">Two editions. One shared view per loop.</text>
+  <text x="48" y="126" class="muted">weed-harness 5.4.2 · e6db271 · execution → data → presentation</text>
+  <rect x="48" y="160" width="530" height="126" rx="16" class="card"/>
+  <text x="72" y="193" class="heading teal">matt-loop</text>
+  <text x="72" y="219" class="muted">Interview → spec → tickets → implementation</text>
+  <rect x="72" y="235" width="226" height="32" rx="8" class="pill"/><text x="90" y="257" class="body">Claude edition</text>
+  <rect x="314" y="235" width="240" height="32" rx="8" class="pill"/><text x="332" y="257" class="body">Codex edition</text>
+  <rect x="622" y="160" width="530" height="126" rx="16" class="card"/>
+  <text x="646" y="193" class="heading violet">auto-loop</text>
+  <text x="646" y="219" class="muted">Hypothesis → experiment → measure → keep</text>
+  <rect x="646" y="235" width="226" height="32" rx="8" class="pill"/><text x="664" y="257" class="body">Claude edition</text>
+  <rect x="888" y="235" width="240" height="32" rx="8" class="pill"/><text x="906" y="257" class="body">Codex edition</text>
+  <rect x="48" y="324" width="1104" height="374" rx="18" fill="#122139" stroke="#496580" stroke-dasharray="6 5"/>
+  <path d="M185 286V302H434V286" fill="none" stroke="#91a8c6" stroke-width="2"/>
+  <path d="M313 330V350" class="edge"/>
+  <path d="M759 286V302H1008V286" fill="none" stroke="#91a8c6" stroke-width="2"/>
+  <path d="M887 302V350" class="edge"/>
+  <rect x="70" y="312" width="364" height="24" fill="#122139"/>
+  <text x="80" y="330" class="label">WEED-HARNESS / REPOSITORY ROOT</text>
+  <rect x="72" y="350" width="482" height="72" rx="12" fill="#183b42" stroke="#467e7c"/>
+  <text x="94" y="379" class="heading teal">interview-report / view.html</text><text x="94" y="405" class="muted">One decision-graph view for both editions</text>
+  <rect x="646" y="350" width="482" height="72" rx="12" fill="#302c4f" stroke="#77659f"/>
+  <text x="668" y="379" class="heading violet">autocode-board / view.html</text><text x="668" y="405" class="muted">One experiment-board view for both editions</text>
+  <path d="M313 422V448H887V422" fill="none" stroke="#91a8c6" stroke-width="2"/>
+  <path d="M600 448V476" class="edge"/>
+  <rect x="72" y="476" width="245" height="76" rx="12" class="card"/><text x="94" y="507" class="heading">data.json</text><text x="94" y="533" class="muted">Written by the loop</text>
+  <rect x="426" y="476" width="348" height="76" rx="12" class="card"/><text x="450" y="507" class="heading">render.py</text><text x="450" y="533" class="muted">Validate + compose → run.html</text>
+  <rect x="883" y="476" width="245" height="76" rx="12" class="card"/><text x="905" y="507" class="heading">shell.html</text><text x="905" y="533" class="muted">Shared page machinery</text>
+  <path d="M317 514H426 M883 514H774 M600 552V589" class="edge"/>
+  <text x="72" y="594" class="label teal">DELIVERY</text>
+  <text x="72" y="625" class="body">Claude: Artifact tool</text>
+  <rect x="426" y="589" width="702" height="49" rx="12" class="card"/>
+  <text x="446" y="620" class="body">deliver.py: Orca artifact link → browser tab → local path</text>
+  <text x="72" y="674" class="muted">Shared policies: model-routing · loop-gates / unlazy completion evidence</text>
+  <text x="48" y="740" class="label teal">DISTRIBUTION &amp; FEEDBACK</text>
+  <text x="48" y="774" class="body">Native marketplaces → Claude / Codex plugin installs</text>
+  <text x="48" y="803" class="body">npx installer → six platform skill directories</text>
+  <text x="48" y="850" class="muted">Registered Claude SessionStart hook → refresh supported installs + external dependencies</text>
+  <rect x="754" y="731" width="398" height="84" rx="12" class="card"/>
+  <text x="776" y="760" class="heading">Check before release</text>
+  <text x="776" y="789" class="muted">Versions · word budgets · delivery tests</text>
+</svg>
