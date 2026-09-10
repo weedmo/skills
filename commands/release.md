@@ -8,6 +8,10 @@ argument-hint: "<X.Y.Z | patch | minor | major>"
 You are performing an automated release of the weed-harness plugin.
 The version argument is: `$ARGUMENTS`
 
+`REPO` below is the harness repo root — the checkout holding `.claude-plugin/`
+(`/home/weed/orca/skills` on this machine). It is **not** `~/.claude`, which
+lives inside an unrelated checkout.
+
 ## Steps
 
 ### 1. Pre-flight Checks
@@ -16,18 +20,18 @@ Run these checks and STOP if any fail:
 
 ```bash
 # Must be on main branch
-[ "$(git -C ~/.claude branch --show-current)" = "main" ] || { echo "ERROR: Not on main branch"; exit 1; }
+[ "$(git -C $REPO branch --show-current)" = "main" ] || { echo "ERROR: Not on main branch"; exit 1; }
 
 # Working tree must be clean
-[ -z "$(git -C ~/.claude status --porcelain)" ] || { echo "ERROR: Working tree is dirty"; exit 1; }
+[ -z "$(git -C $REPO status --porcelain)" ] || { echo "ERROR: Working tree is dirty"; exit 1; }
 
 # Fetch latest from origin
-git -C ~/.claude fetch origin
+git -C $REPO fetch origin
 ```
 
 ### 2. Resolve Version
 
-- If the argument is `patch`, `minor`, or `major`: read the current version from `~/.claude/.claude-plugin/plugin.json` and compute the next semver version accordingly.
+- If the argument is `patch`, `minor`, or `major`: read the current version from `$REPO/.claude-plugin/plugin.json` and compute the next semver version accordingly.
 - If the argument matches `X.Y.Z` format: use it directly.
 - Otherwise: STOP with an error.
 
@@ -35,26 +39,39 @@ Store the resolved version as `NEW_VERSION` (without `v` prefix).
 
 ### 3. Version Bump
 
-Update these 3 locations with the resolved version:
+`bin/check-versions.mjs` is the authority on which files must agree — read it if
+this list looks stale. Today it is:
 
-1. **`~/.claude/.claude-plugin/plugin.json`** → `"version": "NEW_VERSION"`
-2. **`~/.claude/.claude-plugin/marketplace.json`** → `metadata.version` field
-3. **`~/.claude/.claude-plugin/marketplace.json`** → `plugins[0].version` field
+1. **`$REPO/.claude-plugin/plugin.json`** → `"version": "NEW_VERSION"`
+2. **`$REPO/.codex-plugin/plugin.json`** → `"version": "NEW_VERSION"`
+3. **`$REPO/.claude-plugin/marketplace.json`** → root `version` field
+4. **`$REPO/.claude-plugin/marketplace.json`** → the `weed-harness` entry's `version`
+5. **`$REPO/package.json`** → `"version": "NEW_VERSION"` (the npx installer's version)
 
-Use the Edit tool for precise replacements. Verify all three values match after editing.
+Only the `weed-harness` entry moves — `matt-loop` and `auto-loop` carry their own
+versions. Then **run the suite before committing**, because CI runs the same one
+and a half-bumped release fails it:
+
+```bash
+cd $REPO && npm test
+```
+
+`check-versions` must report one version for weed-harness, and `check-words` must
+stay under every cap — a SKILL.md edited earlier in the session can push the
+matt-auto chain over. Fix and re-run until green; never raise a cap.
 
 ### 4. Commit
 
 ```bash
-cd ~/.claude
-git add .claude-plugin/plugin.json .claude-plugin/marketplace.json
+cd $REPO
+git add .claude-plugin .codex-plugin package.json
 git commit -m "chore: bump version to NEW_VERSION"
 ```
 
 ### 5. Tag & Push
 
 ```bash
-cd ~/.claude
+cd $REPO
 git tag vNEW_VERSION
 git push origin main
 git push origin vNEW_VERSION
@@ -63,7 +80,7 @@ git push origin vNEW_VERSION
 ### 6. GitHub Release
 
 ```bash
-cd ~/.claude
+cd $REPO
 gh release create vNEW_VERSION --generate-notes
 ```
 
@@ -97,17 +114,19 @@ rm -rf "$CACHE_BASE"/*/
 mkdir -p "$CACHE_BASE/NEW_VERSION"
 
 # Copy plugin files to cache (exclude .git, plugins/, node_modules)
-rsync -a --exclude='.git' --exclude='plugins/' --exclude='node_modules/' ~/.claude/ "$CACHE_BASE/NEW_VERSION/"
+rsync -a --exclude='.git' --exclude='node_modules/' $REPO/ "$CACHE_BASE/NEW_VERSION/"
 
 # Update installed_plugins.json version
 if [ -f "$INSTALLED" ]; then
   python3 -c "
-import json, sys
+import json
 with open('$INSTALLED') as f:
     data = json.load(f)
-for p in data.get('plugins', []):
-    if p.get('name') == 'weed-harness':
-        p['version'] = 'NEW_VERSION'
+# Format v2: plugins is a dict keyed '<name>@<marketplace>', each a list of installs
+# carrying both version and installPath — both have to move.
+for entry in data['plugins']['weed-harness@weed-plugins']:
+    entry['version'] = 'NEW_VERSION'
+    entry['installPath'] = '$CACHE_BASE/NEW_VERSION'
 with open('$INSTALLED', 'w') as f:
     json.dump(data, f, indent=2)
 print('Updated installed_plugins.json')
@@ -125,10 +144,10 @@ Run all verification checks and report results:
 echo "=== Release Verification ==="
 
 # Tag exists
-git -C ~/.claude tag -l vNEW_VERSION | grep -q vNEW_VERSION && echo "✓ Tag vNEW_VERSION exists" || echo "✗ Tag missing"
+git -C $REPO tag -l vNEW_VERSION | grep -q vNEW_VERSION && echo "✓ Tag vNEW_VERSION exists" || echo "✗ Tag missing"
 
 # GitHub Release exists
-gh release view vNEW_VERSION --repo weedmo/my_harness &>/dev/null && echo "✓ GitHub Release exists" || echo "✗ GitHub Release missing"
+gh release view vNEW_VERSION --repo weedmo/skills &>/dev/null && echo "✓ GitHub Release exists" || echo "✗ GitHub Release missing"
 
 # Cache exists
 [ -d ~/.claude/plugins/cache/weed-plugins/weed-harness/NEW_VERSION ] && echo "✓ Cache directory exists" || echo "✗ Cache missing"
@@ -138,13 +157,9 @@ python3 -c "
 import json
 with open('$HOME/.claude/plugins/installed_plugins.json') as f:
     data = json.load(f)
-for p in data.get('plugins', []):
-    if p.get('name') == 'weed-harness':
-        if p.get('version') == 'NEW_VERSION':
-            print('✓ installed_plugins.json version matches')
-        else:
-            print(f'✗ installed_plugins.json version mismatch: {p.get(\"version\")}')
-        break
+v = data['plugins']['weed-harness@weed-plugins'][0]['version']
+print('✓ installed_plugins.json version matches' if v == 'NEW_VERSION'
+      else '✗ installed_plugins.json version mismatch: ' + v)
 " 2>/dev/null || echo "✗ Could not verify installed_plugins.json"
 
 echo "=== Release vNEW_VERSION complete ==="

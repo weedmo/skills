@@ -1,6 +1,6 @@
 {
   "name": "weed-harness",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Codex packaging for design-map plus the shared loop runtime: visual design with Astra or Gemini implementation and Sol review, progress-page delivery, model routing, and completion gates. Grok is used only when Gemini credentials are absent or token quota is exhausted. Required by matt-loop and auto-loop.",
   "author": {
     "name": "weedmo",
