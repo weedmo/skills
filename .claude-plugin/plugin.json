@@ -1,6 +1,6 @@
 {
   "name": "weed-harness",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "Visual design for Claude Code and Codex plus the shared runtime for delegated loops: progress pages, model routing with Astra extra-high review, completion gates, and Claude Code hooks",
   "author": {
     "name": "weedmo"
