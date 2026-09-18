@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # SessionStart hook: keep required skills auto-updated.
-#  - graphifyy (pip): when PyPI has a newer version, upgrade and re-install
-#    the graphify skill for BOTH platforms (claude + codex).
+#  - graft (npm): ensure the code-context-graph CLI, upgrade it once a day,
+#    register its MCP server for Claude Code (user scope) + Codex, and build
+#    the current repo's graft/ index in the background when it is missing.
 #  - superpowers plugin: best-effort `claude plugin update`.
 #  - weed-plugins (claude): best-effort `claude plugin update` for the three
 #    plugins installed from this repo's marketplace.
@@ -18,15 +19,35 @@ set +e
 
 PY="$(command -v python3 || command -v python)"
 
-# --- graphify: auto-upgrade + reinstall skill for claude & codex ---
-if command -v graphify >/dev/null 2>&1 && [ -n "$PY" ]; then
-  installed="$("$PY" -m pip show graphifyy 2>/dev/null | awk '/^Version:/{print $2; exit}')"
-  latest="$("$PY" -c "import json,urllib.request;print(json.load(urllib.request.urlopen('https://pypi.org/pypi/graphifyy/json',timeout=3))['info']['version'])" 2>/dev/null)"
-  if [ -n "$installed" ] && [ -n "$latest" ] && [ "$installed" != "$latest" ]; then
-    "$PY" -m pip install --user -q -U graphifyy >/dev/null 2>&1
-    graphify install --platform claude >/dev/null 2>&1
-    [ -d "$HOME/.codex" ] && graphify install --platform codex >/dev/null 2>&1
-    echo "[auto-update] graphifyy $installed -> $latest applied (claude + codex)"
+# --- graft: the code-context graph backbone (see CLAUDE.md). `graft build` is
+# local and free (no LLM key); the MCP server refreshes the graph before each
+# query, so no watcher is needed. ---
+if command -v npm >/dev/null 2>&1; then
+  if ! command -v graft >/dev/null 2>&1; then
+    timeout 120 npm install -g @nanonets/graft >/dev/null 2>&1 && echo "[auto-update] graft installed"
+  else
+    stamp="$HOME/.agents/.graft-update-stamp"
+    today="$(date +%Y-%m-%d)"
+    if [ "$(cat "$stamp" 2>/dev/null)" != "$today" ]; then
+      mkdir -p "$HOME/.agents"
+      timeout 120 graft upgrade >/dev/null 2>&1 && printf '%s\n' "$today" > "$stamp"
+    fi
+  fi
+fi
+if command -v graft >/dev/null 2>&1; then
+  # MCP registration — Claude Code user scope (every repo) and Codex.
+  if command -v claude >/dev/null 2>&1 && [ -n "$PY" ] && \
+     ! "$PY" -c "import json,sys;sys.exit(0 if 'graft' in json.load(open('$HOME/.claude.json')).get('mcpServers',{}) else 1)" 2>/dev/null; then
+    claude mcp add --scope user graft -- graft mcp >/dev/null 2>&1 && echo "[auto-update] graft MCP registered (claude)"
+  fi
+  if [ -d "$HOME/.codex" ] && ! grep -q '^\[mcp_servers\.graft\]' "$HOME/.codex/config.toml" 2>/dev/null; then
+    printf '\n[mcp_servers.graft]\ncommand = "graft"\nargs = ["mcp"]\n' >> "$HOME/.codex/config.toml" && echo "[auto-update] graft MCP registered (codex)"
+  fi
+  # Repo index — build once per repo, in the background so startup never waits.
+  ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+  if [ -n "$ROOT" ] && [ ! -d "$ROOT/graft" ]; then
+    (cd "$ROOT" && nohup graft build . >/dev/null 2>&1 &)
+    echo "[auto-update] graft index building for $ROOT"
   fi
 fi
 

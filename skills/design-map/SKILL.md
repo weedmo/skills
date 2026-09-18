@@ -35,14 +35,15 @@ new structure must solve. If ambiguous, ask once with AskUserQuestion (max one r
 then proceed.
 
 ### 2. Survey
-Understand the current shape before proposing a new one. **graphify first** — it is
+Understand the current shape before proposing a new one. **graft first** — it is
 the standard way to read an existing codebase here; token-heavy file sweeps are the
 last resort.
-1. `graphify-out/graph.json` exists → use it: `graphify query "..." --budget N` for
-   orientation, `--dfs` to trace paths. Refresh a stale graph with `graphify --update`.
-2. No graph yet → build it: `graphify <repo> --directed --wiki`. If the CLI is
-   missing, `pip install graphifyy` first.
-3. graphify unavailable or the build fails → fall back: small scope, read the
+1. `graft/` index exists → use the MCP tools: `graft_repo_map` for orientation,
+   `graft_find_code` for "where is X", `graft_trace_calls` to follow callers and
+   callees. The server refreshes the graph before each query, so it is never stale.
+2. No index yet → build it: `graft build <repo>` (local, no LLM key). If the CLI is
+   missing, `npm i -g @nanonets/graft` first.
+3. graft unavailable or the build fails → fall back: small scope, read the
    relevant files yourself; larger scope, send an Explore agent and keep the
    conclusions, not the file dumps.
 The graph is for orientation (where is X, how is it connected). Verify precise

@@ -288,21 +288,19 @@
       <td>Orca 멀티에이전트 조율 — 스레드 메시지, ask/reply 블로킹 플로우, 태스크 DAG, 의사결정 게이트, 코디네이터 루프.</td></tr>
     <tr><td class="name">computer-use</td><td><span class="tag purple">Orca</span></td>
       <td>Orca의 computer-use CLI로 로컬 데스크톱 앱 창을 접근성 트리·스크린샷·안전한 UI 액션으로 검사·조작.</td></tr>
-    <tr><td class="name">graphify</td><td><span class="tag green">독립</span></td>
-      <td>모든 입력(코드·문서·논문·이미지)을 영속 지식 그래프로 변환. <code>graphify-out/</code>이 있으면 코드베이스 질문을 그래프 쿼리로 먼저 처리해 토큰 절약. pip 패키지 <code>graphifyy</code>로 배포.</td></tr>
+    <tr><td class="name">graft</td><td><span class="tag green">독립</span></td>
+      <td>코드를 심볼·호출 그래프로 인덱싱해 MCP(<code>graft_find_code</code>, <code>graft_trace_calls</code> 등)로 제공. <code>graft/</code> 인덱스가 있으면 코드베이스 질문을 그래프 쿼리로 먼저 처리해 토큰 절약. npm 패키지 <code>@nanonets/graft</code>로 배포, auto-update 훅이 설치·등록·빌드를 보장.</td></tr>
   </table>
   </div>
 
   <h2>3. Hooks (<code>hooks/</code>)</h2>
-  <p class="section-note">이벤트에 자동 반응하는 스크립트 3개. OMC 훅(omc-skill-filter), Codex 리뷰 훅(codex-task-review), devlog 계열(devlog-hook, tsg-bash-failure), merge-conflict-trigger, gstack-skill-filter는 정리 완료로 삭제됐습니다.</p>
+  <p class="section-note">이벤트에 자동 반응하는 스크립트 2개. OMC 훅(omc-skill-filter), Codex 리뷰 훅(codex-task-review), devlog 계열(devlog-hook, tsg-bash-failure), merge-conflict-trigger, gstack-skill-filter는 정리 완료로 삭제됐습니다.</p>
 
   <div class="tablewrap">
   <table>
     <tr><th>훅</th><th>이벤트</th><th>역할</th></tr>
-    <tr><td class="name">graphify-claudemd-inject.sh</td><td><span class="tag orange">PostToolUse: Skill</span></td>
-      <td><code>/graphify</code> 스킬 실행 후 프로젝트 CLAUDE.md에 graphify 운용 섹션을 자동 주입.</td></tr>
     <tr><td class="name">auto-update.sh</td><td><span class="tag green">SessionStart</span></td>
-      <td>필수 스킬 자동 업데이트 — PyPI에 <code>graphifyy</code> 신버전이 있으면 업그레이드 후 claude·codex 양쪽에 스킬 재설치, superpowers 플러그인 업데이트(best-effort), weed-plugins 세 플러그인 업데이트, codex 네이티브 설치가 없으면 <code>~/.codex/skills</code>에 공통 런타임과 두 루프 스킬을 재동기화, unlazy 스킬 보장 및 하루 한 번 업데이트. 실패해도 세션 시작을 막지 않음.</td></tr>
+      <td>필수 스킬 자동 업데이트 — <code>graft</code> CLI 보장(npm 전역 설치, 하루 한 번 업그레이드), graft MCP 서버를 claude·codex 양쪽에 등록, 현재 레포에 <code>graft/</code> 인덱스가 없으면 백그라운드 빌드, superpowers 플러그인 업데이트(best-effort), weed-plugins 세 플러그인 업데이트, codex 네이티브 설치가 없으면 <code>~/.codex/skills</code>에 공통 런타임과 두 루프 스킬을 재동기화, unlazy 스킬 보장 및 하루 한 번 업데이트. 실패해도 세션 시작을 막지 않음.</td></tr>
     <tr><td class="name">language-rule.sh</td><td><span class="tag blue">UserPromptSubmit</span></td>
       <td>매 프롬프트마다 언어 규칙 리마인더 주입 — 사용자 보고/대화는 한국어, 코드·주석·커밋 메시지는 English.</td></tr>
     <tr><td class="name">hooks.json</td><td><span class="tag gray">플러그인 등록</span></td>
@@ -322,7 +320,6 @@
           </ul>
         </li>
         <li><strong><code>hooks.json</code> (플러그인)</strong> — Codex 리뷰 훅 제거 후 빈 선언. 플러그인이 자동 등록하는 훅은 없음.</li>
-        <li>graphify-inject 훅은 <code>/setup</code> 스킬이 사용자 설정에 등록해 주는 방식입니다.</li>
       </ul>
       <p class="section-note">참고: 리포의 <code>settings.json</code>은 업스트림에서 vendored된 파일이라 <code>/home/weed/</code> 경로가 남아 있습니다 — 로컬 설정 원본이 아닙니다.</p>
     </div>
@@ -331,7 +328,7 @@
   <div class="callout">
     <span class="ico">🔄</span>
     <div>
-      <p><strong>훅이 만드는 자동화.</strong> 매 프롬프트마다 language-rule이 언어 규칙을 상기시키고, <code>/graphify</code> 실행 후에는 CLAUDE.md에 운용 섹션이 자동 주입됩니다. 세션이 시작될 때마다 auto-update가 필수 스킬(graphify claude+codex, superpowers, matt-*)을 자동으로 최신화합니다.</p>
+      <p><strong>훅이 만드는 자동화.</strong> 매 프롬프트마다 language-rule이 언어 규칙을 상기시킵니다. 세션이 시작될 때마다 auto-update가 graft CLI·MCP 등록·레포 인덱스를 보장하고 필수 스킬(superpowers, weed-plugins, unlazy)을 자동으로 최신화합니다.</p>
     </div>
   </div>
 

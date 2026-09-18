@@ -81,3 +81,6 @@ skills/skill-stocktake/
 # vendored gstack browse: exclude heavy test fixtures (28M) from harness release
 skills/browse/test/
 __pycache__/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
