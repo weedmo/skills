@@ -122,8 +122,8 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
   `max` rung)
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
-- **design-map** — Claude Code and Codex visual design. Codex delivers the page through
-  Orca/HTML and routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
+- **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
+  a page only on request; Codex delivers it through Orca/HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
   Sol review, and optional Antigravity support.
 
 On top of it, two loops with different graphs:

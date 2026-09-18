@@ -165,8 +165,8 @@ npx github:weedmo/skills --yes --dry-run
 
 | Platform | Skill directory | Notes |
 |----------|-----------------|-------|
-| `claude-code` | `~/.claude/skills/` | Installs weed-harness, including Artifact-backed `design-map` and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
-| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, delivered as an Orca link/tab or local HTML; confirmed specs route cost/time-aware Luna, Sol, or Astra implementation through independent Astra extra-high review. Restart Codex after install. |
+| `claude-code` | `~/.claude/skills/` | Installs weed-harness, including terminal-first `design-map` (Artifact only on request) and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
+| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map`, terminal-first with an Orca link/tab or local HTML page only on request; confirmed specs route cost/time-aware Luna, Sol, or Astra implementation through independent Astra extra-high review. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
 | `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. Eligible Codex design implementation/support prioritizes the strongest Gemini with maximum supported thinking; exhausted quota falls back to Codex. |
@@ -249,7 +249,7 @@ workflow guidance.
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the loops use the upstream unlazy skill: ledger per unit of work, coordinator-side `--reverify`, two retries then handoff, boundaries with Orca |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code · Codex | Visual-first design with an independent self-grill, a stable diagram page (Artifact on Claude; Orca link/tab or HTML on Codex), explicit confirmation, and a local spec. Codex `direct` execution classifies implementation by scope, difficulty, and latency, and requires independent Astra extra-high review before completion. |
+| `/design-map` | Claude Code · Codex | Terminal-first design with an independent self-grill: the structure is shown in chat as an ASCII tree plus mermaid source with a decision table, iterated to explicit confirmation, then written to a local spec. A diagram page (Artifact on Claude; Orca link/tab or HTML on Codex) is built only when the user asks. Codex `direct` execution classifies implementation by scope, difficulty, and latency, and requires independent Astra extra-high review before completion. |
 
 ### matt-loop
 

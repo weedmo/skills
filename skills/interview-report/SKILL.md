@@ -97,7 +97,8 @@ contract. The view's own keys:
 - `status`: `done` / `in-progress` / `pending` / `skipped`. Optional explicit `percent`; else done
   is 100, pending 0, an in-progress implement stage follows its tickets.
 - **`design` stage — only on a `matt-auto --spec` run**, and then first: `id: "design"`,
-  `name: "설계 (design-map)"`, `status: "done"`, `note` the spec's artifact URL. Its decisions
+  `name: "설계 (design-map)"`, `status: "done"`, `note` the spec path (its artifact URL when the
+  spec has one). Its decisions
   keep the spec's own ids (`D1`, `D2`…) and carry `source: "design-map"` plus `before` /
   `change` (`null` / `"new"` unless the spec names a prior state). The view renders a sourced
   decision **read-only** — 설계에서 확정 badge, no edit box, no flag — so it never appears in

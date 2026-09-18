@@ -1,38 +1,41 @@
 ---
 name: design-map
-description: Visual-first design flow for Claude Code and Codex. Explore the codebase, grill the design against an independent delegate, present a diagram page with its decisions and grill log, iterate to explicit confirmation, then write and review a local implementation spec. A confirmed Codex spec uses Gemini-priority implementation with cost/time-aware Codex fallback and independent Astra extra-high review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "다이어그램으로 설계", or visual structure design before implementation.
+description: Terminal-first design flow for Claude Code and Codex. Talk the scope through with the user, explore the codebase, grill the design against an independent delegate, present the structure in chat as an ASCII tree plus mermaid source with its decision table, iterate to explicit confirmation, then write and review a local implementation spec. A visual page (Artifact on Claude, delivered HTML on Codex) is built only when the user asks for one. A confirmed Codex spec uses Gemini-priority implementation with cost/time-aware Codex fallback and independent Astra extra-high review. No GitHub issues are filed. Trigger on /design-map, "구조 설계하자", "설계하자", or structure design before implementation.
 ---
 
 # design-map
 
-Design through diagrams, not walls of text. The deliverable of every round is an
-updated design page the user can look at; prose in chat stays to a few sentences.
+Design in the terminal. Every round ends with the structure shown in chat — an
+ASCII tree, the mermaid source, and the decision table — and a few sentences of
+prose. A visual page is not part of the flow; it is built only when the user
+asks for one (see [references/artifact-page.md](references/artifact-page.md)).
 
-Claude Code uses its Artifact route. Codex reads
-[references/codex-delivery.md](references/codex-delivery.md) for its delegate,
-HTML delivery, and feedback differences. When Codex receives an already
-confirmed spec for implementation, skip design steps and follow
+Codex reads [references/codex-delivery.md](references/codex-delivery.md) for its
+delegate; the delivery part of that file applies only when a page was
+requested. When Codex receives an already confirmed spec for implementation,
+skip design steps and follow
 [references/codex-execution.md](references/codex-execution.md).
 
 Hard rules:
 - Never file GitHub issues or use any external tracker. The spec is a local file.
 - The user's explicit confirmation ("확정", "이해됐어", "이걸로 가자") is the only
   thing that moves the flow from design to spec. Do not self-declare the design done.
-- One page route for the whole session — republish the same file, never fork a new one.
-- All deliverables are written in Korean: the design page (headings, labels,
-  descriptions, decision tables) and the spec document. Identifiers that refer to
-  real code — module/function/file names, diagram node names, commands — stay in
-  English as they appear in the codebase.
-- Never hand the user a page before the render check (step 4) has passed on the
-  version that is live. A diagram with clipped, overflowing, or overlapping text is
-  not a deliverable, even if the design behind it is right.
+- No page unless asked. Do not publish an Artifact, deliver HTML, or offer one
+  more than once per session. Structure goes to chat as text; the spec file is
+  the record.
+- All deliverables are written in Korean: the chat view (tree labels, decision
+  table) and the spec document. Identifiers that refer to real code —
+  module/function/file names, diagram node names, commands — stay in English as
+  they appear in the codebase.
 
 ## Flow
 
 ### 1. Scope
-Pin down what is being designed: which module/feature/system, and what problem the
-new structure must solve. If ambiguous, ask once with AskUserQuestion (max one round),
-then proceed.
+Pin down what is being designed — which module/feature/system, and what problem
+the new structure must solve — by talking with the user until it is settled.
+There is no question cap here: ask what is unclear, reflect back the scope in
+a few lines, and move on only when the user agrees with it. Do not survey,
+grill, or draw before that.
 
 ### 2. Survey
 Understand the current shape before proposing a new one. **graft first** — it is
@@ -52,8 +55,8 @@ Collect real names (modules, functions, tables) — diagrams built from real nam
 never placeholders.
 
 ### 3. Self-grill
-The first page the user sees must already be a design that has been argued
-with, not a first guess. Before drawing, interview the design the way
+The first structure the user sees must already be a design that has been argued
+with, not a first guess. Before presenting, interview the design the way
 matt-auto's interview does — but the answerer is a **decision delegate**, not
 the user. This step is self-contained (the `grilling` skill is not installed
 everywhere; do not invoke it):
@@ -76,196 +79,64 @@ everywhere; do not invoke it):
   answered from step 2's graph or the source, not put to the delegate. Only
   decisions go to the delegate.
 - **Stop** when the frontier is empty or after the third round, whichever
-  comes first. Questions still open at the cap stay open on the page.
+  comes first. Questions still open at the cap stay open in the decision table.
 - **Keep the log**: question → options → decision → rationale → what it changed
-  in the design. This log is the source of step 4's decision list; its
-  `ESCALATE` entries are the questions the user must answer.
+  in the design. This log is the source of step 4's decision table and the
+  spec's 검토 로그; its `ESCALATE` entries are the questions the user must
+  answer.
 One line in chat when it ends: how many questions, how many settled, how many
-escalated. The design that gets drawn is the one the log left standing — a
-tree that changed nothing means the questions were not hard enough.
+escalated. Then put the `ESCALATE` questions to the user in chat (AskUserQuestion
+when they are a clean choice, prose otherwise) before presenting the structure —
+their answers shape what gets drawn. The design that gets presented is the one
+the log left standing — a tree that changed nothing means the questions were
+not hard enough.
 
-### 4. Diagram the design
-On Claude Code load `artifact-diagramming`; on Codex load the delivery reference
-above. Build one design page containing:
-- **Current structure** — how it is wired today (only if something exists already).
-- **Proposed structure** — the design. When a real fork in the road exists, show
-  two alternatives side by side (design-it-twice) with a short tradeoff table and
-  a recommendation; otherwise one proposal is fine.
-- **Decision list** — one row per step-3 log entry: question / options / pick /
-  why. `ESCALATE` rows come first, marked 사용자 결정 필요, with the
-  recommended answer as the pick; the user's answer settles them.
-- **Self-grill log** (collapsed by default, `<details>`) — the step-3 log as a
-  table: 질문 · 결정 · 이유 · 설계에 미친 변화. It is data in the page state
-  like the decision list, so the user can open it and see what was tried,
-  without prose in chat.
-Every diagram on the page is hand-drawn inline SVG under the drawing rules
-below — from the first round, not only after confirmation. Mermaid appears
-only in the spec's 확정 구조 (the source the implementing loops read), never
-on the Artifact.
+### 4. Present the structure (terminal)
+Show the design in chat, in this order, and keep it short enough to read in
+one screen per block:
+- **Current structure** (only if something exists already) — an ASCII tree in a
+  fenced code block: modules/files as the tree, one short Korean note per node
+  where the role is not obvious from the name, real names from step 2.
+- **Proposed structure** — the same tree form with the change visible (new
+  nodes marked `+`, removed `-`, moved `~`), followed by the **mermaid source**
+  of the flow in a fenced ```mermaid block. This mermaid is the one the spec's
+  확정 구조 will carry, so write it to that standard now: quote every label
+  (`A["라벨"]`), keep labels to roughly 12 Hangul characters, break longer ones
+  with `<br/>`. When a real fork in the road exists, show two alternatives
+  (design-it-twice) with a short tradeoff table and a recommendation; otherwise
+  one proposal is fine. At most 9 nodes and 12 arrows per diagram — over budget,
+  split into an overview and a detail diagram, never compress.
+- **Decision table** — one markdown row per step-3 log entry: 질문 · 선택 ·
+  이유. Rows the user settled in step 3 carry their answer; anything still
+  open is marked 사용자 결정 필요 with the recommended pick.
+- **Where the code lives** — `file:line` pointers for the nodes that change,
+  so the user can jump there from the terminal.
+Explain in a few sentences what the structure does and why the delegate's log
+landed here; the tree and the table carry the detail, not the prose.
 
-Drawing rules (every diagram, every round — adapted from
-cathrynlavery/diagram-design; its fonts, palette, brand onboarding and
-separate light/dark variants are deliberately not adopted — our tokens and
-theme switch stay):
-- **Budget.** At most 9 nodes, 12 arrows and 2 accent-colored elements per
-  diagram. Over budget → split into an overview and a detail diagram, never
-  compress. Before drawing, try to remove each node, merge any two that
-  always travel together, drop any arrow the layout already implies, and
-  drop any label that color or shape already carries. If a table says the
-  same thing, use the table.
-- **Plan first.** One line in chat before drawing: the diagram type and what
-  the budget forces out. Skip it only when the user already pinned both.
-- **Right the first time.** There is no draft round. The Artifact exists so
-  the user understands the design, and understanding starts at the first
-  look — so the first publish is drawn to the same standard as the last:
-  full geometry and a11y rules, real names, the recommendation already
-  picked. Each later round edits that SVG; nothing is deferred to a
-  "polish" pass.
-- **Inline SVG geometry.** Everything on a 4px grid: font sizes (12, 16, 20),
-  coordinates, box sizes, gaps, padding. Paint arrows before boxes. A
-  connector between nodes that share no axis is orthogonal with rounded
-  right-angle bends (`r=8`); a straight line only when the endpoints share
-  an x or y. An arrow label sits on an opaque rect filled with the page
-  background token, 6–10px off the stroke, over open canvas — never over a
-  box painted after it. No two connectors share a path or a segment;
-  connectors leaving the same edge of a box get their own attach points
-  ≥12px apart; a connector never passes behind a box that is not its
-  endpoint — reroute, and when geometry makes that impossible draw it dashed
-  with the label at the visible end.
-- **Accessible SVG.** Each `<svg>` carries `role="img"` and `aria-labelledby`
-  naming a `<title id="<slug>-title">` (first child; the diagram's name, in
-  Korean) and a `<desc id="<slug>-desc">` (one Korean sentence on what it
-  shows, not its geometry). IDs are prefixed per diagram, never bare
-  `title` / `desc`.
-
-Theme check (MANDATORY before every publish): the page must be legible in both
-light and dark viewer themes. Define the complete palette as CSS tokens on bare
-`:root` (light values), redefine only the tokens under
-`@media (prefers-color-scheme: dark)` guarded as `:root:not([data-theme="light"])`,
-and again under `:root[data-theme="dark"]`; give `body` an explicit token
-background. Never let any color's only definition live inside one theme block,
-and never hardcode text/stroke colors in diagrams (SVG included) that assume one
-background — that is the dark-background-with-black-text bug. Scan the stylesheet
-for this before publishing.
-
-On Claude Code, make the page itself editable (load `artifact-capabilities` first —
-it is the authority; declare only what its roster serves):
-- Declare `capabilities: {artifact: {}}` on the first publish.
-- Decision-list cells and description blocks are editable in place: keep the
-  design state as data embedded in the page, render from it, and on an explicit
-  save action (a visible "저장" button, not on every keystroke) regenerate the
-  full document from that state and call `artifact.publish(html)`. Never
-  serialize the live DOM. `await claude.use("artifact")` can resolve `null` —
-  then hide the editing affordances and the page stays a plain view.
-
-Korean text is wide — size everything for it before drawing. Budget one
-font-size per Hangul glyph (Latin needs about half). Put each box and its
-label in one `<g>`, and make the rect at least `chars × font-size + 24px`
-wide, rounded up to the 4px grid; a label that does not fit gets split across
-lines or shortened, never squeezed. In the spec's mermaid: always quote
-labels (`A["라벨"]`), keep them to roughly 12 Hangul characters, break longer
-ones with `<br/>` — mermaid estimates CJK width badly.
-
-Publish, then run the render check below. Only when it passes, hand the user
-the route. On Claude Code explain chat, comments, and in-page 저장; on Codex
-ask for feedback in chat and republish the same delivered HTML.
-
-Render check (MANDATORY after every publish that touches a diagram or layout):
-the host lays the page out with its own fonts, so what the
-local file looks like proves nothing — check the live page.
-1. Open the published route in a browser. On Claude Code use a browser carrying
-   the user's claude.ai login (new tab, never one the user is working in).
-   On Codex use the in-app browser or the tab returned by `deliver.py`.
-   Fallback when the delivered route is unreachable: serve a scratch copy of
-   the file with `python3 -m http.server <port>` and open it over
-   `http://localhost` with the playwright or chrome-devtools tools (`file://`
-   is blocked there). Say in the handoff that the check ran on a local render.
-2. Run this in the page and read the result; anything but `OK` is a defect:
-   ```js
-   (() => {
-     const out = [];
-     const sel = ':scope > rect, :scope > path, :scope > polygon, :scope > circle, :scope > ellipse';
-     const inside = (a, b) => a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1;
-     const hit = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
-     if (document.body.innerText.includes('\uFFFD')) out.push('garbled: U+FFFD in page text');
-     document.querySelectorAll('body *').forEach(el => {
-       if (getComputedStyle(el).overflow !== 'visible' && el.scrollWidth > el.clientWidth + 1)
-         out.push('clipped: "' + (el.textContent || '').trim().slice(0, 30) + '"');
-     });
-     document.querySelectorAll('svg').forEach((svg, i) => {
-       const shapeOf = g => [...g.querySelectorAll(sel)].map(s => s.getBoundingClientRect()).find(r => r.width > 2 && r.height > 2);
-       const gs = [...svg.querySelectorAll('g')].filter(shapeOf);
-       const leaves = gs.filter(g => !gs.some(o => o !== g && g.contains(o)));
-       const boxes = [];
-       leaves.forEach(g => {
-         const s = shapeOf(g);
-         const texts = [...g.querySelectorAll('text, foreignObject')];
-         if (!texts.length) return;
-         const label = texts[0].textContent.trim().slice(0, 20);
-         boxes.push({ s, label });
-         texts.forEach(t => {
-           if (!inside((t.querySelector('span') || t).getBoundingClientRect(), s)) out.push(`overflow svg#${i}: "${label}"`);
-         });
-       });
-       for (let a = 0; a < boxes.length; a++) for (let b = a + 1; b < boxes.length; b++) {
-         const A = boxes[a].s, B = boxes[b].s;
-         if (hit(A, B) && !inside(A, B) && !inside(B, A)) out.push(`overlap svg#${i}: "${boxes[a].label}" x "${boxes[b].label}"`);
-       }
-       if (!svg.hasAttribute('aria-roledescription') && !svg.closest('.mermaid')) {
-         const k = svg.getBoundingClientRect().width / (svg.viewBox.baseVal.width || svg.getBoundingClientRect().width || 1);
-         const rs = [...svg.querySelectorAll('rect')].map(r => r.getBoundingClientRect());
-         rs.forEach((m, a) => {
-           if (m.width < 20 * k || m.height < 8 * k || m.height > 20 * k) return;
-           if (rs.slice(a + 1).some(n => n.width >= 60 * k && n.height >= 40 * k && hit(m, n) && !inside(m, n)))
-             out.push(`clipped-label svg#${i}: mask at ${Math.round(m.left)},${Math.round(m.top)} under a later box`);
-         });
-       }
-     });
-     return out.length ? out.join('\n') : 'OK';
-   })()
-   ```
-   It flags clipped HTML text, replacement characters, a label whose glyphs
-   leave its box, two labeled boxes that partially overlap (a box fully
-   inside another — a mermaid subgraph around its nodes — is nesting, not a
-   defect), and in hand-drawn SVG an arrow-label mask that a box painted
-   later covers. Hand-drawn SVG is only checked where box and label share a
-   `<g>`.
-3. Take a full-page screenshot and look at it yourself — the script cannot see
-   edge labels crossing nodes, arrows through text, or a diagram wider than the
-   page. Then set `document.documentElement.dataset.theme = 'dark'` (and
-   `'light'` if the browser is already dark), re-run the script, and screenshot
-   again — the fonts do not change between themes, but contrast bugs do.
-4. Any finding → fix the source file (shorten or wrap the label, widen the box,
-   reroute the connector or split the diagram), republish to the same
-   path, and run the check again. Repeat until it comes back `OK` in both
-   themes. Report in one line what the check covered and which browser it ran in.
+A page is not built here. If the user asks for one ("그림으로 보여줘",
+"artifact로"), or if the structure needs more than two diagrams to explain and
+you judge that text will not carry it, follow
+[references/artifact-page.md](references/artifact-page.md) — offer at most
+once, and only build after the user says yes.
 
 ### 5. Understanding loop
-Feedback arrives three ways; treat all of them as design input:
-- **Chat** — as before.
-- **Artifact comments (Claude Code)** — the user selects part of the page and comments.
-  Threads sent to Claude wake this session (the publish arms auto-replies);
-  plain comments don't, so also check `Artifact(action: "comments")` when the
-  user says they left notes. Apply the feedback to the diagram, reply briefly
-  with what changed, and resolve the threads you handled.
-- **In-page edits (Claude Code)** — the user's 저장 publishes a new version. A republish
-  notification means the local file is behind: re-read the live version
-  (`action: "read"`), merge its state into your file, and build every later
-  update on top of it. A publish conflict is the same signal — merge onto the
-  handed-back version, never force.
-A user answer to a 사용자 결정 필요 row settles it: drop the mark, record
-the answer as the pick. A change that reopens a settled decision goes back
-through the delegate for the decisions that hung off it before the diagram
-changes.
-Each round: apply feedback to the same page route,
-run the render check from step 4 on the republished page, answer questions by
-pointing at the diagram, keep decision-list rows updated.
+Feedback arrives in chat (when a page exists, its comments and in-page edits
+count too — see the reference). A user answer to a 사용자 결정 필요 row settles
+it: drop the mark, record the answer as the pick. A change that reopens a
+settled decision goes back through the delegate for the decisions that hung
+off it before the structure changes.
+Each round: apply the feedback, re-show only the blocks that changed (the
+proposed tree, the mermaid, or the affected table rows — not the whole set),
+answer questions by pointing at a node or a `file:line`, and keep the
+decision table current.
 Repeat until the user confirms the design is understood and settled. If they go
 quiet mid-loop, the design is NOT confirmed — wait or ask, don't advance.
 
 ### 6. Spec
-Before writing, re-read the live Artifact on Claude Code or the embedded page
-state on Codex; that version is the source of truth. Then write the spec as a local markdown file (Korean prose,
+Write the spec from the last structure the user confirmed in chat (when a page
+exists, re-read its live version first — the user may have edited it). Write it
+as a local markdown file (Korean prose,
 English code identifiers), default
 `docs/design/<topic>.md` in the repo (create the directory if needed; if the repo
 has an existing spec/docs convention, follow it instead). The file is the bridge
@@ -281,7 +152,7 @@ kind: feature            # feature | optimize
 loop: matt-auto          # matt-auto | autocode | direct | implement — recommended by the rule below
 followup: autocode       # optional: a second loop to run after `loop` finishes
 status: confirmed        # draft while iterating; confirmed only after the user's confirmation
-artifact: <this session's artifact URL>
+artifact: none            # the page route only if the user asked for one
 branch: <filled at handoff>
 execution:                # direct/implement on Codex; omit for matt-auto/autocode
   implementer: gemini    # bounded Default work; astra for Deep
@@ -304,8 +175,9 @@ metric:                  # required when loop or followup is autocode; allowed o
 # <title>
 ## 큰 틀        — 5–10 sentences a delegate can act on without this conversation
 ## 목표 / ## 비목표
-## 확정 구조   — mermaid source transcribed from the confirmed SVG (same nodes, same arrows)
-## 결정        — table: id · 질문 · 선택 · 이유 (from the decision list)
+## 확정 구조   — the confirmed step-4 mermaid source, as shown in chat
+## 결정        — table: id · 질문 · 선택 · 이유 (the step-4 decision table)
+## 검토 로그   — the step-3 self-grill log: 질문 · 결정 · 이유 · 설계에 미친 변화
 ## 구현 순서   — numbered steps, each tagged `[deep]` or `[default]`, each with a verify check
 ```
 
@@ -341,12 +213,13 @@ and repeat it in the step-8 question.
 On Claude Code, run `code-review` with the spec path as before. On Codex, spawn `matt-reviewer` with
 `fork_turns: "none"` to read the spec file directly and adversarially check
 contradictions, missing edge cases, unverifiable steps, and drift from the
-confirmed page; role missing → direct `gpt-6-astra`/`xhigh`, reported once. This
+confirmed structure; role missing → direct `gpt-6-astra`/`xhigh`, reported once. This
 is a file review, not `$code-review`'s Git-diff interface. Apply valid findings
-to the spec and design page.
+to the spec and show the changed blocks in chat.
 
-Any spec change from here on edits the mermaid and the page's SVG
-together, then republishes and runs the step-4 render check.
+Any spec change from here on edits the mermaid in the spec and the chat view
+together (and the page's SVG, when one exists — then republish and run its
+render check).
 
 ### 8. Handoff
 The spec crosses to the implementing CLI as a committed file — nothing else
@@ -405,7 +278,7 @@ In order:
    이 세션에서 계속 runs that protocol here. On other platforms, retain the
    self-contained meta prompt with the spec's goal, checks, and definition of done.
 5. **Report and stop** (Codex / OpenCode / 명령만 받기 / `/fork`): spec path,
-   design-page route, `base → branch`, where it went (terminal handle or
+   page route (only if one exists), `base → branch`, where it went (terminal handle or
    "붙여넣기") and the handoff line. Do not watch the run — from here its own
    loop-report page is the window. 이 세션에서 계속: report the same facts in one
    line and go on as the loop.
