@@ -91,34 +91,29 @@ When reviewing code and finding issues:
 3. Never say "수정할까요?" or "진행할까요?" — just fix it.
 4. The Edit/Write PostToolUse hook will trigger auto-review on your fixes.
 
-# graphify
-- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
-When the user types `/graphify`, invoke the Skill tool with `skill: "graphify"` before doing anything else.
+# graft (code context graph)
 
-## graphify operating policy (codebase knowledge graph)
+graft (`@nanonets/graft`, CLI `graft`) is the standard code-graph backbone for every
+repo here: a prebuilt graph of every symbol, its file:line span, and who calls what,
+served to agents over MCP. The goal is **token savings** for agent retrieval and
+**fast orientation** in an unfamiliar codebase. Apply this policy.
 
-graphify is the standard knowledge-graph backbone for codebases here. The goal is
-two-fold and matters more as a project grows: **token savings** for agent retrieval
-and **fast human comprehension**. Apply this policy.
-
-- **Distribution**: graphify is the pip package `graphifyy`, and
-  `graphify install --platform claude` / `--platform codex` generates the local
-  skill for each platform. The package version IS the skill version. A
-  SessionStart hook (`~/.claude/hooks/auto-update.sh`) AUTO-applies newer PyPI
-  versions and re-installs the skill for both claude and codex; it also updates
-  the superpowers plugin and re-syncs the matt-* codex skills.
-- **Build for both audiences**: `graphify <repo> --directed --wiki`. `--directed`
-  preserves call direction (matters for code); `--wiki` emits an agent-crawlable
-  wiki that humans also read. Outputs land in `graphify-out/` (+ HTML / Obsidian
-  vault for human browsing).
-- **Keep it fresh (critical long-term)**: a stale graph lies. Run `--update`
-  (incremental, changed files only) in CI / on commit, and `--watch` locally.
-  Never rely on a one-time build for an evolving codebase.
-- **Agent retrieval = token savings**: when `graphify-out/graph.json` exists, treat
-  natural-language questions about the codebase as graphify queries
-  (`graphify query "..." --budget N`, `--dfs` to trace a path) instead of reading
-  whole files. Optionally expose query/path/explain to agents via `graphify --mcp`.
-- **Honest limits**: the graph is for orientation (where is X, how is it connected).
-  Precise references ("all callers of f") are better from LSP/Sourcegraph, and
-  actual edits / deep logic verification still require Claude Code reading the real
-  source — the graph narrows that reading to save tokens, it does not replace it.
+- **Installed by default**: the SessionStart hook (`~/.claude/hooks/auto-update.sh`)
+  installs the CLI (`npm i -g @nanonets/graft`), upgrades it once a day, registers
+  the `graft mcp` server for Claude Code (user scope, all repos) and Codex, and runs
+  `graft build` in the background for any repo that has no `graft/` index yet.
+  `graft/` is a git-ignored local cache; never commit it.
+- **Query before you read**: in an indexed repo, answer "where is X / how does Y
+  work / who calls Z" with the MCP tools first — `graft_find_code` (ranked hits, code
+  inlined), `graft_find_all` (every occurrence), `graft_trace_calls` (callers and
+  callees, blast radius before a rename), `graft_file_api` (a file's API in ~200
+  tokens), `graft_repo_map` (orientation). One call usually replaces several file
+  reads. CLI equivalents: `graft ask`, `graft callers`, `graft skeleton`, `graft map`,
+  `graft blast`.
+- **Freshness is automatic**: the MCP server refreshes the graph before each query,
+  so results reflect uncommitted edits. `graft check` fails in CI when the index is
+  stale.
+- **Honest limits**: the graph is for orientation and navigation. It indexes code
+  only (no SQL, docs, or config), and actual edits / deep logic verification still
+  require reading the real source — the graph narrows that reading, it does not
+  replace it.

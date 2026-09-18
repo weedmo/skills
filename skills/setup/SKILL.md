@@ -64,7 +64,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/install.sh" status   # 현재 상태만
 | UserPromptSubmit | (none) | language-rule.sh |
 | SessionStart | (none) | auto-update.sh |
 
-`auto-update.sh`는 세션 시작마다 이미 설치된 필수 스킬을 자동 최신화: graphifyy 신버전이 PyPI에 있으면 업그레이드 후 claude/codex 양쪽에 재설치, superpowers 플러그인 업데이트(best-effort), weed-plugins 세 플러그인 업데이트, `~/.codex/skills`의 weed-plugins 스킬(공통 런타임 + 두 루프)을 marketplace 클론과 재동기화, unlazy 스킬 보장 및 하루 한 번 업데이트.
+`auto-update.sh`는 세션 시작마다 이미 설치된 필수 스킬을 자동 최신화: graft CLI 보장(npm 전역 설치, 하루 한 번 업그레이드) 및 graft MCP 서버를 claude/codex 양쪽에 등록하고 현재 레포에 `graft/` 인덱스가 없으면 백그라운드로 빌드, superpowers 플러그인 업데이트(best-effort), weed-plugins 세 플러그인 업데이트, `~/.codex/skills`의 weed-plugins 스킬(공통 런타임 + 두 루프)을 marketplace 클론과 재동기화, unlazy 스킬 보장 및 하루 한 번 업데이트.
 
 각 hook script 가 사용자 `~/.claude/hooks/` 에 없으면 plugin에서 복사. 등록은 같은 matcher group에 합쳐짐.
 

@@ -1,7 +1,7 @@
 # Skill & Framework Routing Guide
 
 A decision aid for picking the right approach per task. Built from the installed
-harness (superpowers + graphify) and the native Workflow tool.
+harness (superpowers + graft) and the native Workflow tool.
 
 > **Golden rule:** Ceremony scales to the task. Three *independent* inputs decide
 > the approach — never collapse them into one axis.
@@ -102,8 +102,8 @@ They are different axes, not synonyms.
   multi-port dev servers
 
 ### Architecture / knowledge
-- **graphify** (standalone, `~/.claude/skills/graphify` via `graphify install`) —
-  any input → knowledge graph (code/docs/papers/images)
+- **graft** (standalone, `npm i -g @nanonets/graft`; MCP server registered by
+  `auto-update.sh`) — code → symbol/call graph, queried before reading source
 - **understand-anything** — codebase → interactive knowledge graph
 
 ---
@@ -138,7 +138,7 @@ On top of it, two loops with different graphs:
   improvement loop (`init --spec` replaces its interview with a design-map spec), publishing its
   experiment board through loop-report and ending in a PR of the kept changes (one squash
   commit each, on a worktree branch; `run --pr <base>` / `--no-pr`)
-- **graphify** (`graphify install --platform codex`) stays a standalone install
+- **graft** (`graft mcp`, registered in `~/.codex/config.toml` by `auto-update.sh`) stays a standalone install
 
 Native plugin and npx installation availability differs by platform; see the repository README.
 

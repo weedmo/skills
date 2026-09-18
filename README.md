@@ -13,10 +13,10 @@ The split: **weed-harness is the loop runtime** (what every long delegated run
 needs — a page the user can watch, one routing table, gates that make "done"
 measurable), and each loop plugin is only its own graph (matt-auto's decision
 stages and ticket waves, autocode's hypothesis frontier). External loops
-(superpowers, graphify, …) and the [unlazy](https://github.com/Leonxlnx/unlazy)
+(superpowers, graft, …) and the [unlazy](https://github.com/Leonxlnx/unlazy)
 skill are referenced, not vendored: the installer ensures unlazy with
 `npx skills add Leonxlnx/unlazy -g`, and the `auto-update.sh` SessionStart hook
-keeps it, graphify, superpowers, and the three plugins up to date once present.
+keeps it, graft, superpowers, and the three plugins up to date once present.
 
 ## Architecture — weed-harness 5.4.2
 
@@ -99,7 +99,7 @@ Once registered in Claude, the
 [`SessionStart` update hook](hooks/auto-update.sh) refreshes supported existing
 installs: Claude plugins, native Codex plugins, OpenCode through the installer,
 and legacy Codex skill copies when native Codex plugins are absent. It also
-maintains external graphify, superpowers, and unlazy dependencies. This is a
+maintains external graft, superpowers, and unlazy dependencies. This is a
 Claude-triggered, best-effort update path, not a startup hook on all six platforms.
 The daily upstream-sync workflow separately vendors Matt Pocock skills into
 both matt-loop editions; subsequent local updates bring those changes down.
