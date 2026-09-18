@@ -1,6 +1,6 @@
 {
   "name": "weed-harness",
-  "version": "5.4.3",
+  "version": "5.5.0",
   "description": "Codex packaging for design-map plus the shared loop runtime: visual design with Gemini-priority implementation with cost/time-aware Codex quota fallback and independent Astra extra-high review, progress-page delivery, model routing, and completion gates. Required by matt-loop and auto-loop.",
   "author": {
     "name": "weedmo",
