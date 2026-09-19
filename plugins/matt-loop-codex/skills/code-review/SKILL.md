@@ -57,6 +57,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
+On Codex, `$model-routing` selects `matt-reviewer` (Sol high), or `matt-reviewer-deep` (Sol xhigh) when ticket/dispatch history shows any Astra xhigh implementation or fix in scope. Both axes and follow-ups retain the stronger route. Parent/answer models do not count. Unknown history: report it, use high. Record the chosen pair. Use fresh contexts without implementer conclusions. Missing/stale roles require an explicit allowed pair, never inherited defaults.
+
 **Standards sub-agent prompt** should include:
 
 - The full diff command and commit list.

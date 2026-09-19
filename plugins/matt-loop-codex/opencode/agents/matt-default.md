@@ -1,8 +1,8 @@
 ---
-description: Handles small fixes, tests, and mechanical conflicts on Luna medium.
+description: Handles small fixes, tests, and mechanical conflicts on Luna max.
 mode: subagent
 model: openai/gpt-5.6-luna
-variant: medium
+variant: max
 ---
 
 Complete the delegated task using the repository's existing conventions. Verify

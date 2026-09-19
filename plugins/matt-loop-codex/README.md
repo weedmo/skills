@@ -8,7 +8,7 @@ This directory is the Codex · OpenCode · Orca root of the **matt loop**; the C
 - `skills/matt-auto` — conductor that drives Matt Pocock's main flow end to end (grilling interview → spec → tracer-bullet tickets → per-ticket implementation); a decision delegate answers implementation-level questions, unresolved material decisions escalate to the human, and prior approval is reused (`--confirm` requests fresh review gates); with `--dev` / `--main` / `--pr <base>` it also opens a PR against that base and shepherds it to merge-ready (pr-babysit, conflict resolution, push); when Orca orchestration is available, independent ticket waves automatically run as parallel Orca-orchestrated workers (`--parallel N` / `--on <env>` override concurrency and placement) (Run → Task → Dispatch) in separate worktrees, optionally on another connected machine, while verification and merging stay with the coordinator
 - `skills/pr-babysit` — shepherds one GitHub PR through review and CI without merging it
 - `skills/resolving-merge-conflicts` — routed fork of the upstream conflict-resolution skill
-- Routing — questions select Astra low/xhigh per difficulty; implementation uses `model-routing`'s six Codex pairs and designated Gemini-priority slots with Codex quota fallback; review is independent Astra xhigh
+- Routing — questions select Astra low/xhigh per difficulty; implementation uses `model-routing`'s six Codex pairs and designated Gemini-priority slots with Codex quota fallback; review is independent Sol high, raised to Sol xhigh for Astra xhigh implementation
 - `codex/agents/` — Codex roles for `matt-fast`, `matt-default`, `matt-batch`, `matt-standard`, `matt-deep`, `matt-deep-max`, `matt-reviewer`, `matt-answer`, and `matt-answer-deep`, installed to `~/.codex/agents/`; each pins model and effort, while Default also pins standard service tier and low verbosity
 - `skills/interview-report` — matt-auto's decision-graph view (`assets/view.html` + `validate.py`); the page around it and its delivery (Orca artifact link or browser tab) come from weed-harness's shared `loop-report` skill, and completion gates follow its `loop-gates` convention — matt-loop requires weed-harness 4.x
 - `opencode/agents/` — task-tier agents installed only for OpenCode; Codex execution uses six allowed pairs, with separate Astra low/xhigh answer roles; large context prioritizes strongest Gemini/max thinking, then Codex on quota exhaustion; unavailable allowed pairs stop dispatch
@@ -59,8 +59,8 @@ max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; d
   without complaint. That historical check predates the current pair policy;
   tier and verbosity are not visible in session logs — check the bill.
 - Execution: trivial = Luna low; small fixes/tests/mechanical conflicts = Luna
-  medium; bounded background = Luna max; moderate time-sensitive = Sol low;
-  complex = Astra low; escalated/review = Astra xhigh. Never use Astra merely
+  max; bounded background = Luna max; moderate time-sensitive = Sol low;
+  complex = Astra low; escalated = Astra xhigh; review = Sol high (Sol xhigh after Astra xhigh implementation). Never use Astra merely
   because a simple edit blocks the user.
 - Questions: `matt-answer` (Astra low) for ordinary explanations/local decisions;
   `matt-answer-deep` (Astra xhigh) for difficult interacting constraints.
