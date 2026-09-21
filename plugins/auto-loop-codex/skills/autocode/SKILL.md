@@ -20,7 +20,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 | Command | Action | User Confirmation |
 |---|---|---|
-| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` replaces the interview with a confirmed design-map spec | Reuse prior answers and approval; ask for unresolved choices |
+| `/autocode init [N] [--spec <path>]` | Interview → `program.md`. N = max experiments (default 20, 0 = unlimited). `--spec` replaces the interview with a confirmed design spec | Reuse prior answers and approval; ask for unresolved choices |
 | `/autocode run [--parallel N] [--on <env>] [--pr <base> \| --no-pr]` | Run the loop until budget, target, or exhaustion; then open the PR of kept changes | None (autonomous) |
 | `/autocode status` | Frontier, running experiments, best metric, routing tally | None |
 | `/autocode resume` | Continue from `state.json` after interruption | None |
@@ -31,7 +31,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 ## Step 1: Parse Subcommand
 
-- No args or `init` → Step 2. Optional integer N = `max_experiments`. `--spec <path>` names a design-map spec: read it; frontmatter `status` other than `confirmed` → print `spec not confirmed: run /design-map first` and stop.
+- No args or `init` → Step 2. Optional integer N = `max_experiments`. `--spec <path>` names a design spec: read it; frontmatter `status` other than `confirmed` → print `spec not confirmed: run /matt-design first` and stop.
 - `run` → Step 3. `--parallel N` (default from program.md, max 4), `--on <env>` (Orca environment for remote workers), and `--pr <base>` / `--no-pr` override program.md for this run only.
 - `status` → Step 4. `resume` → Step 5.
 
@@ -47,7 +47,7 @@ Scan the repo before asking anything: language and build system, test command, e
 
 Reuse user and reconnaissance answers. Ask only unresolved choices affecting the outcome, using Codex's available clarification tool (e.g. `request_user_input_async`) or chat; `AskUserQuestion` requires a platform exposing it. Continue independent work while required answers are pending. Fields and defaults: `target_files`, `metric_name`, `metric_command` (last line: one number), `metric_direction` (lower), `guard_command` (detected tests), `worktree_setup`, `scope` (module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (current branch; `none` disables PR). Wording, spec keys, and follow-ups are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
-With `--spec` skip the interview: design-map's self-grill and the user's confirmation were it; the `metric` block fills its keys (§ Interview fields), the rest and the follow-ups take recon or defaults; nothing is asked.
+With `--spec` skip the interview: the design discussion and user confirmation were it; the `metric` block fills its keys (§ Interview fields), the rest and the follow-ups take recon or defaults; nothing is asked.
 
 ### 2C: Difficulty classification (strategist tier)
 

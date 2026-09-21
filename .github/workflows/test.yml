@@ -12,6 +12,8 @@ jobs:
         run: node bin/check-versions.mjs
       - name: loop-report deliver.py against the fake Orca CLI
         run: python3 -m unittest skills/loop-report/tests/test_deliver.py
+      - name: confirmed design decisions remain read-only
+        run: node --test skills/interview-report/tests/test_decisions.mjs
       - name: render fixtures with both views
         run: |
           python3 - <<'PY'

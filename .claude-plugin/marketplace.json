@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "weed-plugins",
   "description": "Weed's Claude Code harness - one repo, per-loop plugins",
-  "version": "5.6.1",
+  "version": "6.0.0",
   "owner": {
     "name": "weedmo"
   },
@@ -10,8 +10,8 @@
     {
       "name": "weed-harness",
       "source": "./",
-      "description": "Visual design on Claude Code and Codex plus the shared loop runtime: progress-page delivery, model routing with independent Astra extra-high review, completion gates, and Claude Code hooks",
-      "version": "5.6.1",
+      "description": "Design artifact visualization plus shared progress delivery, routing, completion gates, and Claude hooks.",
+      "version": "6.0.0",
       "author": {
         "name": "weedmo"
       },
@@ -26,8 +26,8 @@
     {
       "name": "matt-loop",
       "source": "./plugins/matt-loop-claude",
-      "description": "Matt loop, Claude Code edition - matt-auto on the built-ins (fork delegate, plugin agents, Workflow or /batch, /code-review, /loop, Artifact page) with an execution plan gate, PR babysitting, conflict resolution, and the vendored Matt Pocock skills. Requires weed-harness 5.0+",
-      "version": "3.3.4",
+      "description": "Collaborative matt-design using Matt Pocock skills; autonomous matt-auto execution from a confirmed spec, verification and independent review. Requires weed-harness 6.0+.",
+      "version": "4.0.0",
       "author": {
         "name": "weedmo"
       },
@@ -42,7 +42,7 @@
       "name": "auto-loop",
       "source": "./plugins/auto-loop-claude",
       "description": "Autonomous loop, Claude Code edition - autocode (hypothesis-driven parallel code improvement) with an Artifact experiment board; kept changes end as one PR. Requires weed-harness 5.0+",
-      "version": "4.2.0",
+      "version": "4.2.1",
       "author": {
         "name": "weedmo"
       },

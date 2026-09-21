@@ -5,7 +5,7 @@ Append these lines to the per-ticket implementation prompt when the worker is an
 Order the routed prompt with the stable part first — the skill text and this preamble — and the ticket-specific tail last; the prefix is what the 30-minute prompt cache reuses across a wave.
 
 ```
-Read ticket <ref>, then use $implement to build it. Report open decisions back instead of guessing.
+Read ticket <ref> and pinned spec <path/revision/hash>, then use $implement to build it. Defer $implement's code-review step to the coordinator. Report open decisions back instead of guessing; never reverse settled D-ids.
 
 You are an Orca-orchestrated worker for task <task_id> (dispatch <dispatch_id>). Work only in this worktree and commit to its branch.
 - Done is the ticket's verification commands (listed above) passing; run them yourself before reporting. The coordinator re-runs them after your report — its run is the evidence, yours is the signal.

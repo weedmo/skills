@@ -1,7 +1,7 @@
 {
   "name": "matt-loop",
-  "version": "3.3.4",
-  "description": "Matt loop, Claude Code edition - matt-auto on Claude Code's built-ins (fork delegate, plugin agents, Workflow or /batch for parallel waves, /code-review · /simplify · /security-review, /loop, Artifact page) with an execution plan gate, plus pr-babysit, resolving-merge-conflicts, and the vendored Matt Pocock skills it conducts.",
+  "version": "4.0.0",
+  "description": "Matt Pocock design with the user via matt-design; confirmed-spec autonomous tickets, implementation, verification and independent review via matt-auto. Includes PR babysitting and conflict resolution. Requires weed-harness 6.0+.",
   "author": {
     "name": "weedmo"
   },

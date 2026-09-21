@@ -1,7 +1,7 @@
 {
   "name": "matt-loop",
-  "version": "3.3.4",
-  "description": "Codex packaging for matt-auto, PR babysitting, conflict resolution, model routing, and Sol high independent implementation review.",
+  "version": "4.0.0",
+  "description": "Matt Pocock design with the user via matt-design; confirmed-spec autonomous tickets, implementation, verification and independent review via matt-auto. Includes PR babysitting and conflict resolution. Requires weed-harness 6.0+.",
   "author": {
     "name": "weedmo",
     "url": "https://github.com/weedmo"
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "matt-loop",
-    "shortDescription": "Matt Pocock's full engineering flow with a decision delegate and one final confirm",
-    "longDescription": "Install matt-loop in Codex to get matt-auto, a conductor that drives Matt Pocock's main flow end to end — grilling interview, spec, tracer-bullet tickets, per-ticket implementation — with a decision delegate answering implementation-level questions, immediate escalation of material decisions, and a single human confirm before tickets publish.",
+    "shortDescription": "Collaborative Matt design and autonomous confirmed-spec execution",
+    "longDescription": "Use matt-design to iterate design decisions with the user and produce a confirmed local spec. Invoke matt-auto --spec separately to create tickets, implement, verify and independently review. design-map in weed-harness visualizes the current design. Optional flags enable PR shipping.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [
@@ -28,7 +28,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use $matt-auto to take this idea through interview, spec, tickets, and implementation."
+      "Use $matt-design to design this change with me.",
+      "Use $matt-auto --spec docs/design/feature.md to implement and review the confirmed design."
     ],
     "brandColor": "#2563EB",
     "screenshots": []

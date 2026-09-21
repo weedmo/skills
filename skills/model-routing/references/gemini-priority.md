@@ -5,7 +5,7 @@ Codex's six-pair execution preference only in the existing slots below.
 
 ## Eligible slots
 
-- Codex design-map direct/implement: clear, bounded implementation with mostly
+- Explicit standalone Codex implementation (outside matt-auto): clear, bounded implementation with mostly
   Default steps. Architecture, public seams, migrations, concurrency and core
   invariants remain Astra Deep; independent review remains Astra xhigh.
 - Antigravity support for that flow: independent discovery, documentation,

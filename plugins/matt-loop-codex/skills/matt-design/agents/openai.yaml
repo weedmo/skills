@@ -1,0 +1,4 @@
+interface:
+  display_name: "Matt Design"
+  short_description: "Design with Matt skills and iterate decisions with the user"
+  default_prompt: "Use $matt-design to work through this design with me and write a confirmed local spec."

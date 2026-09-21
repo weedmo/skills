@@ -67,7 +67,7 @@ const PLUGINS = {
   // that platform; an absent key leaves the skillPlatforms filter unchanged.
   "matt-loop": {
     src: (platform) => path.join(ROOT, "plugins", `matt-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
-    desc: "matt-auto + vendored Matt Pocock skills (human-in-the-loop conducted Matt flow)",
+    desc: "matt-design + matt-auto (collaborative design, autonomous execution) + Matt skills",
     restrictSkills: { antigravity: ["pr-babysit", "resolving-merge-conflicts"] },
   },
   "auto-loop": {

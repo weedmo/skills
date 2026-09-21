@@ -2,22 +2,14 @@
 
 Read this file only when `design-map` runs on Codex.
 
-## Delegate
-
-Run the self-grill on one persistent Astra delegate. Prefer the installed
-`matt-deep` role; otherwise use `spawn_agent` with `gpt-6-astra`, `low`, and
-`fork_turns: "none"`, supplying the scope, survey, settled decisions, and every
-frontier round. Keep the same agent with `send_message` while it runs and
-`followup_task` after it finishes. The delegate never edits files.
-
 ## Page and delivery
 
-Applies only when the user asked for a page (SKILL.md step 4 and
+Applies to a requested visualization (SKILL.md step 3 and
 [artifact-page.md](artifact-page.md)). Write one self-contained HTML file at
 `${TMPDIR:-/tmp}/design-map-<repo>-<slug>.html`; reuse that exact path for the
 whole design. Keep the design state as JSON inside the source and regenerate
 the document from it. The page contains the same current/proposed SVGs,
-decision list, and collapsed self-grill log as the Claude Artifact route. It is read-only;
+decision list, and available review log as the Claude Artifact route. It is read-only;
 Codex feedback returns through chat.
 
 Use the installed `loop-report` delivery helper without calling Orca directly:
@@ -34,12 +26,12 @@ to the page preserves the route. If the helper is absent, report the HTML path.
 
 Run the render check from artifact-page.md on the delivered page. For a path route,
 serve the page over localhost and use the in-app browser; do not treat the
-filesystem rendering alone as evidence. Preserve the final delivery value in
-the spec's `artifact` field even when it is a local path.
+filesystem rendering alone as evidence. Return the final delivery value to the caller. Keep delivery metadata outside
+confirmed specs; matt-design may record the route while authoring a draft.
 
 ## Feedback and source of truth
 
 Chat is the Codex feedback channel. When a page exists, apply each change to
 the embedded state, regenerate the same file, publish, and recheck it, and read
-that local state again before writing the spec. Claude-only Artifact comments, in-page save, and
+that local state again before rendering the next version. Claude-only Artifact comments, in-page save, and
 `claude.use("artifact")` do not apply.

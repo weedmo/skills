@@ -1,6 +1,6 @@
 # Question-by-question answer routing
 
-Read this before answering interview, seam-check, ticket, or follow-up questions
+Read this before answering implementation, ticket, or follow-up questions
 inside matt-auto. This routes the answering delegate, not the parent session's
 model and not implementation workers. Read `$model-routing` for exact pairs.
 
@@ -29,7 +29,7 @@ Missing user intent/authorization is a user question, not a reasoning escalation
    retry that question once on the deep answer route with the attempted
    reasoning and evidence. A deep failure is reported, not endlessly retried.
 4. Record question → selected role/effort + reason → decision + rationale in
-   the existing decision log (in `--confirm`, retain this in conversation).
+   the existing decision log (also during `--confirm`).
    That record is authoritative across role changes; late superseded answers
    do not override it. The coordinator relays the answer without another
    paid reasoning pass just to rewrite it.

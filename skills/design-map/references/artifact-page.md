@@ -1,13 +1,15 @@
 # Design page (Artifact / delivered HTML)
 
 Read this file only when the user asked for a visual design page ("그림으로
-보여줘", "artifact로", "페이지로 만들어줘"). The terminal view in SKILL.md
-step 4 stays the source of truth; the page is a rendering of it, republished
+보여줘", "artifact로", "페이지로 만들어줘"). The supplied design discussion/spec
+stays the source of truth; the page is a rendering of it, republished
 to the same route for the rest of the session — never fork a new one.
 
 Never hand the user a page before the render check below has passed on the
 version that is live. A diagram with clipped, overflowing, or overlapping text
-is not a deliverable, even if the design behind it is right.
+is not a verified deliverable, even if the design behind it is right.
+If rendering tools are unavailable, return only the local HTML source explicitly
+labeled unverified; do not present it as a verified artifact.
 
 ## Page contents
 
@@ -17,10 +19,10 @@ On Claude Code load `artifact-diagramming`; on Codex load
 - **Proposed structure** — the design. When a real fork in the road exists, show
   two alternatives side by side (design-it-twice) with a short tradeoff table and
   a recommendation; otherwise one proposal is fine.
-- **Decision list** — the step-4 decision table, one row per entry. `ESCALATE`
-  rows come first, marked 사용자 결정 필요, with the recommended answer as the
+- **Decision list** — the supplied decision table, one row per entry. Unresolved
+  rows come first, marked 사용자 결정 필요, with the existing recommendation (if any) as a proposal, not the
   pick; the user's answer settles them.
-- **Self-grill log** (collapsed by default, `<details>`) — the step-3 log as a
+- **Review log (when supplied)** (collapsed by default, `<details>`) — the supplied review log as a
   table: 질문 · 결정 · 이유 · 설계에 미친 변화.
 Every diagram on the page is hand-drawn inline SVG under the drawing rules
 below — from the first publish, not only after confirmation. Mermaid stays in
@@ -43,8 +45,7 @@ theme switch stay):
 - **Right the first time.** There is no draft round. The Artifact exists so
   the user understands the design, and understanding starts at the first
   look — so the first publish is drawn to the same standard as the last:
-  full geometry and a11y rules, real names, the recommendation already
-  picked. Each later round edits that SVG; nothing is deferred to a
+  full geometry and a11y rules, real names, settled choices and open alternatives visibly distinguished. Each later round edits that SVG; nothing is deferred to a
   "polish" pass.
 - **Inline SVG geometry.** Everything on a 4px grid: font sizes (12, 16, 20),
   coordinates, box sizes, gaps, padding. Paint arrows before boxes. A
@@ -181,6 +182,7 @@ input:
   handed-back version, never force.
 
 Each round that changes the design: republish the same route, run the render
-check again, and keep the terminal view (tree, mermaid, decision table) in
-step with the page. Before the spec is written, re-read the live version — a
-page the user edited may be ahead of this conversation.
+check again, and keep the chat summary in step with the page. Before a later render, re-read the live version — a
+page the user edited may be ahead of this conversation. Treat decision edits as
+proposals until the user settles them through the design conversation; never
+change a confirmed spec from page feedback alone.

@@ -1,7 +1,7 @@
 {
   "name": "weed-harness",
-  "version": "5.6.1",
-  "description": "Codex packaging for design-map plus the shared loop runtime: terminal-first design with Gemini-priority implementation with cost/time-aware Codex quota fallback and independent Astra extra-high review, progress-page delivery, model routing, and completion gates. Required by matt-loop and auto-loop.",
+  "version": "6.0.0",
+  "description": "Design artifacts plus shared progress-page delivery, model routing, completion gates, and Claude Code hooks. Design conversations and autonomous execution live in matt-loop.",
   "author": {
     "name": "weedmo",
     "url": "https://github.com/weedmo"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "weed-harness",
     "shortDescription": "Visual design plus shared progress, routing, and completion runtime",
-    "longDescription": "Install weed-harness in Codex to design in the terminal (a delivered diagram page only on request), execute eligible confirmed specs with strongest-Gemini priority and cost/time-aware Codex quota fallback, and require independent Astra extra-high review. It also provides the progress-page delivery, model routing, and completion gates shared by matt-loop and auto-loop. The Claude Code-only setup skill is not part of the Codex package.",
+    "longDescription": "Visualize existing designs with design-map. Shared runtime for matt-design/matt-auto and auto-loop: progress pages, model routing, and completion gates. design-map no longer interviews, confirms specs, or implements.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [

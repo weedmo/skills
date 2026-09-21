@@ -1,6 +1,6 @@
 ---
 name: interview-report
-description: "Renders matt-auto's decision log (question → decision → rationale, per pipeline stage) into the run's live decision-graph page: stages in order, each decision an editable node the user can rewrite or flag and export as <slug>.edits.json for matt-auto to rework from, plus ticket waves, review and PR lanes while the run executes. Owns the view and writes <slug>.data.json; build (render.py) and delivery (deliver.py) come from the shared `$loop-report` skill. Called by matt-auto after its interview stage and before its final report — never standalone."
+description: "Renders matt-auto's decision log (question → decision → rationale, per pipeline stage) into the run's live decision-graph page: stages in order, each decision an editable node the user can rewrite or flag and export as <slug>.edits.json for matt-auto to rework from, plus ticket waves, review and PR lanes while the run executes. Owns the view and writes <slug>.data.json; build (render.py) and delivery (deliver.py) come from the shared `$loop-report` skill. Called by matt-auto after loading the confirmed design and before its final report — never standalone."
 ---
 
 # Interview Report (decision graph)
@@ -14,11 +14,11 @@ steering wheel: a node they disagree with, they edit or flag and export for matt
 
 Only inside matt-auto's pipeline:
 
-1. Right after the interview stage — interview decisions, later stages pending. It feeds the
-   interview gate: the published page is what the user approves, so publish before the gate.
-2. On every board update once tickets exist, and before the final report (after the small path's
-   `$implement`, after ship mode's step 10) — regenerate over the full log, the last time **with
-   the `outcome` block**.
+1. After loading the confirmed spec — a read-only `design` stage, interview skipped,
+   and execution stages pending. This is not a design approval gate.
+2. On every board update once tickets exist, and before the final report —
+   regenerate over the full execution log; include `outcome` only after verified
+   implementation and independent review (and shipping when requested).
 
 Never off a standalone `$grill-me` / `$grill-with-docs` session: the report is about delegate
 decisions.
@@ -90,16 +90,15 @@ contract. The view's own keys:
 }
 ```
 
-- `stages` in the order the pipeline ran them. Use matt-auto's own stages (Interview, Size branch,
-  Spec, Tickets, Confirm, Implement, Ship); drop stages that never applied — except skipped ones,
-  which stay visible with `"status": "skipped"` and a `note` saying why (`"small path"`,
-  `"autonomous"`, `"design-map spec"`).
+- `stages` in the order the pipeline ran them. Use matt-auto's execution stages (Load design, Size work,
+  Spec reference, Tickets, Execution plan, Implement, Review, Ship); drop stages that never applied — except skipped ones,
+  which stay visible with `"status": "skipped"` and a `note` saying why (`"autonomous"`, `"confirmed spec"`).
 - `status`: `done` / `in-progress` / `pending` / `skipped`. Optional explicit `percent`; else done
   is 100, pending 0, an in-progress implement stage follows its tickets.
-- **`design` stage — only on a `matt-auto --spec` run**, and then first: `id: "design"`,
-  `name: "설계 (design-map)"`, `status: "done"`, `note` the spec path (its artifact URL when the
+- **`design` stage — first on every run**: `id: "design"`,
+  `name: "확정 설계"`, `status: "done"`, `note` the spec path (its artifact URL when the
   spec has one). Its decisions
-  keep the spec's own ids (`D1`, `D2`…) and carry `source: "design-map"` plus `before` /
+  keep the spec's own ids (`D1`, `D2`…) and carry `source: "matt-design"` (legacy specs: `"design-map"`) plus `before` /
   `change` (`null` / `"new"` unless the spec names a prior state). The view renders a sourced
   decision **read-only** — 설계에서 확정 badge, no edit box, no flag — so it never appears in
   `<slug>.edits.json`; `validate.py` refuses a sourced decision without `change`.
@@ -115,11 +114,11 @@ contract. The view's own keys:
 - **`progress` + `tickets` — the live board, from the ticket stage until the run ends.** They
   render *진행 상황* above everything: run-wide percentage, elapsed and remaining time, the flow —
   **waves as columns left to right, each ticket a node in its wave** — and a red blocker box for
-  anything stuck. The decision graph moves below a 결정 검토 disclosure (open at the interview
-  gate, collapsed once under way; the reader's choice sticks). Omit both on the interview-gate
-  generation. A small-path run has no `tickets` or `plan` but still carries `progress` — `state`
-  and `current` while `$implement` runs, `state: "done"` on the final regeneration — so the
-  header says where the run is and the review lane can render.
+  anything stuck. The decision graph stays below a 결정 검토 disclosure; the reader's
+  expansion choice sticks. Before ticket planning, the initial confirmed-design
+  render may omit `tickets` and `plan`. Once planned, every run, including a
+  one-ticket run, carries `tickets`, `plan`, and `progress` through verification
+  and review. Set `state: "done"` only when execution's completion checks pass.
 
 ```json
 "tickets": [
@@ -201,7 +200,7 @@ contract. The view's own keys:
 - **`outcome`** follows loop-report's contract (files from `git diff --numstat` against matt-auto's
   baseline; `docs/agents/matt-auto-log/**` and `.unlazy/**` left out). Last regeneration only,
   with `progress.state: "done"` **and the `review` block** — matt-auto always runs its review
-  pass, small path included, and `validate.py` refuses an `outcome` without it.
+  pass, one-ticket runs included, and `validate.py` refuses an `outcome` without it.
 
 ### Writing the summary and decision text
 
@@ -223,7 +222,7 @@ export format.
 - Raw Q&A log pasted into the JSON unedited → the point is translation.
 - Graph content in English → only ids and structure stay English.
 - Decision ids changed on regeneration → orphans saved and exported edits.
-- `outcome` on the interview-gate generation → nothing has been built yet.
+- `outcome` on the initial confirmed-design generation → nothing has been built yet.
 - A `blocked` ticket with vague `blocker.detail` ("실패함", "확인 필요") → it must be actionable
   without a terminal.
 - `state` left at `running` on the final regeneration, or `progress.updated` typed from memory →

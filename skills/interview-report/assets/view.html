@@ -685,7 +685,7 @@ window.LoopView = (function () {
     var badges = el("span", "badges");
     if (CHANGE_LABEL[d.change]) badges.appendChild(el("span", "badge " + d.change, CHANGE_LABEL[d.change]));
     if (d.escalated) badges.appendChild(el("span", "badge escalated", "직접 답변"));
-    var readOnly = d.source === "design-map";
+    var readOnly = d.source === "matt-design" || d.source === "design-map";
     if (readOnly) badges.appendChild(el("span", "badge done", "설계에서 확정"));
     var editedBadge = el("span", "badge edited", "수정됨");
     var flaggedBadge = el("span", "badge flagged", "문제");
@@ -715,12 +715,12 @@ window.LoopView = (function () {
     }
     detail.appendChild(el("p", "r", d.rationale));
 
-    // Decisions carried in from a design-map spec are settled: no edit box, no
+    // Decisions carried in from a confirmed spec are settled: no edit box, no
     // flag, so they never reach <slug>.edits.json. Changing one is a chat
-    // request that matt-auto records as an interview-stage redirect.
+    // request returned to matt-design for a user-confirmed revision.
     var ta = null, cb = null, comment = null;
     if (readOnly) {
-      detail.appendChild(el("p", "r", "design-map에서 확정된 결정입니다. 바꾸려면 채팅으로 말해 주세요 — 인터뷰 단계의 방향 전환으로 기록됩니다."));
+      detail.appendChild(el("p", "r", "확정된 설계 결정입니다. 바꾸려면 채팅으로 말해 주세요 — matt-design에서 변경안을 함께 검토합니다."));
     } else {
       detail.appendChild(el("label", null, "결정 수정 (그대로 두면 유지됩니다)"));
       ta = document.createElement("textarea");

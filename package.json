@@ -1,6 +1,6 @@
 {
   "name": "weed-plugins",
-  "version": "5.6.1",
+  "version": "6.0.0",
   "description": "weedmo's AI-CLI skill packs - Claude Code setup plus matt-loop and auto-loop for supported coding agents",
   "type": "module",
   "bin": {
@@ -24,6 +24,6 @@
   "author": "weedmo",
   "license": "MIT",
   "scripts": {
-    "test": "node bin/check-versions.mjs && node bin/check-words.mjs && python3 -m unittest skills/loop-report/tests/test_deliver.py"
+    "test": "node bin/check-versions.mjs && node bin/check-words.mjs && python3 -m unittest skills/loop-report/tests/test_deliver.py && node --test skills/interview-report/tests/test_decisions.mjs"
   }
 }
