@@ -1,6 +1,10 @@
-# Orca worker prompt (matt-auto parallel waves)
+# Orca implementation worker prompt (all matt-auto waves)
 
 Append these lines to the per-ticket implementation prompt when the worker is an Orca dispatch. The first paragraph is the same prompt matt-auto uses in-session.
+
+Use the resolved executable and exact lifecycle commands in the live injected
+preamble. That preamble overrides older example flags below. Read-only reviewers
+receive the code-review brief instead; they do not implement or commit changes.
 
 Order the routed prompt with the stable part first — the skill text and this preamble — and the ticket-specific tail last; the prefix is what the 30-minute prompt cache reuses across a wave.
 
