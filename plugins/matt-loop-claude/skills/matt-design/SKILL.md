@@ -19,9 +19,10 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
 2. **Interview with Matt's skills.** Use `$grill-with-docs` for an existing
    codebase (`$grilling` plus `$domain-modeling`); otherwise `$grill-me`.
    Investigate discoverable facts yourself or with read-only exploration.
-   Put the next unresolved decision frontier to the user with recommendations
-   and tradeoffs, then wait for their answers. Do not send user questions to
-   an answer delegate. Do not invent answers to finish the interview.
+   Collect the full unresolved decision frontier before requesting choices.
+   Use the consolidated decision report below; do not pause for individual
+   choices. Preserve unknown preferences as explicit assumptions or conditional
+   alternatives. Do not invent user answers or send user approval to a delegate.
 3. **Deepen the design.** Use `$codebase-design` for module boundaries, seams,
    and interfaces; use `$prototype` only when a bounded experiment can answer
    a concrete design question. Label prototype work as disposable evidence,
@@ -30,7 +31,7 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
    user. Keep the decision table current: id, question, options, chosen answer,
    rationale, affected decisions, and whether proposed, open, or user-settled.
 4. **Iterate with the user.** Explain the current structure and changed
-   decisions in chat. Ask focused follow-ups until the design is settled;
+   decisions in one report. Collect user corrections after the report is complete;
    there is no arbitrary round cap. A correction reopens only the affected
    decisions and dependents. When the user requests a diagram/artifact, invoke
    `$design-map` with the current design, decision table, and open questions;
@@ -56,6 +57,28 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
    branches, commit, launch a terminal, implement, or ship merely because the
    design was confirmed. A separate explicit execution request starts the
    execution skill, including when the user gives it in this same session.
+
+## Consolidated decision report
+
+The strong model conducting design prepares all meaningful options, evidence,
+tradeoffs and ordered criteria for every discovered open D-id. Read
+`$model-routing`'s `references/jev-decision.md` and its design batch contract.
+Use `kind: design`, `requiresUser: true`; Jev evaluates recommendations without
+choosing for the user. Evaluate every item and deliver one HTML report through
+`scripts/design-report.mjs`, including all options and their probabilities,
+LLM-authored explanations, uncertainties, dependencies, failures and cost.
+Do not stop between items to ask the user to decide. Investigate factual gaps;
+where user preferences are unknown, label assumptions and conditional branches.
+Do not feed an unconfirmed recommendation into a dependent decision as fact.
+Jev is optional. Without a key (or with Jev disabled), use the normal matt-design
+LLM to compare options and recommend with evidence; do not ask for a key or stop.
+Include its recommendation as `llmRecommendation` in the batch input. The report
+labels this as LLM advice without inventing Jev probabilities. API failures use
+the same fallback. Keep the consolidated report and no intermediate choice gates.
+Never force a recommendation or claim completeness
+beyond the explored scope. Present the combined report once for user review.
+Keep recommendations proposed/open until the user confirms; only then update
+the chosen-answer column and spec. A report is not approval or implementation.
 
 ## Revising an established design
 

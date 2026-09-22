@@ -1,0 +1,21 @@
+{
+  "id": "execution-example",
+  "kind": "execution",
+  "requiresUser": false,
+  "question": "In which order should the approved validator and CLI be built?",
+  "evidence": "The confirmed spec requires a pure JSON validator and a CLI importing that validator. Both must be implemented. The validator has no dependency on the CLI. This is an implementation ordering choice; no interface or scope change is proposed.",
+  "constraints": ["D-1: provide a validator and CLI, without a web service"],
+  "criteria": ["Respect dependencies", "Verify components before integration"],
+  "options": [
+    {
+      "id": "validator_first",
+      "description": "Implement and verify the validator, then build the CLI using it. CLI integration starts after the dependency works.",
+      "rationale": "Verifies the dependency before integration; CLI work begins later."
+    },
+    {
+      "id": "cli_first",
+      "description": "Build CLI with a temporary validator stub, then implement the validator and replace the stub. CLI shape is exercised early.",
+      "rationale": "Exercises CLI early but requires temporary code and later integration."
+    }
+  ]
+}

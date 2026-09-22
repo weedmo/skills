@@ -7,6 +7,8 @@ description: "Codex · OpenCode · Orca routing: cost/time-efficient pairs, Astr
 
 Classify work by difficulty and latency.
 
+For matt-design, use [Jev batch reports](references/jev-decision.md): strong-model candidates, one advisory report, no intermediate user gates.
+
 ## Execution tiers
 
 | Tier | Codex / OpenCode | Claude Code | Use |
