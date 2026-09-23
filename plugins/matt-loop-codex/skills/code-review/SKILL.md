@@ -57,13 +57,6 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
-When called by matt-auto with an available Orca run, the coordinator dispatches
-these two read-only review briefs as visible Orca tasks under matt-auto's
-`references/supervised-execution.md`, pinned to the same candidate commit.
-That caller's placement and concurrency cap override native sub-agent dispatch;
-use sequential visible reviews if the cap is one. Aggregate only after both
-reports arrive. Standalone reviews retain the parallel sub-agent behavior below.
-
 **Standards sub-agent prompt** should include:
 
 - The full diff command and commit list.

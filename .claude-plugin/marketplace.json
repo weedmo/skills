@@ -27,7 +27,7 @@
       "name": "matt-loop",
       "source": "./plugins/matt-loop-claude",
       "description": "Collaborative matt-design using Matt Pocock skills; autonomous matt-auto execution from a confirmed spec, verification and independent review. Requires weed-harness 6.0+.",
-      "version": "4.1.1",
+      "version": "4.1.2",
       "author": {
         "name": "weedmo"
       },
