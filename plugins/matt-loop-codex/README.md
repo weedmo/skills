@@ -43,7 +43,7 @@ and verbosity. Two things they cannot carry belong in your own
 
 ```toml
 [agents]
-default_subagent_model = "gpt-5.6-luna"      # trivial work; select named roles for other tasks
+default_subagent_model = "gpt-6-luna"      # trivial work; select named roles for other tasks
 default_subagent_reasoning_effort = "low"
 max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; do not go below it
 ```

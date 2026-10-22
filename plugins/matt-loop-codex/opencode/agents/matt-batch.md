@@ -1,7 +1,7 @@
 ---
 description: Handles bounded background work when waiting is acceptable.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: openai/gpt-6-luna
 variant: max
 ---
 

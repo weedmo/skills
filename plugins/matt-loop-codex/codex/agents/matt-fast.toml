@@ -1,7 +1,7 @@
 # Latency-sensitive work: PR operations, simple edits, mechanical conflicts.
 name = "matt-fast"
 description = "Handles trivial edits and mechanical transformations with Luna low. Dispatched by matt-loop; not for direct invocation."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "low"
 model_verbosity = "low"
 service_tier = "default"

@@ -1,7 +1,7 @@
 ---
 description: Handles moderate reasoning when Luna is insufficient and latency matters.
 mode: subagent
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: low
 ---
 

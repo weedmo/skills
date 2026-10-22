@@ -2,7 +2,7 @@
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "matt-reviewer"
 description = "Reviews completed implementation independently on Sol at high effort, against both repository standards and the originating spec. Dispatched by code-review and matt-auto; not for direct invocation."
-model = "gpt-5.6-sol"
+model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 service_tier = "default"
 developer_instructions = """

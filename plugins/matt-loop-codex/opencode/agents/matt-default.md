@@ -1,7 +1,7 @@
 ---
 description: Handles small fixes, tests, and mechanical conflicts on Luna max.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: openai/gpt-6-luna
 variant: max
 ---
 

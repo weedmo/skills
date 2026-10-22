@@ -4,7 +4,7 @@
 # `service_tier = "priority"` does not leak into background workers.
 name = "matt-default"
 description = "Handles small fixes, tests, and mechanical conflicts with Luna max. Dispatched by matt-auto, pr-babysit, and resolving-merge-conflicts; not for direct invocation."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "max"
 # Output is the expensive side; a worker's code lands through tools and its
 # report is structured, so low verbosity only trims prose nobody reads.

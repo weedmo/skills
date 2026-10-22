@@ -1,7 +1,7 @@
 ---
 description: Handles trivial edits and mechanical transformations.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: openai/gpt-6-luna
 variant: low
 ---
 

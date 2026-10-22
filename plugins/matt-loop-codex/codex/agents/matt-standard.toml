@@ -1,6 +1,6 @@
 name = "matt-standard"
 description = "Handles moderate implementation and analysis with Sol low when Luna is insufficient and latency matters."
-model = "gpt-5.6-sol"
+model = "gpt-6.1-sol"
 model_reasoning_effort = "low"
 model_verbosity = "low"
 service_tier = "default"
