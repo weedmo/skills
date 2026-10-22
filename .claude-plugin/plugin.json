@@ -15,5 +15,6 @@
     "productivity"
   ],
   "agents": [],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "types": "./types/index.d.ts"
 }

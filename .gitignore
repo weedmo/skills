@@ -84,3 +84,6 @@ __pycache__/
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# The engine writes the mod's API declarations here when it loads the folder.
+.claude-plugin/types/
