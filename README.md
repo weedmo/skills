@@ -79,7 +79,8 @@ skills/                               # repository root = weed-harness plugin
 │   ├── auto-loop-claude/              # Claude experiments + native manifest
 │   └── auto-loop-codex/               # Codex experiments + native manifest
 ├── bin/                              # installer, version and word-budget checks
-├── hooks/                            # Claude SessionStart update hook
+├── hooks/                            # Claude SessionStart update hook + the mod (register.tsx)
+├── types/index.d.ts                  # the mod's $.state contract
 ├── commands/release.md               # release procedure
 └── .github/workflows/                # CI, release and upstream sync
 ```
@@ -250,6 +251,15 @@ workflow guidance.
 | `loop-gates` | 693 | 700 | 7 |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
+
+#### The mod (Claude Code 2.1.287+)
+
+`hooks/register.tsx` makes weed-harness a [Claude Code mod](https://code.claude.com/docs/en/plugins/mods/overview): a hooks module that runs inside Claude Code and can draw in the interface. It adds two things, both Claude Code-only; every other platform is untouched.
+
+- **`/board`** — a pane beside the transcript showing the running loop from its `<slug>.data.json` (loop-report's common contract: state, current step, elapsed, blockers, gates, outcome). It follows the newest file under `.autocode/report/` or `docs/agents/matt-auto-log/`, or the path given as `/board <path>`, polls it every 3 s while open, and opens by itself when a loop writes such a file. The Artifact page stays the shareable report; the pane is the in-terminal live view.
+- **Guard** — a `tool.call` hook on Bash that refuses `git push --force` (not `--force-with-lease`), `git reset --hard`, `git clean -f`, `git checkout/restore -- .`, and `rm -rf` on `/`, `~`, `*`, `.` or `..`. The deny text tells the model to ask first; after the user confirms, `HARNESS_GUARD=off <command>` runs it.
+
+`claude plugin validate .` and `claude plugin test .` (the tests in `hooks/register.test.tsx`) check the mod; `claude --plugin-dir .` runs the working copy in place of the installed one.
 
 ### matt-loop
 

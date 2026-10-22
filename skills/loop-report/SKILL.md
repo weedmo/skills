@@ -25,7 +25,7 @@ The script validates the common contract below, then the view's own `validate.py
 
 **Deliver** — after every build. Which way depends on the platform:
 
-- **Claude Code** — publish the page with the **Artifact tool** on the same file path every time (same path, same URL; favicon on the first publish only) and relay the URL. No probe, no `deliver.py`; without the Artifact tool the page is a path, said once.
+- **Claude Code** — publish the page with the **Artifact tool** on the same file path every time (same path, same URL; favicon on the first publish only) and relay the URL. No probe, no `deliver.py`; without the Artifact tool the page is a path, said once. The weed-harness mod's `/board` pane reads the same `<slug>.data.json` in the terminal (it opens by itself when the file is written under `.autocode/report/` or `docs/agents/matt-auto-log/`); nothing to run for it, and it never replaces the Artifact publish.
 - **Codex, OpenCode, Orca** — `deliver.py`, below.
 
 
