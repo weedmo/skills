@@ -125,6 +125,9 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 - **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
   a page only on request; Codex delivers it through Orca/HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
   Sol review, and optional Antigravity support.
+- **rust-port** — every platform: oracle-first porting of any codebase to Rust (profile →
+  frozen differential gates → boundary design → stepwise port → equivalence + scaling benchmarks),
+  with per-language pitfall references (Python/PyO3, C/C++, Go, JS/TS, JVM, C#)
 
 On top of it, two loops with different graphs:
 

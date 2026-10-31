@@ -72,6 +72,7 @@ skills/                               # repository root = weed-harness plugin
 │   ├── model-routing/                # model / effort / review policies
 │   ├── loop-gates/                   # completion evidence via upstream unlazy
 │   ├── design-map/                   # existing design → artifact visualization
+│   ├── rust-port/                    # oracle-first port of any codebase to Rust
 │   └── setup/                        # Claude setup, hooks and HUD
 ├── plugins/
 │   ├── matt-loop-claude/              # Claude orchestration + native manifest
@@ -251,6 +252,7 @@ workflow guidance.
 | `loop-gates` | 693 | 700 | 7 |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
+| `rust-port` | all | Port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers |
 
 #### The mod (Claude Code 2.1.287+)
 
