@@ -180,12 +180,14 @@ contract. The view's own keys:
   check, expect, actual }` — `CHECK:` and expected-vs-actual make an unmet gate actionable),
   `files`, `commits`. All optional.
 - **`review` and `pr` — the tail of the flow.** `review` renders a 리뷰 lane (one node per
-  dimension with its finding count); `pr` a PR lane (number, `branch → base`, check rows, babysit
+  pass with its finding count and, when given, the `reviewer` route; `cross_model: false` is shown); `pr` a PR lane (number, `branch → base`, check rows, babysit
   cycles, link) at the right end.
 
 ```json
 "review": { "status": "in-progress", "skill": "code-review", "note": "…",
-  "passes": [ { "id": "r1", "name": "정확성", "status": "done", "findings": 2, "note": "…" } ] },
+  "passes": [ { "id": "qa", "name": "QA", "status": "done", "findings": 0, "reviewer": "http · 4/4", "note": "…" },
+              { "id": "rg1", "name": "교차 리뷰 1", "status": "done", "findings": 2,
+                "reviewer": "codex:gpt-6.1-sol/medium", "cross_model": true, "note": "…" } ] },
 "pr": { "number": 128, "url": "https://…", "base": "dev", "branch": "matt-auto/x",
   "status": "in-progress", "cycles": 2, "note": "…",
   "checks": [ { "name": "CI", "status": "failed", "detail": "unit: 2 failing" },

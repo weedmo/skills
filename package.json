@@ -26,6 +26,6 @@
   "scripts": {
     "decision": "node skills/model-routing/scripts/decision.mjs",
     "decision:report": "node skills/model-routing/scripts/design-report.mjs",
-    "test": "node bin/check-versions.mjs && node bin/check-words.mjs && python3 -m unittest skills/loop-report/tests/test_deliver.py && node --test skills/interview-report/tests/test_decisions.mjs skills/model-routing/tests/test_decision.mjs"
+    "test": "node bin/check-versions.mjs && node bin/check-words.mjs && python3 -m unittest skills/loop-report/tests/test_deliver.py && node --test skills/interview-report/tests/test_decisions.mjs skills/model-routing/tests/test_decision.mjs skills/model-routing/tests/test_gate_route.mjs skills/review-gate/tests/test_rounds.mjs skills/qa-gate/tests/test_run_scenarios.mjs"
   }
 }

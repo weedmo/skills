@@ -19,7 +19,7 @@
                     files: [ { path, added, removed } ],
                     commits: [ { sha, subject } ] } ],
       review?: { status, skill, note,
-                 passes: [ { id, name, status, findings, note } ] },
+                 passes: [ { id, name, status, findings, reviewer, cross_model, note } ] },
       pr?: { number, url, base, branch, status, cycles, note,
              checks: [ { name, status, detail } ] } }
   Decision ids must be stable across regenerations — localStorage edits and
@@ -483,6 +483,9 @@ window.LoopView = (function () {
       var rows = [];
       if (typeof pass.findings === "number") {
         rows.push(el("div", "nnote", pass.findings ? "지적 " + pass.findings + "건" : "지적 없음"));
+      }
+      if (pass.reviewer) {
+        rows.push(el("div", "nnote", pass.reviewer + (pass.cross_model === false ? " · 같은 계열" : "")));
       }
       if (pass.note) rows.push(el("p", "nnote", pass.note));
       lane.appendChild(laneNode(pass.name || pass.id, pass.status, rows));

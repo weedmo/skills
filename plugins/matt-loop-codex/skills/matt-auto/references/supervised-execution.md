@@ -17,10 +17,11 @@ Read-only answer delegates and short coordinator commands may remain in-session.
 Implementation workers receive isolated child worktrees based on the integration
 branch. Sequential means one active implementation worker; integrate and verify
 its result before dispatching dependents. Review workers inspect the same pinned
-candidate commit read-only; do not give them implementation ownership. Pass both
-axes from code-review, its standards/spec context and exact model route. Use
-separate visible review tasks; respect the run's concurrency cap. Do not dispatch
-code-review inside a worker merely to spawn hidden review subagents.
+candidate commit read-only; do not give them implementation ownership. Give each
+the review-gate reviewer prompt, its standards/spec context and the exact model
+route `gate-route.mjs` returned. Use separate visible review tasks; respect the
+run's concurrency cap. Reviewers write their findings file; never read results
+from a worker's screen.
 
 Record each worker's Run, Task, Dispatch, worktree and terminal/session handle
 from actual receipts. Publish them at launch and on meaningful changes in the
