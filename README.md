@@ -71,6 +71,8 @@ skills/                               # repository root = weed-harness plugin
 │   ├── autocode-board/assets/        # autocode view.html + validator + reference
 │   ├── model-routing/                # model / effort / review policies
 │   ├── loop-gates/                   # completion evidence via upstream unlazy
+│   ├── review-gate/                  # cross-model review loop node (verdict bound to HEAD)
+│   ├── qa-gate/                      # behavioural QA node (re-runnable scenarios + evidence)
 │   ├── design-map/                   # existing design → artifact visualization
 │   ├── rust-port/                    # oracle-first port of any codebase to Rust
 │   └── setup/                        # Claude setup, hooks and HUD
@@ -250,6 +252,8 @@ workflow guidance.
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | 693 | 700 | 7 |
+| `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: the writer's other model family reviews (models from `model-routing`'s `gate-route.mjs` rule table), the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
+| `qa-gate` | all | Behavioural QA node for matt-auto: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
 | `rust-port` | all | Port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers |
@@ -280,7 +284,7 @@ returns to the user through matt-design; it cannot be settled by a delegate.
 | Skill | Description |
 |-------|-------------|
 | `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. |
-| `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. Codex keeps Sol high review (Sol xhigh after Astra xhigh implementation). |
+| `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (the writer's other family reviews; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
 | `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
 | vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `code-review`, `setup-matt-pocock-skills` |

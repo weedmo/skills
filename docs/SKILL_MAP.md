@@ -115,13 +115,18 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 
 - **loop-report** — the live progress page of a run and its delivery (Orca artifact link →
   Orca browser tab → path); each loop plugs in its own view
-- **model-routing** — Codex · OpenCode · Orca only: the Default / Deep task tiers plus Codex's Sol review reservation, with the model and
+- **model-routing** — Codex · OpenCode · Orca only: the Default / Deep task tiers plus the review/QA rule table (`gate-route.mjs`), with the model and
   reasoning-effort pair per platform (Codex `spawn_agent` by role name — the roles live in
   `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, Orca
   `worker-start` flags) and the escalation ladder (`matt-deep-max` / `strategist-max` as the one
   `max` rung)
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
+- **review-gate** — cross-model review node: the writer's other family reviews on the route
+  `model-routing/scripts/gate-route.mjs` returns, findings and triage as JSON under `.review/`,
+  a verdict that counts only for the reviewed HEAD
+- **qa-gate** — behavioural QA node: acceptance criteria as re-runnable scenario scripts against
+  the running app, evidence under `.qa/`, judged criteria as manual gates
 - **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
   a page only on request; Codex delivers it through Orca/HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
   Sol review, and optional Antigravity support.

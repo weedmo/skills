@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "qa-gate plan",
+  "type": "object",
+  "required": ["surface"],
+  "properties": {
+    "surface": { "enum": ["web", "http", "cli", "tui", "library"] },
+    "na_reason": { "type": "string", "description": "Required for library: the detection evidence (no bin, no server, no UI entry point)." },
+    "app": {
+      "type": "object",
+      "required": ["start"],
+      "properties": {
+        "start": { "type": "string", "description": "Shell command that starts the app in the foreground." },
+        "cwd": { "type": "string" },
+        "env": { "type": "object", "additionalProperties": { "type": "string" } },
+        "ready": {
+          "type": "object",
+          "properties": {
+            "url": { "type": "string", "description": "Polled until it answers below 500." },
+            "output": { "type": "string", "description": "Text the app prints when ready." }
+          }
+        },
+        "base_url": { "type": "string", "description": "Exported to scenarios as QA_BASE_URL; default: the origin of ready.url." },
+        "timeout_s": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "acceptance", "driver", "kind"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$" },
+          "acceptance": { "type": "string", "description": "The acceptance criterion this scenario proves, quoted or by id." },
+          "driver": { "enum": ["playwright", "http", "cli", "tui"] },
+          "kind": { "enum": ["scripted", "judged"] },
+          "script": { "type": "string", "description": "scripted only: path relative to the qa dir, .mjs/.js/.sh; exit 0 = pass." },
+          "timeout_s": { "type": "integer", "minimum": 1 },
+          "why_judged": { "type": "string", "description": "judged only: why no command can decide it." }
+        }
+      }
+    }
+  }
+}

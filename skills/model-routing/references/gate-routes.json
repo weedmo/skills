@@ -1,0 +1,65 @@
+{
+  "comment": "Rule table for review-gate and qa-gate model choice. Read only by scripts/gate-route.mjs. Change models here, not in skill prose.",
+  "families": {
+    "claude": {
+      "cli": "claude",
+      "qa_author": {
+        "model": "sonnet"
+      },
+      "qa_triage": {
+        "model": "haiku"
+      },
+      "review": {
+        "model": "sonnet"
+      },
+      "review_up": {
+        "model": "opus",
+        "effort": "medium"
+      }
+    },
+    "codex": {
+      "cli": "codex",
+      "qa_author": {
+        "model": "gpt-6.1-sol",
+        "effort": "low",
+        "agent": "matt-standard"
+      },
+      "qa_triage": {
+        "model": "gpt-6-luna",
+        "effort": "low",
+        "agent": "matt-fast"
+      },
+      "review": {
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "agent": "matt-reviewer-lite"
+      },
+      "review_up": {
+        "model": "gpt-6.1-sol",
+        "effort": "high",
+        "agent": "matt-reviewer"
+      }
+    }
+  },
+  "security_globs": [
+    "**/auth/**",
+    "**/*oauth*",
+    "**/*authn*",
+    "**/*authz*",
+    "**/*authenticat*",
+    "**/*authoriz*",
+    "**/*login*",
+    "**/*permission*",
+    "**/*rbac*",
+    "**/*secret*",
+    "**/*credential*",
+    "**/*crypto*",
+    "**/*payment*",
+    "**/*billing*",
+    "**/migrations/**",
+    "**/*.sql",
+    "**/.github/workflows/**",
+    "**/Dockerfile",
+    "**/.env*"
+  ]
+}
