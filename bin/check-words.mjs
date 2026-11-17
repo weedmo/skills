@@ -20,6 +20,7 @@ const CAPS = {
 };
 const CHAIN = [
   "plugins/matt-loop-codex/skills/matt-auto/SKILL.md",
+  "plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md",
   "skills/interview-report/SKILL.md",
   "skills/loop-report/SKILL.md",
   "skills/model-routing/SKILL.md",
@@ -40,4 +41,10 @@ const chain = CHAIN.reduce((sum, f) => sum + words(f), 0);
 const chainOk = chain <= CHAIN_CAP;
 if (!chainOk) bad++;
 console.log(`  ${chainOk ? "✓" : "✗"} matt-auto chain ${chain} words (cap ${CHAIN_CAP})`);
+// The execution core is one text shipped in both matt-loop roots; the copies must not drift.
+const CORE = "skills/matt-auto/references/execution-core.md";
+const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+const coreOk = read(`plugins/matt-loop-codex/${CORE}`) === read(`plugins/matt-loop-claude/${CORE}`);
+if (!coreOk) bad++;
+console.log(`  ${coreOk ? "✓" : "✗"} matt-auto execution core identical in both editions`);
 process.exit(bad ? 1 : 0);

@@ -33,12 +33,15 @@ SKILLS=(
   handoff
   implement
   improve-codebase-architecture
+  pr
   prototype
   research
+  retro
   setup-matt-pocock-skills
   tdd
   to-spec
   to-tickets
+  writing-for-agents
 )
 
 UPSTREAM="${1:-}"

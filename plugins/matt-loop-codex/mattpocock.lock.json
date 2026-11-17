@@ -1,6 +1,6 @@
 {
   "repo": "https://github.com/mattpocock/skills.git",
-  "commit": "a496f5513d4a4cf889bc48e189e579f4b0bdf6aa",
+  "commit": "5863806dd4e15c63174bee4e7515a4256792ecfa",
   "skills": [
     "codebase-design",
     "code-review",
@@ -12,11 +12,14 @@
     "handoff",
     "implement",
     "improve-codebase-architecture",
+    "pr",
     "prototype",
     "research",
+    "retro",
     "setup-matt-pocock-skills",
     "tdd",
     "to-spec",
-    "to-tickets"
+    "to-tickets",
+    "writing-for-agents"
   ]
 }
