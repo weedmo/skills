@@ -1,7 +1,7 @@
 ---
 description: Answers difficult matt-loop questions and interacting constraints; read-only.
 mode: subagent
-model: openai/gpt-6-astra
+model: openai/gpt-6.2-astra
 variant: xhigh
 ---
 

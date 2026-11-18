@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { mergeRound, decide, findingId } from '../scripts/rounds.mjs';
 
 const scripts = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts');
-const codex = { family: 'codex', model: 'gpt-6.1-sol', effort: 'medium' };
+const codex = { family: 'codex', model: 'gpt-6.2-sol', effort: 'medium' };
 const claude = { family: 'claude', model: 'sonnet', effort: null };
 const f = (id, severity = 'major', extra = {}) => ({ id, file: 'src/a.ts', line: 3, axis: 'correctness', severity, claim: `issue ${id}`, evidence: 'x', ...extra });
 

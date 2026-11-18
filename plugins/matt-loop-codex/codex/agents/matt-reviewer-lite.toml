@@ -2,7 +2,7 @@
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "matt-reviewer-lite"
 description = "Reviews a diff written by another model family on Sol at medium effort, against repository standards and the originating spec, and writes review-gate findings JSON. Routed by review-gate's gate-route.mjs; not for direct invocation."
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "medium"
 service_tier = "default"
 developer_instructions = """

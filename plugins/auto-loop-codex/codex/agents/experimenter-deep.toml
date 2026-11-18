@@ -2,7 +2,7 @@
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "experimenter-deep"
 description = "Implements a single high-difficulty autocode hypothesis inside its own worktree — algorithm replacement, cross-module restructuring, concurrency, changes that touch invariants. Dispatched by autocode, not for direct invocation."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "low"
 service_tier = "default"
 developer_instructions = """

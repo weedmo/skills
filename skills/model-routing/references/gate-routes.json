@@ -20,7 +20,7 @@
     "codex": {
       "cli": "codex",
       "qa_author": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "low",
         "agent": "matt-standard"
       },
@@ -30,12 +30,12 @@
         "agent": "matt-fast"
       },
       "review": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "medium",
         "agent": "matt-reviewer-lite"
       },
       "review_up": {
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6.2-sol",
         "effort": "high",
         "agent": "matt-reviewer"
       }

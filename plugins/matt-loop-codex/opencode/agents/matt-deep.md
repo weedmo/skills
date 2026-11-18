@@ -1,7 +1,7 @@
 ---
 description: Handles difficult debugging, design, review, and refactoring selected by matt-loop model routing.
 mode: subagent
-model: openai/gpt-6-astra
+model: openai/gpt-6.2-astra
 variant: low
 ---
 

@@ -187,7 +187,7 @@ contract. The view's own keys:
 "review": { "status": "in-progress", "skill": "code-review", "note": "…",
   "passes": [ { "id": "qa", "name": "QA", "status": "done", "findings": 0, "reviewer": "http · 4/4", "note": "…" },
               { "id": "rg1", "name": "교차 리뷰 1", "status": "done", "findings": 2,
-                "reviewer": "codex:gpt-6.1-sol/medium", "cross_model": true, "note": "…" } ] },
+                "reviewer": "codex:gpt-6.2-sol/medium", "cross_model": true, "note": "…" } ] },
 "pr": { "number": 128, "url": "https://…", "base": "dev", "branch": "matt-auto/x",
   "status": "in-progress", "cycles": 2, "note": "…",
   "checks": [ { "name": "CI", "status": "failed", "detail": "unit: 2 failing" },

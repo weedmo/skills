@@ -1,6 +1,6 @@
 name = "matt-answer-deep"
 description = "Answers difficult matt-loop questions on Astra extra high, selected directly by difficulty or once after a low-answer reasoning limit. Read-only."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 service_tier = "default"
 developer_instructions = """

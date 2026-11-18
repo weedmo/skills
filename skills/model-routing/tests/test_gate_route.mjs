@@ -14,7 +14,7 @@ const models = r => r.reviewers.map(x => `${x.family}:${x.model}${x.effort ? '/'
 
 test('claude-written code gets a single low-tier codex reviewer', () => {
   const r = route({ role: 'review', writer: 'claude', files: ['src/app.ts'], available: both }, table);
-  assert.deepEqual(models(r), ['codex:gpt-6.1-sol/medium']);
+  assert.deepEqual(models(r), ['codex:gpt-6.2-sol/medium']);
   assert.equal(r.cross_model, true);
   assert.equal(r.escalated, false);
 });
@@ -27,7 +27,7 @@ test('codex-written code gets a sonnet reviewer', () => {
 test('each risk trigger escalates once and adds a same-family second opinion', () => {
   for (const extra of [{ deep: true }, { files: ['src/auth/session.ts'] }, { triageConflict: true }]) {
     const r = route({ role: 'review', writer: 'claude', files: ['src/app.ts'], available: both, ...extra }, table);
-    assert.deepEqual(models(r), ['codex:gpt-6.1-sol/high', 'claude:sonnet'], JSON.stringify(extra));
+    assert.deepEqual(models(r), ['codex:gpt-6.2-sol/high', 'claude:sonnet'], JSON.stringify(extra));
     assert.equal(r.escalated, true);
     assert.ok(r.reasons.length >= 2);
   }
@@ -36,7 +36,7 @@ test('each risk trigger escalates once and adds a same-family second opinion', (
 test('mixed or unknown writers get one reviewer per family', () => {
   for (const writer of ['mixed', 'unknown']) {
     const r = route({ role: 'review', writer, available: both }, table);
-    assert.deepEqual(models(r), ['codex:gpt-6.1-sol/medium', 'claude:sonnet']);
+    assert.deepEqual(models(r), ['codex:gpt-6.2-sol/medium', 'claude:sonnet']);
   }
 });
 
@@ -49,7 +49,7 @@ test('missing opposite CLI falls back to the same family and records it', () => 
 
 test('QA roles split author, rerun and triage tiers', () => {
   assert.deepEqual(models(route({ role: 'qa-author', writer: 'codex', available: both }, table)), ['claude:sonnet']);
-  assert.deepEqual(models(route({ role: 'qa-author', writer: 'claude', available: both }, table)), ['codex:gpt-6.1-sol/low']);
+  assert.deepEqual(models(route({ role: 'qa-author', writer: 'claude', available: both }, table)), ['codex:gpt-6.2-sol/low']);
   assert.deepEqual(models(route({ role: 'qa-triage', writer: 'codex', available: both }, table)), ['claude:haiku']);
   assert.deepEqual(route({ role: 'qa-rerun', writer: 'claude', available: both }, table).reviewers, []);
 });

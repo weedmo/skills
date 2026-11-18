@@ -1,6 +1,6 @@
 name = "matt-answer"
 description = "Answers ordinary matt-loop questions and local decisions on Astra low; read-only, separate from implementation workers."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "low"
 model_verbosity = "low"
 service_tier = "default"

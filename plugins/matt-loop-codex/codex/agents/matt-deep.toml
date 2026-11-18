@@ -2,7 +2,7 @@
 # Installed to ~/.codex/agents/ by `npx github:weedmo/skills --platforms codex`.
 name = "matt-deep"
 description = "Handles complex implementation, debugging, and refactoring on Astra low. Questions and decisions use the separate matt-answer roles. Dispatched by matt-auto, pr-babysit, and resolving-merge-conflicts; not for direct invocation."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "low"
 service_tier = "default"
 developer_instructions = """
