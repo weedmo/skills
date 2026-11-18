@@ -221,9 +221,11 @@ installer for those.
 
 Nothing here installs into Herdr itself: its terminals run the same agent CLIs,
 so the native plugin installs above (Claude + Codex) and the npx installer for
-the rest are all it needs. When `hc` (herdr-core) is on PATH, the Codex-side
-loops start their workers and reviewers as visible `hc` terminals; without it
-they fall back to in-session execution. Pick ONE channel per platform — native
+the rest are all it needs. When the coordinator runs in an `hc` (herdr-core) terminal, the loops on both
+Claude Code and Codex start their subagents as Herdr workers through the shared
+`hc-workers` skill: hc templates generated from the role files, one visible tab
+per run, reports as result files. Without `hc` they fall back to the platform's
+own subagents. Pick ONE channel per platform — native
 plugin install or npx copy — to avoid duplicate skill entries.
 
 Current limitation: Claude-specific hook automation and slash-command behavior

@@ -32,7 +32,7 @@ requests execution. Confirming a design in `$matt-design` alone does not start i
 ## Pipeline
 
 1. **Precondition** — validate and pin the confirmed spec before any side effects; record the full baseline commit (`git rev-parse HEAD`). Recheck the spec hash before dispatch and at completion; a changed spec pauses affected work until its new revision is confirmed and explicitly adopted. Missing `docs/agents/issue-tracker.md` → `$setup-matt-pocock-skills` for the execution tracker only. Apply pending report edits under Change control. Prepare the feature branch before workers start in ship mode.
-2. **Probe** — note on the board: the coordinator's model (from the session; Fable-class or not — it decides the delegate route in step 3); whether the plugin agents `matt-loop:matt-default` / `matt-loop:matt-deep` can be spawned (else the Agent fallback in Routing, said once); which built-ins this session lists (`/code-review`, `/simplify`, `/security-review`, `/batch`, `/deep-research`) — an absent one is not used in the plan; and that the page will be an Artifact link (if the Artifact tool is unavailable, the page is a path and the board says so once).
+2. **Probe** — note on the board: the coordinator's model (from the session; Fable-class or not — it decides the delegate route in step 3); whether the plugin agents `matt-loop:matt-default` / `matt-loop:matt-deep` can be spawned (else the Agent fallback in Routing, said once); whether hc workers are available (`$hc-workers` probe, with `--roles <this plugin>/agents`; else `hc unavailable: <why>` once); which built-ins this session lists (`/code-review`, `/simplify`, `/security-review`, `/batch`, `/deep-research`) — an absent one is not used in the plan; and that the page will be an Artifact link (if the Artifact tool is unavailable, the page is a path and the board says so once).
 3. **Spawn the decision delegate** — if the coordinator runs on a Fable-class model, a **fork** (`subagent_type: "fork"`): it inherits this conversation, so the big frame needs no summary. Otherwise `matt-loop:matt-deep` with the confirmed spec summary, codebase access, and the delegate brief — `subagent_type` only, no `model` or `effort` argument (the agent file fixes fable / high; an override would run the delegate on the session's model). Keep the same agent alive across stages (`SendMessage`). The spec's `## 큰 틀` is the frame and its `## 결정` table is settled: the delegate closes any question the spec answers by citing the D-id, decides only the rest, and replies `ESCALATE: contradicts <D-id>` when a settled decision would have to be reversed.
 4. **Load design** — populate the report's read-only `design` stage from the spec's D-ids and show interview as `⏭️ confirmed spec`. There is no interview or design gate here, even with `--confirm`. Keep the source spec unchanged.
 5. **Size work** — choose ticket granularity from the implementation steps. Small work becomes one ticket and one in-session worker; it still receives verification and independent review. Never skip review based on size.
@@ -56,7 +56,7 @@ One markdown table, printed at start, at every stage transition, on every escala
 | 6 | Spec reference | pinned local spec | ✅ |
 | 7 | Tickets | to-tickets | ⏳ |
 | 8 | Execution plan | autonomous / --confirm | ⏳ |
-| 9 | Implement loop | Agent / Workflow | ⏳ |
+| 9 | Implement loop | hc workers / Agent | ⏳ |
 | 9b | QA + review | $qa-gate · $review-gate · /simplify | ⏳ |
 | 10 | Ship | pr-babysit → matt-default | ⏭️ no --pr |
 
@@ -66,7 +66,7 @@ Statuses: `✅` done · `🔄` in progress with a short note (the current questi
 
 ## Execution defaults (Claude Code)
 
-Use an in-session Agent for a ticket running alone and background Agents in
+Use hc workers when the probe succeeded. Otherwise use an in-session Agent for a ticket running alone and background Agents in
 worktrees for the frontier, falling back to one in-session Agent at a time if
 unavailable. Record the plan before dispatch. Independent review is `$review-gate` (cross-model, rule-table routed); if its
 other-family CLI is missing it falls back to a same-family fresh-context reviewer
@@ -119,18 +119,22 @@ Step 7 plans the task graph; step 8 records the engine; step 9 keeps the frontie
 
 **Planning (step 7)** — your call, recorded as the page's `plan` block: forecast waves from `$to-tickets`' blocking edges, every wave with its reason, and the tickets that must not run together (same files or section, dependent assumptions, exploratory work, a colliding merge). Give every ticket an honest `estimateMin`.
 
-**Engines** — a ticket running alone runs in-session as an Agent; otherwise the engine the execution plan selects:
+**Engines** — with hc available, every implementation ticket and review-fix worker, alone or not, is an hc worker; step 3's delegate and read-only lookups stay in-session:
+
+- **hc workers** (default whenever the probe succeeded). Per `$hc-workers`: a worktree from the integration branch tip, the template `matt-default-claude` or `matt-deep-claude` for the ticket's route, and a task that is the in-session prompt plus the worker contract and the lifecycle lines. Start the frontier up to the cap, then wait; each `DONE` is a frontier event: read the result file, send its open decisions to the delegate, apply the coordinator merge, then dispatch what became ready before waiting again. A verification failure returns to that worker (`hc send`) with the failing output, at most twice, then handoff.
+
+Without hc, a ticket running alone runs in-session as an Agent; otherwise the engine the execution plan selects:
 
 - **Background Agent** (default, the frontier engine). One Agent call per frontier ticket with `isolation: 'worktree'` and its route, in the background, several ready tickets in one message, never more than the cap. The prompt is the in-session prompt plus the worker contract and "report branch, worktree, commits, summary, openDecisions". Each completion notification is a frontier event: send an `openDecisions` entry to the delegate, apply the coordinator merge, then dispatch what became ready in the same turn. A verification failure returns to that agent (`SendMessage`) with the failing output, at most twice, then handoff.
 - **Workflow** (only a ready set nothing else waits on, such as the last layer or a fully independent ticket set, because one call returns when all its agents finish). `pipeline(tickets, t => agent(<the background prompt for t>, { agentType: <t's route>, isolation: 'worktree', phase: 'Wave <n>', schema: { branch, worktree, commits, summary, openDecisions } }))`, then the coordinator merge per returned ticket. `ultracode` only when the user explicitly requested it. A Workflow that stops early is resumed with `resumeFromRunId`, never restarted.
 - **`/batch`** (ship mode only, independent tickets, one PR each). Give it the tickets, one per agent, each with its verification commands and the PR branch as base. For each PR it opens: fetch the branch, run the ticket's commands locally, and treat the PR as that ticket's deliverable — step 10 shepherds every PR; the user decides the landing order. A failed ticket gets one in-session retry on its branch, then handoff.
 
-Step 10 stays in-session. Add the agent or Workflow run ids, batch PR numbers, worktrees, and merge order to the final report and the decision log.
+Step 10 stays in-session. Add the hc terminal names, agent or Workflow run ids, batch PR numbers, worktrees, and merge order to the final report and the decision log.
 
 ## Fallback
 
 - Plugin agents unavailable: the Agent tool with the same model / effort pairs, said once (Routing).
-- Background Agent unavailable: one in-session Agent at a time (Parallel execution). `/batch` absent: use background Agents.
+- hc unavailable: the engines below it, said once. Background Agent unavailable: one in-session Agent at a time (Parallel execution). `/batch` absent: use background Agents.
 - Artifact tool unavailable: the page is a path; the board says so once.
 - Delegate lost mid-pipeline: respawn it with the Q&A log so far (a fork re-inherits the conversation).
 - Shared weed-harness skill missing: see Rules.

@@ -6,4 +6,4 @@ The Claude Code root of the **matt loop**. `.claude-plugin/plugin.json` lists `s
 - `skills/pr-babysit`, `skills/resolving-merge-conflicts` — Claude Code editions (plugin-agent routing, `/loop` cycle).
 - `agents/` — `matt-loop:matt-default` (opus / medium) and `matt-loop:matt-deep` (fable / high); each fixes model and effort.
 - The remaining skill directories are vendored from [mattpocock/skills](https://github.com/mattpocock/skills) by `../matt-loop-codex/scripts/sync-upstream.sh` (this root skips `code-review`; the built-in `/code-review` is used instead). Do not hand-edit them.
-- Requires weed-harness 5.0+ (`interview-report`, `loop-report`, `loop-gates`). Never reads `model-routing` or runs `deliver.py`.
+- Requires weed-harness 7.1+ (`interview-report`, `loop-report`, `loop-gates`, `hc-workers`). Never reads `model-routing` or runs `deliver.py`.

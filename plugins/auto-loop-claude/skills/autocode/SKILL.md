@@ -216,6 +216,7 @@ Routing is the plugin's agent files, which fix model and effort — there is no 
 | Experimenter deep | Deep | `auto-loop:experimenter-deep` | fable / high | Algorithm replacement, cross-module restructuring, concurrency, invariants |
 
 - Spawn by name with the Agent tool; never pass a `model` override on top.
+- **hc workers.** When `$hc-workers`' probe succeeds (run it in 3A with `--roles <this plugin>/agents`), the strategist and every experimenter are hc workers from the templates `strategist-claude` / `experimenter-default-claude` / `experimenter-deep-claude` instead of Agent calls: same prompts plus the lifecycle lines, `hc send` where this file says `SendMessage`, the terminal name where it says agent id. Their output is still the result files.
 - The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters.**
 - Escalation (2C hard, 3E): Claude Code has no higher effort file, so the retrospective goes to the same `strategist` conversation and `escalated = true` is set — once per run; 3E-3 still terminates with `plateau`.
 - If the plugin agents are unavailable on this machine (e.g. `auto-loop:strategist` cannot be spawned), fall back to the Agent tool with `model` / `effort` set to the same pairs (`opus` / `medium`, `fable` / `high`) and say so once on the board.

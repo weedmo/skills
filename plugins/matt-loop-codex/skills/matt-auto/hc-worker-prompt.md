@@ -2,7 +2,7 @@
 
 Append these lines to the per-ticket implementation prompt when the worker is an hc terminal. The first paragraph is the same prompt matt-auto uses in-session.
 
-`hc --skill` is the live manual and overrides the example flags below.
+`$hc-workers` owns the launch; these lines are its lifecycle lines specialized for a ticket.
 `<coordinator>` is the coordinator's own `$HC_TERMINAL_ID`. Read-only reviewers
 receive the code-review brief instead; they do not implement or commit changes.
 

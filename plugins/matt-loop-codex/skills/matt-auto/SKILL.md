@@ -33,7 +33,7 @@ requests execution. Confirming a design in `$matt-design` alone does not start i
 ## Pipeline
 
 1. **Precondition** — validate and pin the confirmed spec before any side effects; record the full baseline commit (`git rev-parse HEAD`). Recheck the spec hash before dispatch and at completion; a changed spec pauses affected work until its new revision is confirmed and explicitly adopted. Missing `docs/agents/issue-tracker.md` → `$setup-matt-pocock-skills` for the execution tracker only. Apply pending report edits under Change control. Prepare the feature branch before workers start in ship mode.
-2. **Select routing and probe** — routing is automatic on Codex, OpenCode, and Claude Code (Model routing); never ask for an effort there. `--free` selects free-only routing on OpenCode; elsewhere report that it has no route and continue. Without an enforceable allowed pair, stop dispatch and report it. Probe hc: run `hc ls --json`; if it fails, print `hc unavailable: <why>` and run one ticket at a time — never another parallel mechanism. Have `$interview-report` **probe** report delivery and put its answer on the board (`Report delivery: open` / `path — <why>`). Delivery is `deliver.py`'s job; matt-auto never opens the page itself.
+2. **Select routing and probe** — routing is automatic on Codex, OpenCode, and Claude Code (Model routing); never ask for an effort there. `--free` selects free-only routing on OpenCode; elsewhere report that it has no route and continue. Without an enforceable allowed pair, stop dispatch and report it. Probe hc per `$hc-workers` (`--roles ~/.codex/agents`); if unavailable, print `hc unavailable: <why>` and run one ticket at a time — never another parallel mechanism. Have `$interview-report` **probe** report delivery and put its answer on the board (`Report delivery: open` / `path — <why>`). Delivery is `deliver.py`'s job; matt-auto never opens the page itself.
 3. **Prepare answer routing** — read [answer-routing](references/answer-routing.md). Before each question, select `matt-answer` or `matt-answer-deep` by difficulty; reuse only while the route matches. Supply the confirmed spec summary, evidence, constraints, and latest decision log. Include `## 큰 틀` and settled `## 결정`; cite existing D-ids and return `ESCALATE: contradicts <D-id>` for unresolved reversals. Free-only/Claude routes follow the reference.
 4. **Load design** — populate the report's read-only `design` stage from the spec's D-ids and show interview as `⏭️ confirmed spec`. There is no interview or design gate here, even with `--confirm`. Keep the source spec unchanged.
 5. **Size work** — choose ticket granularity from the implementation steps. Small work becomes one ticket and one visible hc worker when available; it still receives verification and independent review. Never skip review based on size.
@@ -130,9 +130,9 @@ wait loop, lifecycle recovery and final-answer boundary.
 
 `--parallel N` (default 2, max 4) limits active
 workers; it never selects invisible execution. `--on <machine>` selects placement.
-Read `hc --skill`, the live manual, before the first command. Name every
-terminal after the run and its ticket. Keep the integration branch and pinned spec
-in every brief; record each terminal's name, id and worktree from `hc run`'s answer.
+Start and settle workers per `$hc-workers`, with the route's template
+(`<role>-codex`). Keep the integration branch and pinned spec
+in every brief; record each terminal's name, id and worktree from the start answer.
 Use `hc-worker-prompt.md` for implementation only.
 
 Start every frontier task up to the cap before waiting. On each reported worker,

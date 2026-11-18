@@ -120,6 +120,8 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
   `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, hc
   agent commands) and the escalation ladder (`matt-deep-max` / `strategist-max` as the one
   `max` rung)
+- **hc-workers** — how the loops run subagents as Herdr workers on both platforms: hc templates
+  generated from the role files, one visible tab per run, file-based reports, a bounded wait loop
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
 - **review-gate** — cross-model review node: the writer's other family reviews on the route

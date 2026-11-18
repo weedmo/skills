@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake `hc` and `herdr-app` (by basename) for hc-worker.mjs tests; logs every call.
+printf '%s %s\n' "$(basename "$0")" "$*" >> "${FAKE_HC_LOG:-/dev/null}"
+case "$(basename "$0") $1" in
+  "hc get") echo "{\"labels\":{\"herdr.space\":\"${FAKE_SPACE-sp1}\"}}" ;;
+  "hc run") echo '{"address":"t9","name":"w","first_message":{"sent":true},"state":"live"}' ;;
+  "herdr-app ls") echo '{"spaces":[{"id":"sp1","tabs":[{"id":"tbX","terminals":[{"terminal":"t9"}]}]}]}' ;;
+  *) echo '{}' ;;
+esac

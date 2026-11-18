@@ -7,20 +7,11 @@ The coordinator stays in its current session and owns verification and progressi
 
 ## Dispatch and visibility
 
-Read `hc --skill`, the live manual; it overrides any flag written here. With
-`hc` available, every implementation or review task is its own terminal:
-
-```sh
-hc run --bg --name <run>-<ticket> --cwd <worktree> <agent command with the routed model/effort> "<prompt>"
-```
-
-The agent command comes from `$model-routing`'s hc line. Run agents
-interactively, never in a one-shot print mode, and put the task in `run`: a
-send to a booting agent can be dropped. Check `first_message.sent` in the
-answer; when false, `hc read` the terminal, clear what blocks it (a trust
-dialog), then send the task. Do not replace these tasks with native invisible
-`spawn_agent`, even for one ticket or a fix. Read-only answer delegates and
-short coordinator commands may remain in-session.
+Read `$hc-workers`: it owns the probe, the templates, starting a worker, the
+wait loop and recovery. With hc available, every implementation or review task
+is its own worker from the route's template (`<role>-codex`). Do not replace
+these tasks with native invisible `spawn_agent`, even for one ticket or a fix.
+Read-only answer delegates and short coordinator commands may remain in-session.
 
 Create each implementation worker's worktree yourself with `git worktree add`
 from the integration branch tip. Sequential means one active implementation worker; integrate and verify
@@ -31,8 +22,8 @@ route `gate-route.mjs` returned. Use separate visible review terminals; respect 
 run's concurrency cap. Workers and reviewers write a result file and send its
 path; never read results from a worker's screen.
 
-Record each worker's terminal name and id, worktree and branch from `hc run`'s
-actual answer. Publish them at launch and on meaningful changes in the
+Record each worker's terminal name and id, worktree and branch from the start
+answer. Publish them at launch and on meaningful changes in the
 existing progress report. Show current phase, last verified action, timestamp,
 next action and whether working, waiting on a worker, verifying or blocked.
 For read-only reviews and shipping, use a visible task row or progress note even

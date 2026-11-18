@@ -87,7 +87,7 @@ The session running this skill is the **coordinator**. It owns scheduling, measu
 1. `program.md` exists, target files exist, working tree clean (else stop and say so).
 2. Create the experiment branch in its own worktree — the user's checkout is never moved. If `$WORKTREE_DIR/best` already exists: a `state.json` whose `terminated_reason` is null means an interrupted run → stop and say `run /autocode resume`; otherwise `git worktree remove --force` it. Then `git worktree prune` and `git worktree add "$WORKTREE_DIR/best" -b "autocode/<slug>" HEAD`. `<slug>` is the spec's `slug` when program.md names a spec, else `metric_name` slugified (`p95_latency_ms` → `p95-latency-ms`); if the branch exists, append `-2`, `-3`, …. Run `worktree_setup` inside it if set. Record `base_branch` and `base_commit` (this HEAD) in `state.json`. `best` always means the head of this branch, and every command that touches it runs inside `$WORKTREE_DIR/best`. Resolve `pr_base`: `--pr <base>` / `--no-pr` → else program.md `pr_base` → else `base_branch`.
 3. Run the guard on the unmodified code inside `$WORKTREE_DIR/best`; abort if it fails.
-4. Resolve routing (3H). Probe hc only if `--on <machine>` was given or program.md `parallel` > 1 and the user asked for hc at init: `hc ls --json` (with `--on`, also `hc machine ls`). Without hc, workers are in-session subagents in local worktrees — the default, not a degraded mode.
+4. Resolve routing (3H). Probe hc per `$hc-workers` (`--roles ~/.codex/agents`; with `--on`, also `hc machine ls`). Without hc, workers are in-session subagents in local worktrees, said once on the board.
 5. Load lessons from `$LESSONS_DIR/*.json`.
 6. **Probe report delivery** — `python3 <loop-report's dir>/assets/deliver.py probe --page .autocode/report/autocode.html` (the page need not exist yet) and print its answer with the other pre-flight facts (`Report delivery: link` / `tab — <why>` / `path — <why>`). Print `PR: autocode/<slug> → <pr_base>` (or `PR: none`) in the same block.
 
@@ -127,7 +127,7 @@ If the frontier is empty while nothing is running, ask the strategist for a refi
 #### 3D-1: Dispatch one hypothesis
 
 1. Worktree: `git worktree add "$WORKTREE_DIR/H{id}" -b "autocode/H{id}" "$best_commit"`. Run `worktree_setup` inside it if set (note the duration on the first run; if it dominates, say so in the final summary).
-2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the **experimenter prompt** (`<autocode-board's dir>/assets/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. hc placement (only when `--on <machine>` was given or the user chose hc at init and 3A's probe succeeded): `hc run --bg --name <run>-H{id} --cwd <worktree> <agent command>` with the same prompt plus hc lifecycle lines (report and ask with `hc send <coordinator terminal>`), then `hc wait --children any`; the agent command from `$model-routing`'s hc line. A report is verified by reading the result file and the branch; it is a signal, not evidence.
+2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the **experimenter prompt** (`<autocode-board's dir>/assets/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. hc placement (whenever 3A's probe succeeded; the strategist too): start it per `$hc-workers` with the route's template and the same prompt plus the lifecycle lines. A report is verified by reading the result file and the branch; it is a signal, not evidence.
 3. Set `H.status = running`, add to `state.running`, log the route in `results.tsv` later.
 
 #### 3D-2: Measure (serial)
@@ -217,7 +217,7 @@ Tiers, pairs, dispatch mechanics, and the escalation ladder live in the shared *
 | Experimenter deep | Deep | `auto-loop:experimenter-deep` | Algorithm replacement, cross-module restructuring, concurrency, invariants |
 
 - The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters**; `strategist-max` is the strategist's alone.
-- hc workers take the tier's agent command from `$model-routing`'s hc line.
+- hc workers use the role's template, `<role>-codex`.
 - Without an enforceable allowed pair, stop dispatch and report the unavailable route; never inherit the platform's default model or effort.
 
 ### 3I: The experiment board

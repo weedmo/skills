@@ -34,7 +34,7 @@ For matt-design, use [Jev batch reports](references/jev-decision.md): strong-mod
 - **Codex** — `spawn_agent` by pinned role (`matt-fast/default/batch/standard/deep/deep-max/reviewer/reviewer-deep/answer/answer-deep`; autocode `experimenter-default/deep`, `strategist/strategist-max`), `fork_turns: "none"`, required context and `ROUTED_EXECUTION=1`. Verify installed roles match the table; missing/stale roles require the explicit allowed pair, reported once.
 - **Claude Code** — named loop agents pin model/effort; no model override. Fast/Default/Background/Standard map to its Default agent; Deep maps to its Deep agent.
 - **OpenCode** — packaged roles under `~/.config/opencode/agents/`; verify provider support for the exact pair. Missing roles may use another mechanism enforcing that pair; otherwise stop dispatch.
-- **hc** — `hc run --bg codex -m <exact model> -c model_reasoning_effort=<exact effort> "<task>"` from the table. Reasoning retries start another terminal with the context; initial hard questions need no failed retry. Claude: `claude --model opus --effort medium` or `--model claude-fable-5-1 --effort high`. OpenCode: `opencode --agent <role>`, `ROUTED_EXECUTION=1` in prompt.
+- **hc** — the role's template (`<role>-codex`, `<role>-claude`) through `$hc-workers`; the template pins the pair. Reasoning retries start another worker with the context; initial hard questions need no failed retry.
 - **Unavailable route** — stop and report if no mechanism enforces the required pair. Never omit rejected flags, inherit defaults, or switch providers silently.
 - **Explicit free-only mode** retains OpenCode `matt-free/free-fast`; missing agents stop rather than pay.
 
