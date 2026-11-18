@@ -88,8 +88,8 @@ setup_hud() {
   fi
 
   # Register statusLine in settings.json. Only claim it when unset or already
-  # pointing at weed-hud — never clobber a foreign statusLine (e.g. one managed
-  # by Orca or another tool).
+  # pointing at weed-hud — never clobber a foreign statusLine (one managed by
+  # another tool).
   local result
   result=$(mutate_settings "
 existing = data.get('statusLine')

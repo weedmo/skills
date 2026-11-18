@@ -169,8 +169,8 @@ Include verbatim in the strategist's first prompt:
 > "obstacle": "<only for crash/beyond_scope>" }`. Do **not** run the metric command; the
 > coordinator measures. Do not merge, do not touch other worktrees, do not install hooks.
 
-For an Orca worker, append the lifecycle lines (report with `worker_done`, ask with
-`orchestration ask`).
+For an hc worker, append the lifecycle lines (report and ask with
+`hc send <coordinator terminal>`).
 
 ## Keep commit (3D-3)
 
@@ -228,8 +228,8 @@ The common keys follow loop-report's contract (`title`, `slug: "autocode"`, `gen
 - `hypotheses` mirrors `hypotheses/*.json` + `results.tsv`: every hypothesis the run has seen,
   with `status` as in 3C (`pending … cancelled`), `seq` = measurement order (measured ones
   only), `metric` the measured value, `delta` the signed percent against the best at the time,
-  `worker` the model/effort the route resolved to (plus worktree, and the dispatch id for an
-  Orca worker). Claims, notes, and obstacles are translated into one plain Korean line each;
+  `worker` the model/effort the route resolved to (plus worktree, and the terminal name as `dispatchId` for an
+  hc worker). Claims, notes, and obstacles are translated into one plain Korean line each;
   the strategist's English JSON is not pasted through.
 - `run.pr` is `{ base, url }` — `base` the resolved `pr_base` (`"none"` when the PR is off),
   `url` null until 3F opens it; the page shows the tile only when `run.pr` is present.

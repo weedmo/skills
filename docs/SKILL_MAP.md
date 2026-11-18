@@ -113,12 +113,12 @@ They are different axes, not synonyms.
 Long-running delegated loops share one runtime, shipped in **weed-harness** (repo root
 `skills/`, installed on every platform):
 
-- **loop-report** — the live progress page of a run and its delivery (Orca artifact link →
-  Orca browser tab → path); each loop plugs in its own view
-- **model-routing** — Codex · OpenCode · Orca only: the Default / Deep task tiers plus the review/QA rule table (`gate-route.mjs`), with the model and
+- **loop-report** — the live progress page of a run and its delivery (system opener →
+  path); each loop plugs in its own view
+- **model-routing** — Codex · OpenCode · hc only: the Default / Deep task tiers plus the review/QA rule table (`gate-route.mjs`), with the model and
   reasoning-effort pair per platform (Codex `spawn_agent` by role name — the roles live in
-  `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, Orca
-  `worker-start` flags) and the escalation ladder (`matt-deep-max` / `strategist-max` as the one
+  `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, hc
+  agent commands) and the escalation ladder (`matt-deep-max` / `strategist-max` as the one
   `max` rung)
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
@@ -128,7 +128,7 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 - **qa-gate** — behavioural QA node: acceptance criteria as re-runnable scenario scripts against
   the running app, evidence under `.qa/`, judged criteria as manual gates
 - **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
-  a page only on request; Codex delivers it through Orca/HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
+  a page only on request; Codex delivers it as local HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
   Sol review, and optional Antigravity support.
 - **rust-port** — every platform: oracle-first porting of any codebase to Rust (profile →
   frozen differential gates → boundary design → stepwise port → equivalence + scaling benchmarks),
@@ -139,7 +139,7 @@ On top of it, two loops with different graphs:
 - **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit` and `resolving-merge-conflicts`): **matt-auto** conducts Matt Pocock's main flow
   (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
   starts from a confirmed design-map spec whose step tags fix the ticket tiers), publishing
-  its decision graph through loop-report and running independent tickets as parallel Orca
+  its decision graph through loop-report and running independent tickets as parallel hc
   workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
   resolves an active merge/rebase on the Deep tier
 - **auto-loop** (`plugins/auto-loop-claude/skills/` on Claude Code, `plugins/auto-loop-codex/skills/` elsewhere): **autocode** runs a hypothesis-driven parallel

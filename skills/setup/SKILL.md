@@ -53,7 +53,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/install.sh" status   # 현재 상태만
 - 플러그인의 `hud/weed-hud.mjs` → 사용자의 `~/.claude/hud/weed-hud.mjs` 로 복사
 - `~/.claude/settings.json` 의 `statusLine` 을 `node ~/.claude/hud/weed-hud.mjs` 로 등록
 - **버전 무관 안정 경로** 를 사용 → plugin 업데이트에도 statusLine 깨지지 않음
-- statusLine이 비어 있거나 이미 weed-hud를 가리킬 때만 등록. **다른 도구(예: Orca)가 관리 중인 statusLine은 건드리지 않고 경고만 출력**
+- statusLine이 비어 있거나 이미 weed-hud를 가리킬 때만 등록. **다른 도구가 관리 중인 statusLine은 건드리지 않고 경고만 출력**
 
 ### `hooks`
 

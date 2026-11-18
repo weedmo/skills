@@ -588,7 +588,7 @@
   }
 
   // ── theme ──────────────────────────────────────────────────
-  // The hash is only honoured for direct links: assigning to it inside Orca's
+  // The hash is only honoured for direct links: assigning to it inside a hosted
   // frame reloads the document and the fragment is dropped, so the toggle
   // never writes it. `replaceState` throws in an opaque origin — hence the
   // try/catch around the cosmetic URL update.
@@ -717,9 +717,8 @@
     row.appendChild(btn);
     row.appendChild(label);
     host.appendChild(row);
-    // Orca's built-in browser ignores script-initiated reloads of a file://
-    // page entirely; there the agent pushes the regeneration with
-    // `orca reload --page <id>` instead, and this timer is a harmless no-op.
+    // A viewer that ignores script-initiated reloads of a file:// page makes
+    // this timer a harmless no-op.
     setInterval(function () {
       var hold = typeof view.hasUnsavedEdits === "function" && view.hasUnsavedEdits();
       if (auto && !hold) location.reload();

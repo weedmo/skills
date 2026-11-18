@@ -1,11 +1,11 @@
 # weed-plugins
 
 One repo, per-loop plugins. An AI-CLI harness by weedmo — installable skill packs
-for **Claude Code, Codex, opencode, gemini-cli, and Orca**.
+for **Claude Code, Codex, opencode, and gemini-cli**.
 
 | Plugin | Where | What | Required |
 |--------|-------|------|----------|
-| `weed-harness` | repo root | The shared runtime every loop builds on — `loop-report` (live progress page; Artifact on Claude Code, Orca delivery elsewhere), `interview-report` and `autocode-board` (the loops' page views), `model-routing` (Codex-side model/effort tiers), `loop-gates` (unlazy-backed completion) — plus the Claude Code-only setup, hooks, and HUD | yes, every platform |
+| `weed-harness` | repo root | The shared runtime every loop builds on — `loop-report` (live progress page; Artifact on Claude Code, local HTML elsewhere), `interview-report` and `autocode-board` (the loops' page views), `model-routing` (Codex-side model/effort tiers), `loop-gates` (unlazy-backed completion) — plus the Claude Code-only setup, hooks, and HUD | yes, every platform |
 | `matt-loop` | `plugins/matt-loop-claude/` · `plugins/matt-loop-codex/` | matt-design + matt-auto + vendored Matt Pocock skills; one edition per platform | optional, needs weed-harness 6.0+ |
 | `auto-loop` | `plugins/auto-loop-claude/` · `plugins/auto-loop-codex/` | autocode hypothesis-driven parallel code improvement loop with a live experiment board; one edition per platform | optional, needs weed-harness 6.0+ |
 
@@ -53,7 +53,7 @@ does not require duplicating changes in the two orchestration editions.
 
 Claude uses its Artifact tool for delivery. On the other delivery route,
 [`deliver.py`](skills/loop-report/assets/deliver.py) probes capabilities and
-falls back from **Orca artifact link → built-in browser tab → local path**.
+falls back from **system opener → local path**.
 The selected route is kept stable for the run.
 
 ### 3. Repository layout
@@ -112,7 +112,7 @@ both matt-loop editions; subsequent local updates bring those changes down.
 
 Run `npm test` before committing a release. At this snapshot it checks plugin
 version agreement, skill word budgets, read-only design decisions, and delivery behavior against a fake
-Orca CLI. [Push/PR CI](.github/workflows/test.yml) checks version agreement,
+opener. [Push/PR CI](.github/workflows/test.yml) checks version agreement,
 delivery tests, both view render fixtures, and strict YAML frontmatter.
 **The word-budget check currently runs in `npm test`, but is not wired into
 that CI workflow.**
@@ -174,7 +174,7 @@ npx github:weedmo/skills --yes --dry-run
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
 | `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. Eligible Codex design implementation/support prioritizes the strongest Gemini with maximum supported thinking; exhausted quota falls back to Codex. |
-| `orca` | `~/.agents/skills/` | Universal agent-skills directory; Orca exposes these skills to every agent it drives. Skip this platform if you installed the plugins natively via Claude/Codex (see [Orca](#orca) below) to avoid duplicates. |
+| `agents` | `~/.agents/skills/` | Universal agent-skills directory, read by tools that follow the `~/.agents/skills` convention. Skip this platform if you installed the plugins natively via Claude/Codex to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,
 so it doubles as an updater (`npx github:weedmo/skills --yes` pulls the current
@@ -217,25 +217,14 @@ marketplace (`.agents/plugins/marketplace.json`) lists all three plugins.
 opencode and gemini-cli have no compatible plugin marketplace — use the npx
 installer for those.
 
-### Orca
+### Herdr
 
-Orca (the multi-agent IDE) has no skill plugin format of its own yet — its
-current plugin manifest (`orca-plugin.json`) does not accept skill
-contributions. Instead, Orca discovers and manages skills from the native
-plugin systems and skill directories of the agents it drives:
-
-| Orca skill source | How these plugins get there |
-|-------------------|------------------------------|
-| Claude plugin installs (`~/.claude/plugins/`) | `/plugin install <name>@weed-plugins` — Orca reads each install's `.claude-plugin/plugin.json` `skills` field |
-| Codex plugin cache (`~/.codex/plugins/cache/`) | `codex plugin add <name>@weed-plugins` — Orca reads `.codex-plugin/plugin.json` |
-| OpenCode home skills (`~/.config/opencode/skills/`) | npx installer with `--platforms opencode` |
-| Agent-skills home (`~/.agents/skills/`) | npx installer with `--platforms orca` — exposed to **every** Orca agent |
-
-So the recommended Orca setup is simply the native plugin installs above
-(Claude + Codex), plus `--platforms opencode` or `--platforms orca` for the
-rest. Orca then tracks these skills in its Skills UI, per agent, and flags
-stale copies. Pick ONE channel per platform — native plugin install or npx
-copy — to avoid duplicate skill entries.
+Nothing here installs into Herdr itself: its terminals run the same agent CLIs,
+so the native plugin installs above (Claude + Codex) and the npx installer for
+the rest are all it needs. When `hc` (herdr-core) is on PATH, the Codex-side
+loops start their workers and reviewers as visible `hc` terminals; without it
+they fall back to in-session execution. Pick ONE channel per platform — native
+plugin install or npx copy — to avoid duplicate skill entries.
 
 Current limitation: Claude-specific hook automation and slash-command behavior
 ship only with the Claude plugin; on other platforms the skills act as
@@ -247,7 +236,7 @@ workflow guidance.
 
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
-| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): Orca artifact link, or the Orca built-in browser tab when links are unavailable, or the path — route kept stable per run; `npm test` runs its tests against a fake Orca CLI |
+| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
 | `model-routing` | 679 | 700 | 21 |
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
@@ -272,7 +261,7 @@ workflow guidance.
 Two editions share the same boundary: `matt-design` collaborates with the user;
 `matt-auto --spec <path>` executes the confirmed contract autonomously. Claude
 uses native agents/Workflow and reviews; Codex/OpenCode use model-routing and
-Orca worker waves. Both retain coordinator verification and independent review.
+visible hc workers. Both retain coordinator verification and independent review.
 `--confirm` optionally adds a ticket/execution-plan gate on either platform.
 
 Typical flow: `$matt-design` → iterate in chat (call `$design-map` when a page
@@ -300,7 +289,7 @@ skill to `~/.codex/skills/`.
 
 ### auto-loop
 
-Two editions as well: `plugins/auto-loop-claude` (in-session experimenters, plugin agents, Artifact board) and `plugins/auto-loop-codex` (Orca placement, `model-routing`, `deliver.py`); both render `autocode-board`.
+Two editions as well: `plugins/auto-loop-claude` (in-session experimenters, plugin agents, Artifact board) and `plugins/auto-loop-codex` (hc placement, `model-routing`, `deliver.py`); both render `autocode-board`.
 
 | Skill | Description |
 |-------|-------------|

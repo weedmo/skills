@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: plugin versions agree across manifests and marketplace
         run: node bin/check-versions.mjs
-      - name: loop-report deliver.py against the fake Orca CLI
+      - name: loop-report deliver.py against the fake opener
         run: python3 -m unittest skills/loop-report/tests/test_deliver.py
       - name: confirmed design decisions remain read-only
         run: node --test skills/interview-report/tests/test_decisions.mjs

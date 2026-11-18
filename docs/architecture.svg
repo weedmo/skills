@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="890" viewBox="0 0 1200 890" role="img" aria-labelledby="title desc">
   <title id="title">weed-harness — shared runtime, two loop families</title>
-  <desc id="desc">Claude and Codex editions of matt-loop share the interview-report view. Both auto-loop editions share autocode-board. Loop data, the selected view and shell feed render.py. Delivery uses Claude Artifact or the Orca artifact, browser and local-path fallback. Native marketplaces and the installer distribute the runtime and loops.</desc>
+  <desc id="desc">Claude and Codex editions of matt-loop share the interview-report view. Both auto-loop editions share autocode-board. Loop data, the selected view and shell feed render.py. Delivery uses Claude Artifact or the system opener with a local-path fallback. Native marketplaces and the installer distribute the runtime and loops.</desc>
   <defs>
     <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101a30"/><stop offset="1" stop-color="#172943"/></linearGradient>
     <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 8 4 0 8" fill="none" stroke="#91a8c6" stroke-width="1.5"/></marker>
@@ -42,7 +42,7 @@
   <text x="72" y="594" class="label teal">DELIVERY</text>
   <text x="72" y="625" class="body">Claude: Artifact tool</text>
   <rect x="426" y="589" width="702" height="49" rx="12" class="card"/>
-  <text x="446" y="620" class="body">deliver.py: Orca artifact link → browser tab → local path</text>
+  <text x="446" y="620" class="body">deliver.py: system opener → local path</text>
   <text x="72" y="674" class="muted">Shared policies: model-routing · loop-gates / unlazy completion evidence</text>
   <text x="48" y="740" class="label teal">DISTRIBUTION &amp; FEEDBACK</text>
   <text x="48" y="774" class="body">Native marketplaces → Claude / Codex plugin installs</text>

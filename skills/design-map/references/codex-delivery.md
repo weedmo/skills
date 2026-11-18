@@ -12,7 +12,7 @@ the document from it. The page contains the same current/proposed SVGs,
 decision list, and available review log as the Claude Artifact route. It is read-only;
 Codex feedback returns through chat.
 
-Use the installed `loop-report` delivery helper without calling Orca directly:
+Use the installed `loop-report` delivery helper; do not open the page yourself:
 
 ```bash
 python3 <loop-report-dir>/assets/deliver.py probe --page <page>
@@ -21,7 +21,7 @@ python3 <loop-report-dir>/assets/deliver.py show --page <page>
 ```
 
 Probe once before the first publish. Publish after every regeneration and relay
-the returned link, tab plus path, or path and reason. The `.delivery.json` next
+the returned route: opened plus path, or path and reason. The `.delivery.json` next
 to the page preserves the route. If the helper is absent, report the HTML path.
 
 Run the render check from artifact-page.md on the delivered page. For a path route,

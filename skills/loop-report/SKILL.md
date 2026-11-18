@@ -1,6 +1,6 @@
 ---
 name: loop-report
-description: "Builds and delivers the live progress page of a long-running delegated loop (matt-auto, autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (Orca artifact link, or the worktree's Orca browser tab when links are unavailable, or the path), which keeps the route stable for the whole run. Callers run those two scripts and relay the answer; they never run `orca` commands themselves. Called by interview-report (matt-auto's decision graph) and autocode (the experiment board); do not trigger standalone."
+description: "Builds and delivers the live progress page of a long-running delegated loop (matt-auto, autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (the page opened once with the system opener, or the path), which keeps the route stable for the whole run. Callers run those two scripts and relay the answer; they never open the page themselves. Called by interview-report (matt-auto's decision graph) and autocode (the experiment board); do not trigger standalone."
 ---
 
 # Loop report (the shared progress page)
@@ -11,7 +11,7 @@ The loop owns its *graph* (matt-auto's decision stages and ticket waves, autocod
 
 ## Two scripts, two verbs
 
-Both live in `assets/` next to this file. `<this skill's dir>` is the directory holding this SKILL.md: `~/.codex/skills/loop-report` under the npx installer on Codex, the installed weed-harness plugin's `skills/loop-report` on Claude Code or a native Codex plugin install, `~/.agents/skills/loop-report` under Orca.
+Both live in `assets/` next to this file. `<this skill's dir>` is the directory holding this SKILL.md: `~/.codex/skills/loop-report` under the npx installer on Codex, the installed weed-harness plugin's `skills/loop-report` on Claude Code or a native Codex plugin install, `~/.agents/skills/loop-report` for the `agents` platform.
 
 **Build** — the caller writes its data JSON next to the page and names its view:
 
@@ -26,21 +26,19 @@ The script validates the common contract below, then the view's own `validate.py
 **Deliver** — after every build. Which way depends on the platform:
 
 - **Claude Code** — publish the page with the **Artifact tool** on the same file path every time (same path, same URL; favicon on the first publish only) and relay the URL. No probe, no `deliver.py`; without the Artifact tool the page is a path, said once. The weed-harness mod's `/board` pane reads the same `<slug>.data.json` in the terminal (it opens by itself when the file is written under `.autocode/report/` or `docs/agents/matt-auto-log/`); nothing to run for it, and it never replaces the Artifact publish.
-- **Codex, OpenCode, Orca** — `deliver.py`, below.
+- **Codex, OpenCode** — `deliver.py`, below.
 
 
 ```
 python3 <this skill's dir>/assets/deliver.py probe   --page <dir>/<slug>.html
-python3 <this skill's dir>/assets/deliver.py publish --page <dir>/<slug>.html [--rerun-share]
+python3 <this skill's dir>/assets/deliver.py publish --page <dir>/<slug>.html
 python3 <this skill's dir>/assets/deliver.py show    --page <dir>/<slug>.html
 ```
 
-- `probe` runs once, early in the loop, before its first gate (the page need not exist yet), so the user learns *before* the gate whether there will be a public link. `publish` runs after every regeneration. `show` reports the current route without doing anything — for a status command or a fresh context that has no publish answer in memory.
-- The answer is one JSON line on stdout: `{"route": "link|tab|path", "url", "browserPageId", "bin", "reason"}`. Relay it as-is to the user or the calling loop — the URL, or "browser tab + path", or the path, plus `reason` whenever the route is not `link`. Exit code 0 means answered (a run with no link is an answer, not an error); 1 means the page file is missing.
-- The script chooses the route in order link → tab → path, picks the Orca executable (`orca` inside an Orca terminal, `orca-ide` elsewhere on Linux, falling through the broken `--no-sandbox` shim), shares once and updates afterwards so the URL stays the same, reuses the worktree's browser tab and reloads it after each regeneration, and keeps all of that in `<dir>/<slug>.delivery.json`. Nothing else reads or writes that file.
-- A refused share (`artifact_sharing_disabled`) is a device setting only a human can flip in Orca desktop › Settings › Artifacts; the script does not retry it, and its `reason` carries the explanation once and a short tag afterwards — relay it once. On a headless runtime (`orca serve` on a server) that switch may be unreachable, so the tab is the delivery for that run, not something to wait for. Pass `--rerun-share` only when the user says they turned sharing on (or signed in, for `authentication_required`). A transient `update` failure keeps the existing link and says the previous version is still showing; the CLI caps a page at 800 KB, so a size failure means the data block grew wrong. Links expire 30 days after the last update.
-- A `link` from `probe` is provisional — sharing can still be refused at the first `publish`. Hosted pages run in a sandboxed frame without `localStorage`, so a view that keeps edits there keeps them only for that page load; say "export before reloading" when handing over a link to such a page.
-- Inside Orca's built-in browser the page cannot reload itself (script reloads of `file://` pages are ignored), which is why `publish` after every regeneration is not optional there.
+- `probe` runs once, early in the loop, before its first gate (the page need not exist yet), so the user learns *before* the gate whether the page will open by itself. `publish` runs after every regeneration. `show` reports the current route without doing anything — for a status command or a fresh context that has no publish answer in memory.
+- The answer is one JSON line on stdout: `{"route": "open|path", "url", "bin", "reason"}`. Relay it as-is to the user or the calling loop — "opened + path", or the path plus `reason`. Exit code 0 means answered (a page nobody could open is an answer, not an error); 1 means the page file is missing.
+- The script opens the page once with the system opener (`xdg-open`, `open` on macOS; `--bin` or `LOOP_REPORT_OPEN_BIN` names another), falls back to the path when there is no opener, no display, or the opener fails, and keeps that in `<dir>/<slug>.delivery.json`. Nothing else reads or writes that file. Under Herdr the opener can show the page in its Artifact panel; that is the machine's handler, not this script's concern.
+- Later publishes never reopen the page: it reloads itself on its auto-refresh poll. A failed open is retried on the next publish.
 
 Loops that call these scripts require weed-harness ≥ 3.1 (the version that ships `deliver.py`); when the script is missing, say `weed-harness 3.1 required: deliver.py missing` once and hand over the rendered path.
 
@@ -77,12 +75,11 @@ Loops that call these scripts require weed-harness ≥ 3.1 (the version that shi
 
 ## The view interface (for loop authors)
 
-A view is one file, `assets/view.html` in the loop's skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views (`interview-report`, `autocode`) before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake Orca CLI — run it after touching the script.
+A view is one file, `assets/view.html` in the loop's skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views (`interview-report`, `autocode`) before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake opener — run it after touching the script.
 
 ## Red flags
 
 - Building the page with `cp` + `sed`/`perl`, or editing the shell's or a view's CSS/JS → the scripts exist because those shortcuts shipped broken pages.
-- Running `orca artifacts` / `tab` / `reload` from a loop instead of `deliver.py publish` → two owners of one route drift apart; the script owns the route and `delivery.json`.
-- Skipping `publish` after a regeneration, or skipping the page because publishing failed → in the Orca tab the old version stays on screen; and the local HTML is still the report when only the link is missing.
-- Passing `--rerun-share` on your own, or on every regeneration → the device setting only changes when a human flips it.
+- Opening the page yourself from a loop instead of `deliver.py publish` → a new window on every regeneration; the script owns the route and `delivery.json`.
+- Skipping `publish` after a regeneration, or skipping the page because opening failed → the local HTML is still the report when nothing could open it.
 - `progress.updated` from memory, `state` left at `running` on the final page, `outcome` line counts not from `git diff --numstat`, a blocker with a vague `detail` → each one makes the page lie in a way the reader cannot see.

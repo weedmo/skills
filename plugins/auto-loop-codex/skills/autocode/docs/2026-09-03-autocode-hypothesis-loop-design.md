@@ -88,9 +88,9 @@ and say so.
 ### Worker placement
 
 Default: in-session background subagents in local `git worktree`s under `.autocode/worktrees/`.
-Overhead is seconds, which matters because a single experiment can be a one-line change. Orca
-workers (`--on <env>`, or chosen at init) are available for remote placement, following the
-matt-auto supervised path (`run-create → task-create → worker-start → check`), but they add
+Overhead is seconds, which matters because a single experiment can be a one-line change. hc
+workers (`--on <machine>`, or chosen at init) are available for remote placement, following the
+matt-auto supervised path (`hc run --bg` → `hc wait --children`), but they add
 minutes per dispatch and are not the default.
 
 ## Removed from v2

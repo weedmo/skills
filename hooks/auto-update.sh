@@ -89,7 +89,7 @@ fi
 
 # --- weed-plugins skills for codex: legacy file-sync fallback. Only runs when
 # the codex plugins are NOT installed natively (the plugin cache path above
-# supersedes this and file copies would show up as duplicates in Orca).
+# supersedes this and file copies would show up as duplicate skills).
 # Syncs the shared runtime (root skills/, minus the Claude-only ones) and both
 # loop plugins so matt-auto / autocode find loop-report next to them.
 MPC="$HOME/.claude/plugins/marketplaces/weed-plugins"

@@ -32,7 +32,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 ## Step 1: Parse Subcommand
 
 - No args or `init` → Step 2. Optional integer N = `max_experiments`. `--spec <path>` names a design spec: read it; frontmatter `status` other than `confirmed` → print `spec not confirmed: run /matt-design first` and stop.
-- `run` → Step 3. `--parallel N` (default from program.md, max 4), `--on <env>` (Orca environment for remote workers), and `--pr <base>` / `--no-pr` override program.md for this run only.
+- `run` → Step 3. `--parallel N` (default from program.md, max 4), `--on <machine>` (hc machine for remote workers), and `--pr <base>` / `--no-pr` override program.md for this run only.
 - `status` → Step 4. `resume` → Step 5.
 
 ---
@@ -70,7 +70,7 @@ Follow `$loop-gates`: locate unlazy once; if missing, ask once whether to instal
 - `verify-metric.mjs` — re-runs the metric inside `.autocode/worktrees/best` and asserts it is at least as good as `best_metric` in `state.json` within the noise band; prints `autocode gate passed: metric`. It re-measures; it never trusts the recorded number.
 - `verify-target.mjs` — only with `performance_target`; re-measures and asserts the target is met; prints `autocode gate passed: target`.
 
-Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines never change and one approval keeps the loop autonomous. Read every check and approve the coordinator-authored ledger once (`gate-check.mjs --approve`) as specified by `$loop-gates`, provided its commands stay within the user's authorized scope. New external or destructive actions still require authorization. The coordinator re-verifies it at termination (3F); the retry bound, the handoff on unmet gates, and the Orca boundaries are loop-gates'. Do not install unlazy's Stop hook.
+Scripts read thresholds from `program.md` / `state.json`, so `CHECK:` lines never change and one approval keeps the loop autonomous. Read every check and approve the coordinator-authored ledger once (`gate-check.mjs --approve`) as specified by `$loop-gates`, provided its commands stay within the user's authorized scope. New external or destructive actions still require authorization. The coordinator re-verifies it at termination (3F); the retry bound, the handoff on unmet gates, and the hc boundaries are loop-gates'. Do not install unlazy's Stop hook.
 
 ### 2F: Approval
 
@@ -87,7 +87,7 @@ The session running this skill is the **coordinator**. It owns scheduling, measu
 1. `program.md` exists, target files exist, working tree clean (else stop and say so).
 2. Create the experiment branch in its own worktree — the user's checkout is never moved. If `$WORKTREE_DIR/best` already exists: a `state.json` whose `terminated_reason` is null means an interrupted run → stop and say `run /autocode resume`; otherwise `git worktree remove --force` it. Then `git worktree prune` and `git worktree add "$WORKTREE_DIR/best" -b "autocode/<slug>" HEAD`. `<slug>` is the spec's `slug` when program.md names a spec, else `metric_name` slugified (`p95_latency_ms` → `p95-latency-ms`); if the branch exists, append `-2`, `-3`, …. Run `worktree_setup` inside it if set. Record `base_branch` and `base_commit` (this HEAD) in `state.json`. `best` always means the head of this branch, and every command that touches it runs inside `$WORKTREE_DIR/best`. Resolve `pr_base`: `--pr <base>` / `--no-pr` → else program.md `pr_base` → else `base_branch`.
 3. Run the guard on the unmodified code inside `$WORKTREE_DIR/best`; abort if it fails.
-4. Resolve routing (3H). Probe Orca only if `--on <env>` was given or program.md `parallel` > 1 and the user asked for Orca at init: `orca status --json`, `orca orchestration run-list --json` (on `bad option: --no-sandbox`, retry with `orca-ide`). Without Orca, workers are in-session subagents in local worktrees — the default, not a degraded mode.
+4. Resolve routing (3H). Probe hc only if `--on <machine>` was given or program.md `parallel` > 1 and the user asked for hc at init: `hc ls --json` (with `--on`, also `hc machine ls`). Without hc, workers are in-session subagents in local worktrees — the default, not a degraded mode.
 5. Load lessons from `$LESSONS_DIR/*.json`.
 6. **Probe report delivery** — `python3 <loop-report's dir>/assets/deliver.py probe --page .autocode/report/autocode.html` (the page need not exist yet) and print its answer with the other pre-flight facts (`Report delivery: link` / `tab — <why>` / `path — <why>`). Print `PR: autocode/<slug> → <pr_base>` (or `PR: none`) in the same block.
 
@@ -127,7 +127,7 @@ If the frontier is empty while nothing is running, ask the strategist for a refi
 #### 3D-1: Dispatch one hypothesis
 
 1. Worktree: `git worktree add "$WORKTREE_DIR/H{id}" -b "autocode/H{id}" "$best_commit"`. Run `worktree_setup` inside it if set (note the duration on the first run; if it dominates, say so in the final summary).
-2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the **experimenter prompt** (`<autocode-board's dir>/assets/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. Orca placement (only when `--on <env>` was given or the user chose Orca at init and 3A's probe succeeded): `orca orchestration run-create` once per run, then `task-create` + `worker-start --task <id> --worktree path:<worktree> <route flags>` with the same prompt plus Orca lifecycle lines (report with `worker_done`, ask with `orchestration ask`); route flags from `$model-routing`'s Orca table. A `worker_done` is verified by reading the result file and the branch; it is a signal, not evidence.
+2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the **experimenter prompt** (`<autocode-board's dir>/assets/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. hc placement (only when `--on <machine>` was given or the user chose hc at init and 3A's probe succeeded): `hc run --bg --name <run>-H{id} --cwd <worktree> <agent command>` with the same prompt plus hc lifecycle lines (report and ask with `hc send <coordinator terminal>`), then `hc wait --children any`; the agent command from `$model-routing`'s hc line. A report is verified by reading the result file and the branch; it is a signal, not evidence.
 3. Set `H.status = running`, add to `state.running`, log the route in `results.tsv` later.
 
 #### 3D-2: Measure (serial)
@@ -185,7 +185,7 @@ Stop the loop when the first of these holds, after letting running experiments f
 - frontier empty and the strategist returned nothing twice → `exhausted`
 - plateau persisted through 3E → `plateau`
 
-Then remove leftover hypothesis worktrees and release any Orca dispatches. The user's checkout is where it was; the experiment branch sits at `best_commit` in `$WORKTREE_DIR/best`.
+Then remove leftover hypothesis worktrees and end any hc workers. The user's checkout is where it was; the experiment branch sits at `best_commit` in `$WORKTREE_DIR/best`.
 
 When `unlazy_gates: true`, run `node "$UNLAZY_DIR/scripts/gate-check.mjs" --reverify $AUTOCODE_DIR/GATES.md` first, per `$loop-gates`. Compose the summary only on `ALL MET`; otherwise record `ABANDON: <id> <reason>` in the ledger and end as an explicit handoff naming the unmet gates. `target_reached` must be backed by the target gate's measured evidence. **Gates caught** = gates UNMET on that `--reverify`; write it into the last experiment's lesson file as `"gates_caught": n` (`null` when `unlazy_gates` is false) and print it in the summary (`—` when false).
 
@@ -217,12 +217,12 @@ Tiers, pairs, dispatch mechanics, and the escalation ladder live in the shared *
 | Experimenter deep | Deep | `auto-loop:experimenter-deep` | Algorithm replacement, cross-module restructuring, concurrency, invariants |
 
 - The strategist assigns `difficulty`; the coordinator only translates it into a route. When an experimenter reports `beyond_scope`, re-dispatch once on Deep (3D-2) and mark the hypothesis `rerouted`. **Deep is the ceiling for experimenters**; `strategist-max` is the strategist's alone.
-- Orca workers take the tier's `worker-start` flags from `$model-routing`'s Orca table.
+- hc workers take the tier's agent command from `$model-routing`'s hc line.
 - Without an enforceable allowed pair, stop dispatch and report the unavailable route; never inherit the platform's default model or effort.
 
 ### 3I: The experiment board
 
-The board is the run's status page and, at the end, its report — built and delivered by `$loop-report` with autocode's own view (`$autocode-board`'s `assets/view.html`, its data checks in `assets/validate.py` beside it). autocode owns the data; loop-report owns the page and the route. Delivery is `deliver.py`'s alone: autocode runs it and relays its answer, never the underlying Orca commands.
+The board is the run's status page and, at the end, its report — built and delivered by `$loop-report` with autocode's own view (`$autocode-board`'s `assets/view.html`, its data checks in `assets/validate.py` beside it). autocode owns the data; loop-report owns the page and the route. Delivery is `deliver.py`'s alone: autocode runs it and relays its answer, never opening the page itself.
 
 **Publish** = write `$REPORT_DIR/autocode.data.json`, then:
 
@@ -234,7 +234,7 @@ python3 <loop-report's dir>/assets/render.py \
 python3 <loop-report's dir>/assets/deliver.py publish --page .autocode/report/autocode.html
 ```
 
-`deliver.py` keeps the route beside the page so every republish lands on the same link or tab; that record is the script's — autocode never reads it. Relay the one-line JSON answer (`route`, `url` or `browserPageId`, `reason`) to the user. `deliver.py probe --page …` is 3A step 6; `deliver.py show --page …` prints the current route without publishing (Step 4). Publish first after the baseline (3B), then on every state change (3D), on plateau/escalation (3E), and last at termination (3F) with `progress.state: "done"` and the `outcome`.
+`deliver.py` keeps the route beside the page so every republish keeps the same route; that record is the script's — autocode never reads it. Relay the one-line JSON answer (`route`, `url`, `reason`) to the user. `deliver.py probe --page …` is 3A step 6; `deliver.py show --page …` prints the current route without publishing (Step 4). Publish first after the baseline (3B), then on every state change (3D), on plateau/escalation (3E), and last at termination (3F) with `progress.state: "done"` and the `outcome`.
 
 **Data** — the common keys follow loop-report's contract (`title`, `slug: "autocode"`, `generated`, `summary`, `progress`, `outcome`); the view's keys are `run` (including `run.pr { base, url }`) and `hypotheses`, with the JSON and its rules (Korean one-liners for claims/notes/obstacles, `terminatedReason` null until 3F, `progress.current` / `blockers`, never pre-sum what the page derives) in `<autocode-board's dir>/assets/reference.md` § Board data. Read it before the first publish.
 
@@ -258,7 +258,7 @@ Read `state.json`, `results.tsv`, and `hypotheses/*.json`; display the block fro
 - Coordinator editing target code or proposing hypotheses itself → the expensive reasoning is spent once, on hypotheses.
 - Experimenter running the metric → measurement is serial by design; a parallel benchmark is noise.
 - Waiting for a whole batch before replanning, or respawning the strategist per result → the frontier is revised per result, and the strategist's context is what makes a delta cheap.
-- Keeping a change inside the noise band, or trusting a `worker_done` or an experimenter's "it's faster" → status comes from the coordinator's own measurement, nothing else.
+- Keeping a change inside the noise band, or trusting a worker report or an experimenter's "it's faster" → status comes from the coordinator's own measurement, nothing else.
 - Running one hypothesis at a time when `parallel > 1` and the frontier has disjoint `touches` → that is the sequential loop this design replaces.
 - Letting the board go stale, skipping a publish because the link was refused, or delivering with anything but `deliver.py` → the page is the user's window into the run; delivery and the build have one owner.
 - Checking the experiment branch out in the user's checkout, merging a keep with `--no-ff`, pushing after every keep, or merging the PR → the branch lives in `$WORKTREE_DIR/best`, one keep is one squash commit, the PR is opened once at 3F, and merging it is the user's call.

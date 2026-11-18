@@ -50,9 +50,9 @@ Claude Code maps Fast/Default/Background/Standard to its Default agent, Deep to 
 
 For OpenCode large-context work, read model-routing's `references/gemini-priority.md`: strongest Gemini first, Codex on quota exhaustion. Preserve check names/source links; chunk on Deep otherwise (`matt-free` in free-only mode).
 
-## Running as an Orca worker
+## Running as an hc worker
 
-When the prompt names an Orca task and dispatch id (an explicit Orca dispatch; matt-auto's step 10 normally runs in-session), execute the workflow as usual with `ROUTED_EXECUTION=1`, and add the Orca lifecycle: ask blocking questions with `orca orchestration ask`, send material decisions as `escalation` messages, and finish exactly once with `orca orchestration send --type worker_done --task-id <task_id> --dispatch-id <dispatch_id> --outcome succeeded|failed` whose body carries the merge-ready ledger tally and the stop condition. A stop that is not merge-ready is `--outcome failed` with the unmet ids; never report it only in prose. The coordinator re-verifies its own ship ledger after your report.
+When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto's step 10 normally runs in-session), execute the workflow as usual with `ROUTED_EXECUTION=1`, and add the hc lifecycle: ask blocking questions with `hc send <coordinator> "QUESTION: …"` and end the turn, send material decisions as `ESCALATION: …` the same way, and finish exactly once by writing the result file (`outcome: succeeded|failed`, the merge-ready ledger tally and the stop condition) and sending `hc send <coordinator> "DONE|FAILED: <result_path>"`. A stop that is not merge-ready is `outcome: failed` with the unmet ids; never report it only in prose. The coordinator re-verifies its own ship ledger after your report.
 
 ## Workflow
 

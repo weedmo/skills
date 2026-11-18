@@ -44,9 +44,9 @@ const PLATFORMS = {
     dir: (home) => path.join(home, ".antigravity", "skills"),
     note: "no native skill discovery confirmed - reference the skill files yourself; the loop plugins install only the shared PR skills here (pr-babysit, resolving-merge-conflicts).",
   },
-  orca: {
+  agents: {
     dir: (home) => path.join(home, ".agents", "skills"),
-    note: "universal agent-skills directory; Orca exposes these skills to every agent it drives. Orca also auto-discovers plugins installed via Claude (/plugin install) and Codex (codex plugin add) - skip this platform if you use those to avoid duplicate skills.",
+    note: "universal agent-skills directory read by tools that follow the ~/.agents/skills convention - skip this platform if you installed the plugins natively via Claude (/plugin install) or Codex (codex plugin add) to avoid duplicate skills.",
   },
 };
 
@@ -62,7 +62,7 @@ const PLUGINS = {
   },
   // Loop plugins ship two roots: plugins/<name>-claude (Claude Code edition,
   // built on Workflow / Agent / Artifact) and plugins/<name>-codex (Codex,
-  // OpenCode, gemini-cli, Orca edition). The platform picks the root.
+  // OpenCode, gemini-cli, agents edition). The platform picks the root.
   // restrictSkills: per-platform allow-list. An empty list skips the plugin on
   // that platform; an absent key leaves the skillPlatforms filter unchanged.
   "matt-loop": {

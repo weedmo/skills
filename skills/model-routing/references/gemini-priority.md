@@ -36,8 +36,8 @@ tokens. Maximum allowance is not a promise of exact token consumption. Verify
 task subagents separately: a CLI's main-model flag may not override them.
 
 For Antigravity, check installed CLI help and use explicit `--model`, `--effort`
-and structured output; retain the conversation ID and usage. Use an authorized
-Orca terminal when the enclosing workflow requires one, following `$orca-cli`.
+and structured output; retain the conversation ID and usage. Use a visible
+`hc` terminal when the enclosing workflow requires one, following `hc --skill`.
 Do not change permissions, purchase credits, enable overages, or move to another
 billing account/API key to continue using Gemini.
 

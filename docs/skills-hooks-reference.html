@@ -232,11 +232,11 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">loop-report</td><td><span class="tag blue">진행 페이지</span></td>
-      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 <code>view.html</code> + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: Orca artifact 링크 → Orca 내장 브라우저 탭 → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
+      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 <code>view.html</code> + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
     <tr><td class="name">model-routing</td><td><span class="tag blue">라우팅</span></td>
-      <td>Fast / Default / Deep / Max 티어 표 하나 — Codex <code>spawn_agent</code>, Claude Code agent, OpenCode, Orca <code>worker-start</code> 플래그별 정확한 model/effort 쌍, 디스패치 규칙, 에스컬레이션 사다리. 각 루프는 자기 역할을 이 티어에 매핑만 한다.</td></tr>
+      <td>Fast / Default / Deep / Max 티어 표 하나 — Codex <code>spawn_agent</code>, Claude Code agent, OpenCode, hc 에이전트 명령별 정확한 model/effort 쌍, 디스패치 규칙, 에스컬레이션 사다리. 각 루프는 자기 역할을 이 티어에 매핑만 한다.</td></tr>
     <tr><td class="name">loop-gates</td><td><span class="tag blue">완료 게이트</span></td>
-      <td>루프가 unlazy 스킬(Leonxlnx/unlazy, 벤더링하지 않고 npx로 설치)을 쓰는 규약 — 작업 단위별 GATES.md, 코디네이터가 직접 <code>--reverify</code>, 재시도 2회 후 핸드오프, Orca 오케스트레이션과의 경계.</td></tr>
+      <td>루프가 unlazy 스킬(Leonxlnx/unlazy, 벤더링하지 않고 npx로 설치)을 쓰는 규약 — 작업 단위별 GATES.md, 코디네이터가 직접 <code>--reverify</code>, 재시도 2회 후 핸드오프, hc 워커와의 경계.</td></tr>
   </table>
   </div>
 
@@ -256,7 +256,7 @@
     <tr><td class="name">setup</td><td><span class="tag orange">유지관리</span></td>
       <td>Claude Code 전용. 터미널 UI + 기본 설정만 담당 — statusLine HUD 설치, 커스텀 훅(language-rule, auto-update) 등록. 스킬 설치는 하지 않으며 멱등이라 반복 실행해도 안전.</td></tr>
     <tr><td class="name">design-map</td><td><span class="tag orange">설계</span></td>
-      <td>Claude Code·Codex 공용. Claude는 Artifact, Codex는 Orca 링크·탭 또는 로컬 HTML로 설계 페이지를 유지한다. 확정된 Codex direct spec은 deep이면 Astra, 그 외에는 Gemini(Antigravity)가 구현하며 Gemini 인증 토큰이 없거나 토큰 할당량이 소진됐을 때만 Grok으로 대체하고 Sol이 독립 리뷰한다. Antigravity는 조사·문서·기계적 보조 작업에 사용한다.</td></tr>
+      <td>Claude Code·Codex 공용. Claude는 Artifact, Codex는 로컬 HTML로 설계 페이지를 유지한다. 확정된 Codex direct spec은 deep이면 Astra, 그 외에는 Gemini(Antigravity)가 구현하며 Gemini 인증 토큰이 없거나 토큰 할당량이 소진됐을 때만 Grok으로 대체하고 Sol이 독립 리뷰한다. Antigravity는 조사·문서·기계적 보조 작업에 사용한다.</td></tr>
   </table>
   </div>
 
@@ -266,7 +266,7 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">matt-auto</td><td><span class="tag brown">Codex</span></td>
-      <td>Matt Pocock 메인 플로우(grilling 인터뷰 → spec → 티켓 → 티켓별 구현)를 처음부터 끝까지 지휘. 결정 위임자가 일상 질문에 답하고 인터뷰 게이트 하나만 사람이 승인. 모델은 model-routing 티어로 자동 라우팅, 결정 그래프와 티켓 보드는 interview-report → loop-report로 발행, 병렬 웨이브만 Orca 워커. <code>--spec &lt;path&gt;</code>로 확정된 design-map spec을 받으면 그 결정은 읽기 전용 design 단계가 되고 인터뷰는 열린 질문만 묻는다.</td></tr>
+      <td>Matt Pocock 메인 플로우(grilling 인터뷰 → spec → 티켓 → 티켓별 구현)를 처음부터 끝까지 지휘. 결정 위임자가 일상 질문에 답하고 인터뷰 게이트 하나만 사람이 승인. 모델은 model-routing 티어로 자동 라우팅, 결정 그래프와 티켓 보드는 interview-report → loop-report로 발행, 병렬 티켓은 hc 워커. <code>--spec &lt;path&gt;</code>로 확정된 design-map spec을 받으면 그 결정은 읽기 전용 design 단계가 되고 인터뷰는 열린 질문만 묻는다.</td></tr>
     <tr><td class="name">interview-report</td><td><span class="tag brown">보고</span></td>
       <td>matt-auto의 결정 그래프 뷰(<code>assets/view.html</code> + <code>validate.py</code>) — 스테이지, 편집 가능한 결정 노드와 <code>&lt;slug&gt;.edits.json</code> 왕복, 티켓 웨이브, 리뷰·PR 레인. 페이지 조립과 전달은 loop-report.</td></tr>
     <tr><td class="name">pr-babysit</td><td><span class="tag brown">PR</span></td>

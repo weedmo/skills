@@ -144,7 +144,7 @@ contract. The view's own keys:
   - `gates` counts the ticket's verification commands: `total` the commands the ticket names,
     `met` how many passed on the coordinator's own last run. Omit when the ticket names none.
   - **Who does the work shows on the node**: `route` is the routed agent; `worker` the model and
-    effort it resolved to plus, for an Orca worker, `dispatchId` and `worktree`. Fill both — a
+    effort it resolved to plus, for an hc worker, `dispatchId` (its terminal name) and `worktree`. Fill both — a
     route alone half-answers "어떤 티켓을 어떤 서브에이전트가 어떤 모델로".
 
 - **`plan` — how the run intends to execute the tickets**, an ordered wave graph. Fill it right
