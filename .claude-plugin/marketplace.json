@@ -41,7 +41,7 @@
     {
       "name": "auto-loop",
       "source": "./plugins/auto-loop-claude",
-      "description": "Autonomous loop, Claude Code edition - autocode (hypothesis-driven parallel code improvement) with an Artifact experiment board; kept changes end as one PR. Requires weed-harness 5.0+",
+      "description": "Autonomous loop, Claude Code edition - autocode (hypothesis-driven parallel code improvement) with an Artifact experiment board; kept changes end as one PR. Requires weed-harness 6.0+",
       "version": "5.1.0",
       "author": {
         "name": "weedmo"

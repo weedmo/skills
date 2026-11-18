@@ -8,9 +8,8 @@ argument-hint: "<X.Y.Z | patch | minor | major>"
 You are performing an automated release of the weed-harness plugin.
 The version argument is: `$ARGUMENTS`
 
-`REPO` below is the harness repo root — the checkout holding `.claude-plugin/`
-(`/home/weed/orca/skills` on this machine). It is **not** `~/.claude`, which
-lives inside an unrelated checkout.
+`REPO` below is the harness repo root — the checkout holding `.claude-plugin/`.
+It is **not** `~/.claude`, which lives inside an unrelated checkout.
 
 ## Steps
 

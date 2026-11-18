@@ -18,9 +18,9 @@ skill are referenced, not vendored: the installer ensures unlazy with
 `npx skills add Leonxlnx/unlazy -g`, and the `auto-update.sh` SessionStart hook
 keeps it, graft, superpowers, and the three plugins up to date once present.
 
-## Architecture — weed-harness 5.4.2
+## Architecture — weed-harness 7.1.0
 
-Snapshot: [`main @ e6db271`](https://github.com/weedmo/skills/tree/e6db271).
+Snapshot: [`main @ d01da8c`](https://github.com/weedmo/skills/tree/d01da8c).
 The diagram and counts below describe that revision; they are not live status indicators.
 
 [![weed-harness architecture: two editions per loop share one view, rendered by the common runtime](docs/architecture.svg)](docs/architecture.svg)
@@ -119,17 +119,18 @@ that CI workflow.**
 
 | Skill / read chain | Words | Cap | Remaining |
 |--------------------|------:|----:|----------:|
-| `model-routing` | 679 | 700 | 21 |
-| `loop-gates` | 693 | 700 | 7 |
-| Codex `matt-auto` | 3,503 | 3,800 | 297 |
-| Codex `autocode` | 4,234 | 4,250 | 16 |
-| Claude `matt-auto` | 3,569 | 4,200 | 631 |
+| `model-routing` | 680 | 700 | 20 |
+| `loop-gates` | 697 | 700 | 3 |
+| Codex `matt-auto` | 2,829 | 3,800 | 971 |
+| Codex `autocode` | 4,182 | 4,250 | 68 |
+| Claude `matt-auto` | 3,351 | 4,200 | 849 |
 | Claude `pr-babysit` | 1,018 | 1,100 | 82 |
-| Claude `autocode` | 4,084 | 4,200 | 116 |
-| Codex matt-auto read chain | 8,387 | 8,700 | 313 |
+| Claude `autocode` | 4,166 | 4,200 | 34 |
+| Codex matt-auto read chain | 8,396 | 8,700 | 304 |
 
 Counts come from [`bin/check-words.mjs`](bin/check-words.mjs), using
-whitespace-separated words. The chain includes Codex `matt-auto`,
+whitespace-separated words. The chain includes Codex `matt-auto`, its
+[`execution-core.md`](plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md),
 `interview-report`, `loop-report`, `model-routing`, and `loop-gates`.
 Keep additions within the applicable budgets; splitting design from execution
 reduces the execution read chain.
@@ -239,10 +240,10 @@ workflow guidance.
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
 | `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
-| `model-routing` | 679 | 700 | 21 |
+| `model-routing` | Codex · OpenCode · hc | Cost/time-efficient model and effort pairs, Astra question answering, independent review, dispatch, and escalation. Reference skill, never invoked standalone |
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
-| `loop-gates` | 693 | 700 | 7 |
+| `loop-gates` | all | How the delegated loops (pr-babysit, autocode, matt-auto's ship step) use the upstream unlazy skill so "done" is a measured verdict: a runnable GATES.md ledger per unit, coordinator-approved, re-verified with gate-check.mjs, a retry bound, and hc boundaries. Reference skill, never invoked standalone |
 | `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: the writer's other model family reviews (models from `model-routing`'s `gate-route.mjs` rule table), the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
 | `qa-gate` | all | Behavioural QA node for matt-auto: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
@@ -278,7 +279,7 @@ returns to the user through matt-design; it cannot be settled by a delegate.
 | `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (the writer's other family reviews; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
 | `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
-| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `code-review`, `setup-matt-pocock-skills` |
+| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
 
 The vendored skills come from
 [mattpocock/skills](https://github.com/mattpocock/skills) and are auto-synced:
