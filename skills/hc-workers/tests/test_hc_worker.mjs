@@ -44,11 +44,11 @@ test("templates: one template per role file, named by family", () => {
   assert.equal(r.code, 0);
   assert.deepEqual(r.out.written, ["matt-deep-claude", "matt-fast-codex"]);
   const claude = fs.readFileSync(path.join(s.env.HC_TEMPLATES_DIR, "matt-deep-claude.md"), "utf8");
-  assert.match(claude, /^command: claude --model fable --effort high --permission-mode acceptEdits$/m);
+  assert.match(claude, /^command: claude --model fable --effort high --dangerously-skip-permissions$/m);
   assert.match(claude, /^description: Hard: tickets$/m);
   assert.match(claude, /Be careful\./);
   const codex = fs.readFileSync(path.join(s.env.HC_TEMPLATES_DIR, "matt-fast-codex.md"), "utf8");
-  assert.match(codex, /^command: codex -m gpt-6-luna -c model_reasoning_effort=low -c service_tier=default -s workspace-write -a on-request$/m);
+  assert.match(codex, /^command: codex -m gpt-6-luna -c model_reasoning_effort=low -c service_tier=default --dangerously-bypass-approvals-and-sandbox$/m);
   assert.match(codex, /Be quick\./);
 });
 

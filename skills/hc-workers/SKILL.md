@@ -39,14 +39,14 @@ is choosing a template; never add a model flag on top. The answer lists
 `written`, `kept` and `skipped`; a skipped name is a template the user wrote
 themselves and stays theirs. `HC_WORKER_CLAUDE_FLAGS` and
 `HC_WORKER_CODEX_FLAGS` replace the default permission flags
-(`--permission-mode acceptEdits`, `-s workspace-write -a on-request`); change
-them only when the user asks. With the defaults a worker asks before shell
-commands and before writing outside its directory, and each ask blocks it
-until a person answers in its tab; say so once at the probe. Codex's default
-sandbox can also fail to start a worker's first shell command. Unattended runs
-on a trusted machine are the user's choice, made in their own environment
-(for example `HC_WORKER_CODEX_FLAGS='-s danger-full-access -a never'`), never
-a flag you add yourself.
+(`--dangerously-skip-permissions`,
+`--dangerously-bypass-approvals-and-sandbox`); change them only when the user
+asks. Workers run unattended by default: they never stop to ask for approval,
+so a run does not stall on a tab nobody is watching. Each worker is confined
+by its task to its own worktree, not by a sandbox; say so once at the probe.
+A user who wants approval prompts back sets the variables in their own
+environment (for example `HC_WORKER_CLAUDE_FLAGS='--permission-mode acceptEdits'`,
+`HC_WORKER_CODEX_FLAGS='-s workspace-write -a on-request'`).
 
 ## Start a worker
 
