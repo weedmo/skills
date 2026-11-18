@@ -42,7 +42,11 @@ themselves and stays theirs. `HC_WORKER_CLAUDE_FLAGS` and
 (`--permission-mode acceptEdits`, `-s workspace-write -a on-request`); change
 them only when the user asks. With the defaults a worker asks before shell
 commands and before writing outside its directory, and each ask blocks it
-until a person answers in its tab; say so once at the probe.
+until a person answers in its tab; say so once at the probe. Codex's default
+sandbox can also fail to start a worker's first shell command. Unattended runs
+on a trusted machine are the user's choice, made in their own environment
+(for example `HC_WORKER_CODEX_FLAGS='-s danger-full-access -a never'`), never
+a flag you add yourself.
 
 ## Start a worker
 
@@ -61,8 +65,11 @@ Outside a Herdr window the workers run unshown. It prints hc's answer plus
 
 - `first_message.sent: false` means the task was **not** delivered. `hc read`
   the terminal; a trust dialog for the worktree you just created is yours to
-  accept (`hc keys <t> down enter`), then `hc send <t>` the task. Any other
-  dialog goes to the user.
+  accept. Pick the trust option the screen shows, never a fixed key sequence:
+  the selected entry differs by CLI (Claude Code starts on "No, exit", so
+  `hc keys <t> down enter`; Codex starts on "Trust and continue", so
+  `hc keys <t> enter`). Then `hc send <t>` the task. Any other dialog goes to
+  the user.
 - The task ends with the lifecycle lines below, with `<coordinator>` and
   `<result path>` filled in. The result path is outside the worktree, next to
   the state file.
