@@ -98,8 +98,8 @@ They are different axes, not synonyms.
 ### Infrastructure
 - **using-git-worktrees** (superpowers) — isolated workspace before feature work;
   prerequisite for parallel/subagent execution
-- **worktree-spawn** (weed-harness) — deterministic PORT_BASE for parallel
-  multi-port dev servers
+- **worktree-spawn** (`commands/worktree-spawn.md`, `scripts/worktree-spawn.sh`) — deterministic PORT_BASE for parallel
+  multi-port dev servers; a command/script, not a skill
 
 ### Architecture / knowledge
 - **graft** (standalone, `npm i -g @nanonets/graft`; MCP server registered by
