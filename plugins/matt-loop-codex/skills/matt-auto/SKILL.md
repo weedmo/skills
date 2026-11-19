@@ -83,7 +83,7 @@ Tiers, pairs, dispatch, and the ladder live in **`$model-routing`**. matt-loop's
 | matt role | Tier | Claude Code agent | Use |
 |---|---|---|---|
 | `matt-fast` | Fast | `matt-loop:matt-default` | Trivial edits |
-| `matt-default` | Default override: Luna max | `matt-loop:matt-default` | Small fixes, tests, mechanical conflicts |
+| `matt-default` | Default override: Terra medium | `matt-loop:matt-default` | Small fixes, tests, mechanical conflicts |
 | `matt-batch` / `matt-standard` | Background / Standard | `matt-loop:matt-default` | Waiting acceptable / moderate time-sensitive work |
 | `matt-deep` | Deep | `matt-loop:matt-deep` | Complex implementation and semantic conflicts |
 | `matt-answer` / `matt-answer-deep` | Answer / hard answer | `matt-loop:matt-deep` | Questions and decisions only |

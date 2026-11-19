@@ -57,7 +57,7 @@ probe. Missing/unusable routes follow the shared unavailable-route rule.
 On exhaustion, stop the old worker and confirm it no longer owns writes. Preserve
 branch/worktree, scope, prompt, decisions, diff/commits, evidence, completed work,
 checks and remaining steps. Launch a **Codex** worker on the same authorized
-scope using the sufficient shared tier; simple work stays Luna, complex work
+scope using the sufficient shared tier; simple work stays Luna/Terra, complex work
 Astra. Large-context fallback chunks evidence on Codex and synthesizes on Deep.
 Verify after continuation; do not restart completed work or overlap writers.
 

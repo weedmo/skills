@@ -38,7 +38,7 @@ Missing user intent/authorization is a user question, not a reasoning escalation
 
 Both roles return `ESCALATE: <unresolved user decision>` when authority or intent
 is missing; additional reasoning never supplies user approval. Execute an
-approved simple change on the appropriate Luna route even when Astra discussed it.
+approved simple change on the appropriate Luna/Terra route even when Astra discussed it.
 
 On OpenCode use the same named answer roles when the pairs are supported.
 Explicit free-only mode keeps `matt-free`; Claude Code keeps its native Deep
