@@ -59,8 +59,8 @@ max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; d
   loads the role files with `service_tier`, `model_verbosity`, and `xhigh`
   without complaint. That historical check predates the current pair policy;
   tier and verbosity are not visible in session logs — check the bill.
-- Execution: trivial = Luna low; small fixes/tests/mechanical conflicts = Luna
-  max; bounded background = Luna max; moderate time-sensitive = Sol low;
+- Execution: trivial = Luna low; small fixes/tests/mechanical conflicts = Terra
+  medium; bounded background = Terra medium; moderate time-sensitive = Sol low;
   complex = Astra low; escalated = Astra xhigh; review = `review-gate`'s rule table (Sol medium, Sol high on risk). Never use Astra merely
   because a simple edit blocks the user.
 - Questions: `matt-answer` (Astra low) for ordinary explanations/local decisions;

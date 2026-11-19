@@ -2,7 +2,7 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "claude-fable-5-1[1m]",
+  "model": "claude-fable-5-2[1m]",
   "skillOverrides": {
     "browse": "off",
     "scrape": "off",
