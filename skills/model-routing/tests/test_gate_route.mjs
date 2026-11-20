@@ -130,8 +130,8 @@ test('one CLI: the loop still runs with a same-family fresh-context reviewer', (
   assert.equal(g.cross_model, true);
 });
 
-test('at or over 90%, unset budget, or missing CLI: grok drops out and the rest is unchanged', () => {
-  for (const g of [over, { ok: false, reason: 'weekly token budget unset (GROK_WEEKLY_TOKEN_BUDGET)' }]) {
+test('at or over 90%, paused after a usage limit, or missing CLI: grok drops out and the rest is unchanged', () => {
+  for (const g of [over, { ok: false, reason: 'grok usage limit hit 2026-11-20T00:00:00Z; paused until 2026-11-21T00:00:00Z' }]) {
     for (const w of ['claude', 'codex', 'mixed']) {
       const r = review(w, all, { grok: g });
       assert.deepEqual(models(r), models(route({ role: 'review', writer: w, files: ['src/app.ts'], available: both }, table)), w);

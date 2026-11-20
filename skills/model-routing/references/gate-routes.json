@@ -56,14 +56,15 @@
     }
   },
   "grok_priority": {
-    "comment": "Grok goes first for these roles while its weekly token use is under cap_pct. Budget: env GROK_WEEKLY_TOKEN_BUDGET, else weekly_token_budget here; unset means Grok is skipped (fail closed).",
+    "comment": "Grok goes first for these roles while its weekly token use is under cap_pct. Budget: env GROK_WEEKLY_TOKEN_BUDGET, else weekly_token_budget here, else the budget learned at Grok's last usage-limit error (grok.mjs state). With none yet Grok stays on; a usage-limit error pauses it for pause_hours_after_limit.",
     "roles": [
       "review",
       "qa-triage"
     ],
     "cap_pct": 90,
     "weekly_token_budget": null,
-    "window_days": 7
+    "window_days": 7,
+    "pause_hours_after_limit": 24
   },
   "security_globs": [
     "**/auth/**",
