@@ -1,6 +1,6 @@
 ---
 name: matt-auto
-description: "Execute a confirmed local spec: create tickets, implement, verify, and independently review with bounded fix cycles. Use --spec PATH; design and user iteration belong to matt-design, visualization to design-map. Autonomous by default; --confirm requests a ticket/execution-plan gate. --dev / --main / --pr BASE enable PR shipping; --parallel N caps concurrency. --on MACHINE selects hc placement; --free uses free-only OpenCode routing."
+description: "Execute a confirmed local spec: create tickets, implement, verify, and independently review with bounded fix cycles. Use --spec PATH; design and user iteration belong to matt-design, visualization to design-map. --core / --full pick the execution mode (otherwise a rule table). Autonomous by default; --confirm requests a ticket/execution-plan gate. --dev / --main / --pr BASE enable PR shipping; --parallel N caps concurrency. --on MACHINE selects hc placement; --free uses free-only OpenCode routing."
 disable-model-invocation: true
 ---
 
@@ -30,6 +30,24 @@ requests execution. Confirming a design in `$matt-design` alone does not start i
   verification, isolated workers, retry bounds and measured reports below.
 - Read the [execution core](references/execution-core.md) before any side effect: frontier dispatch, worker contract, coordinator merge, QA/review with fix workers, PR body, retro candidates, Change control, red flags.
 - Shared runtime: `$model-routing`, `$interview-report`, `$loop-report`, and `$loop-gates`. Missing routing stops dispatch; unavailable page delivery falls back to the local report; unavailable gates means report checks directly, never claim ledger verification.
+## Modes
+
+In step 1, before its tracker setup, pick the mode by the first matching row and log it with its reason:
+
+| # | Condition | Mode |
+|---|---|---|
+| 1 | `--core` or `--full` | that flag |
+| 2 | spec frontmatter `mode:` | that value |
+| 3 | an implementation step tagged `[deep]` | full |
+| 4 | `--parallel` given, or `followup:` present | full |
+| 5 | two or more independently verified deliverables (your call; log the list) | full |
+| 6 | the spec changes an external interface, data meaning, or migrates data | full |
+| 7 | otherwise | core |
+
+`full` is the pipeline below. `core` follows [core mode](references/core-mode.md):
+one ticket, no delegate or report page, the same verification and `$review-gate`
+(one cycle), automatic promotion to full when the work outgrows it.
+
 ## Pipeline
 
 1. **Precondition** — validate and pin the confirmed spec before any side effects; record the full baseline commit (`git rev-parse HEAD`). Recheck the spec hash before dispatch and at completion; a changed spec pauses affected work until its new revision is confirmed and explicitly adopted. Missing `docs/agents/issue-tracker.md` → `$setup-matt-pocock-skills` for the execution tracker only. Apply pending report edits under Change control. Prepare the feature branch before workers start in ship mode.

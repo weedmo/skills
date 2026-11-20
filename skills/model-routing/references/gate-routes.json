@@ -39,7 +39,31 @@
         "effort": "high",
         "agent": "matt-reviewer"
       }
+    },
+    "grok": {
+      "cli": "grok",
+      "qa_triage": {
+        "model": "grok-4.7-build-fast"
+      },
+      "review": {
+        "model": "grok-4.7",
+        "effort": "medium"
+      },
+      "review_up": {
+        "model": "grok-4.7",
+        "effort": "high"
+      }
     }
+  },
+  "grok_priority": {
+    "comment": "Grok goes first for these roles while its weekly token use is under cap_pct. Budget: env GROK_WEEKLY_TOKEN_BUDGET, else weekly_token_budget here; unset means Grok is skipped (fail closed).",
+    "roles": [
+      "review",
+      "qa-triage"
+    ],
+    "cap_pct": 90,
+    "weekly_token_budget": null,
+    "window_days": 7
   },
   "security_globs": [
     "**/auth/**",

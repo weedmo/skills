@@ -129,8 +129,11 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
   a verdict that counts only for the reviewed HEAD
 - **qa-gate** — behavioural QA node: acceptance criteria as re-runnable scenario scripts against
   the running app, evidence under `.qa/`, judged criteria as manual gates
+- **pr-visual** — As-Is / To-Be before every loop PR: web changes filmed on base and HEAD and shown
+  before the PR (Codex via `deliver.py`, else a Claude Artifact, else locally), pipeline changes drawn as
+  mermaid diagram pairs in the PR body
 - **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
-  a page only on request; Codex delivers it as local HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (Grok only when Gemini credentials are absent or token quota is exhausted), independent
+  a page only on request; Codex delivers it as local HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (on Gemini quota exhaustion a Grok worker while Grok's weekly use is under 90%, else Codex), independent
   Sol review, and optional Antigravity support.
 - **rust-port** — every platform: oracle-first porting of any codebase to Rust (profile →
   frozen differential gates → boundary design → stepwise port → equivalence + scaling benchmarks),
@@ -140,7 +143,8 @@ On top of it, two loops with different graphs:
 
 - **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit` and `resolving-merge-conflicts`): **matt-auto** conducts Matt Pocock's main flow
   (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
-  starts from a confirmed design-map spec whose step tags fix the ticket tiers), publishing
+  starts from a confirmed design-map spec whose step tags fix the ticket tiers; a rule table picks
+  `full` or the one-ticket `core` mode, see `matt-auto/references/core-mode.md`), publishing
   its decision graph through loop-report and running independent tickets as parallel hc
   workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
   resolves an active merge/rebase on the Deep tier

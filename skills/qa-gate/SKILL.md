@@ -23,7 +23,7 @@ with `.git/info/exclude`).
    write `plan.json` with `"surface": "library"`, and stop: command verification covers it.
 2. **Route** — `gate-route.mjs --role qa-author --writer <w>` for writing scenarios and
    `--role qa-triage` for reading failures (`$model-routing`). Use the returned model;
-   QA re-runs need none.
+   QA re-runs need none. A `grok` triage route launches as `$model-routing`'s Grok priority says.
 3. **Plan and write** — the QA author (fresh context, the routed model) writes
    `.qa/<unit>/plan.json` ([schema](schemas/plan.schema.json)) with at least one scenario per
    acceptance criterion, and one script per scripted scenario under `scenarios/` following

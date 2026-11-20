@@ -74,7 +74,10 @@ function runScript(file, cwd, env, timeoutS) {
   });
 }
 
-export async function runPlan(qaDir, root = process.cwd()) {
+// opts (pr-visual): appRoot starts the app from another tree (the base worktree),
+// evidenceDir keeps that run's evidence apart, env adds variables such as QA_VIDEO_DIR
+// (a function of the scenario id so each scenario records into its own folder).
+export async function runPlan(qaDir, root = process.cwd(), opts = {}) {
   const plan = JSON.parse(readFileSync(join(qaDir, 'plan.json'), 'utf8'));
   validatePlan(plan);
   const result = { surface: plan.surface, ran_at: new Date().toISOString(), scenarios: [], judged: [] };
@@ -83,18 +86,19 @@ export async function runPlan(qaDir, root = process.cwd()) {
     result.line = `qa-gate: PASS (N/A — ${plan.na_reason})`;
     return result;
   }
-  mkdirSync(join(qaDir, 'evidence'), { recursive: true });
+  const evidenceRoot = opts.evidenceDir ?? join(qaDir, 'evidence');
+  mkdirSync(evidenceRoot, { recursive: true });
   const baseUrl = plan.app?.base_url ?? (plan.app?.ready?.url ? new URL(plan.app.ready.url).origin : null);
   let app = null;
   try {
-    if (plan.app) app = await startApp(plan.app, root, join(qaDir, 'evidence', 'app.log'));
+    if (plan.app) app = await startApp(plan.app, opts.appRoot ?? root, join(evidenceRoot, 'app.log'));
     for (const s of plan.scenarios) {
       if (s.kind === 'judged') { result.judged.push({ id: s.id, acceptance: s.acceptance }); continue; }
-      const evidence = resolve(qaDir, 'evidence', s.id);
+      const evidence = resolve(evidenceRoot, s.id);
       mkdirSync(evidence, { recursive: true });
       const script = resolve(qaDir, s.script);
       if (!existsSync(script)) { result.scenarios.push({ id: s.id, acceptance: s.acceptance, exit: 127, output: `missing ${s.script}` }); continue; }
-      const env = { ...process.env, QA_EVIDENCE_DIR: evidence, ...(baseUrl ? { QA_BASE_URL: baseUrl } : {}) };
+      const env = { ...process.env, QA_EVIDENCE_DIR: evidence, ...(baseUrl ? { QA_BASE_URL: baseUrl } : {}), ...(opts.env?.(s.id) ?? {}) };
       result.scenarios.push({ id: s.id, acceptance: s.acceptance, ...(await runScript(script, root, env, s.timeout_s ?? 120)) });
     }
   } catch (e) {

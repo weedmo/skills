@@ -119,3 +119,22 @@ test('CLI: merge is append-only; verdict passes only for the reviewed HEAD', () 
     assert.equal(run(dir, 'verdict.mjs', rd).status, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('cross-model by reviewer family: grok on mixed work, both families on mixed, never the writer alone', () => {
+  const grok = { family: 'grok', model: 'grok-4.7', effort: 'medium' };
+  const cases = [
+    ['mixed', [grok], true],
+    ['mixed', [codex, claude], true],
+    ['mixed', [codex], false],
+    ['grok', [grok], false],
+    ['grok', [claude], true],
+    ['claude', [grok, codex], true],
+  ];
+  for (const [writer, reviewers, expect] of cases) {
+    const { dir, rd } = repo();
+    try {
+      put(rd, 'round-1.json', mergeRound(1, reviewers.map(reviewer => ({ reviewer, findings: [] }))));
+      assert.equal(decide({ dir: rd, writer, sha: 's' }).cross_model, expect, `${writer} ← ${reviewers.map(r => r.family)}`);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  }
+});

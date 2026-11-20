@@ -95,7 +95,10 @@ export function decide({ dir, writer, maxCycles = 2, sha }) {
   else { status = 'CONTINUE'; reasons.push(`${open.length} blocker/major open; next is fix cycle ${rounds.length} of ${maxCycles}`); }
 
   const families = [...new Set(rounds.flatMap(r => r.reviewers.map(x => x.family)))];
-  const cross = writer === 'claude' || writer === 'codex' ? families.some(f => f !== writer) : families.length > 1;
+  // Families that wrote the code; a reviewer outside them is cross-model.
+  const wrote = writer === 'mixed' ? ['claude', 'codex'] : ['claude', 'codex', 'grok'].includes(writer) ? [writer] : [];
+  // Mixed work reviewed by both of its families still counts: each reviews the other's part.
+  const cross = families.some(f => !wrote.includes(f)) || (writer !== 'claude' && writer !== 'codex' && writer !== 'grok' && families.length > 1);
   return { status, reviewed_sha: sha, rounds: rounds.length, max_cycles: maxCycles, writer,
     cross_model: cross, reviewers: latest.reviewers, open, minor, reasons,
     counts: Object.fromEntries(SEVERITIES.map(s => [s, latest.findings.filter(f => f.severity === s).length])),
@@ -105,7 +108,7 @@ export function decide({ dir, writer, maxCycles = 2, sha }) {
 const USAGE = `usage:
   rounds.mjs merge <dir> <n> <reviewer-output.json>...   write <dir>/round-<n>.json
       each output: {"reviewer": {"family","model","effort"}, "findings": [...]}
-  rounds.mjs decide <dir> --writer claude|codex|mixed|unknown [--max-cycles 2]
+  rounds.mjs decide <dir> --writer claude|codex|grok|mixed|unknown [--max-cycles 2]
       write <dir>/verdict.json for HEAD and print the status line`;
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

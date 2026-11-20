@@ -119,14 +119,14 @@ that CI workflow.**
 
 | Skill / read chain | Words | Cap | Remaining |
 |--------------------|------:|----:|----------:|
-| `model-routing` | 680 | 700 | 20 |
+| `model-routing` | 681 | 700 | 19 |
 | `loop-gates` | 697 | 700 | 3 |
-| Codex `matt-auto` | 2,829 | 3,800 | 971 |
-| Codex `autocode` | 4,182 | 4,250 | 68 |
-| Claude `matt-auto` | 3,351 | 4,200 | 849 |
+| Codex `matt-auto` | 2,986 | 3,800 | 814 |
+| Codex `autocode` | 4,184 | 4,250 | 66 |
+| Claude `matt-auto` | 3,508 | 4,200 | 692 |
 | Claude `pr-babysit` | 1,018 | 1,100 | 82 |
-| Claude `autocode` | 4,166 | 4,200 | 34 |
-| Codex matt-auto read chain | 8,396 | 8,700 | 304 |
+| Claude `autocode` | 4,168 | 4,200 | 32 |
+| Codex matt-auto read chain | 8,571 | 8,700 | 129 |
 
 Counts come from [`bin/check-words.mjs`](bin/check-words.mjs), using
 whitespace-separated words. The chain includes Codex `matt-auto`, its
@@ -244,8 +244,9 @@ workflow guidance.
 | `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
 | `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the delegated loops (pr-babysit, autocode, matt-auto's ship step) use the upstream unlazy skill so "done" is a measured verdict: a runnable GATES.md ledger per unit, coordinator-approved, re-verified with gate-check.mjs, a retry bound, and hc boundaries. Reference skill, never invoked standalone |
-| `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: the writer's other model family reviews (models from `model-routing`'s `gate-route.mjs` rule table), the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
+| `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: every installed model family other than the writer's reviews, Grok only while its weekly token use is under 90% (`model-routing/scripts/grok.mjs status`) (models from `model-routing`'s `gate-route.mjs` rule table), the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
 | `qa-gate` | all | Behavioural QA node for matt-auto: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
+| `pr-visual` | all | As-Is / To-Be before every loop PR: a web change is filmed on the base commit and on HEAD (qa-gate scenarios with `QA_VIDEO_DIR`) and shown side by side before the PR (Codex via `deliver.py` first, Claude Artifact second, local window last); a pipeline change gets As-Is / To-Be mermaid diagrams in the PR body. Nothing goes to GitHub |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
 | `rust-port` | all | Port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers |
@@ -269,14 +270,16 @@ visible hc workers. Both retain coordinator verification and independent review.
 
 Typical flow: `$matt-design` → iterate in chat (call `$design-map` when a page
 helps) → confirm the local spec → separately invoke `$matt-auto --spec <path>`.
+Small work: `$matt-design --brief` writes a short confirmed brief (목표 · 수용 기준 ·
+비목표) and matt-auto runs it in `core` mode.
 Confirming a design alone never starts implementation. Existing confirmed
 `design-map: 1` specs remain accepted. A design-changing implementation question
 returns to the user through matt-design; it cannot be settled by a delegate.
 
 | Skill | Description |
 |-------|-------------|
-| `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. |
-| `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (the writer's other family reviews; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
+| `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. `--brief` writes a three-section spec for small work. |
+| `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. Two modes from a rule table (`--core` / `--full` override): `core` is one ticket with no delegate or report page, keeping coordinator verification and one `review-gate` cycle, and promotes itself to `full` when the work outgrows it. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (every installed family other than the writer's reviews — one CLI falls back to same-family, Grok joins only while its weekly token use is under 90%; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
 | `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
 | vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
