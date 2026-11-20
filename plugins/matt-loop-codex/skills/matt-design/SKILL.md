@@ -1,6 +1,6 @@
 ---
 name: matt-design
-description: "Collaboratively design a feature or change using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; design-map renders the current design as an artifact."
+description: "Collaboratively design a feature or change using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; --brief writes a short confirmed spec for small work run in matt-auto core mode. design-map renders the current design as an artifact."
 ---
 
 # Matt Design
@@ -57,6 +57,16 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
    branches, commit, launch a terminal, implement, or ship merely because the
    design was confirmed. A separate explicit execution request starts the
    execution skill, including when the user gives it in this same session.
+
+## Brief mode (`--brief`)
+
+For small work bound for matt-auto `core`. Skip steps 2–4: read the request and
+the relevant code, then write a brief per
+[references/spec-contract.md](references/spec-contract.md) (`mode: core`, sections
+목표 · 수용 기준 · 비목표 · 확인) and ask for one confirmation. Investigate facts
+yourself; do not ask the user what the repo can answer. The moment a choice needs
+the user, stop the brief and continue at step 2 with what you have. Step 6 applies
+unchanged: confirmation never starts execution.
 
 ## Consolidated decision report
 

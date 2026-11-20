@@ -25,6 +25,8 @@ artifact: none
   and `forbidden`. The command is `$autocode init --spec <path>`; confirming
   this spec still does not launch that loop.
 - `artifact`: design-map's delivered page route, or `none`; no page is required.
+- `mode` (optional): `core` or `full`. It pins matt-auto's execution mode;
+  omitted, matt-auto selects one from its mode table.
 
 Required sections:
 
@@ -41,6 +43,19 @@ Required sections:
   where no command can decide the result. Deep covers invariants, concurrency,
   core interfaces and logic; default covers bounded implementation and mechanical work.
 - `## 확인`: the user's confirmation and which revision/content it covers.
+
+## Brief (`--brief`)
+
+A brief is a confirmed spec for small work that matt-auto runs in `core` mode.
+Same frontmatter with `mode: core`; the body has only these sections:
+
+- `## 목표`: what and why, three to five sentences.
+- `## 수용 기준`: numbered; each item names its verify command and expected result.
+- `## 비목표`: what stays untouched.
+- `## 확인`: the user's confirmation of this revision.
+
+A brief has no `## 결정`. When a choice needs the user (two or more real options),
+it is no longer a brief: continue with the full workflow and the sections above.
 
 Do not copy transient execution routes, terminal handles, or worker ids into the
 contract. `matt-auto` chooses execution details within the confirmed constraints.

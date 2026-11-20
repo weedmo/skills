@@ -5,11 +5,12 @@ import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { budgetStatus } from './grok.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const TABLE_PATH = join(here, '..', 'references', 'gate-routes.json');
 export const ROLES = ['qa-author', 'qa-rerun', 'qa-triage', 'review'];
-const WRITERS = ['claude', 'codex', 'mixed', 'unknown'];
+const WRITERS = ['claude', 'codex', 'grok', 'mixed', 'unknown'];
 
 export function loadTable(path = TABLE_PATH) {
   return JSON.parse(readFileSync(path, 'utf8'));
@@ -44,29 +45,48 @@ export function matchingFiles(files, globs) {
 
 const other = family => (family === 'claude' ? 'codex' : 'claude');
 
+// Grok goes first for table.grok_priority.roles while input.grok.ok (weekly use under
+// the cap, computed by grok.mjs). Otherwise Grok is invisible and the routes below are
+// exactly the pre-Grok ones.
+function grokFirst(input, table, available) {
+  const p = table.grok_priority;
+  if (!p || !p.roles.includes(input.role)) return { use: false };
+  const g = input.grok ?? { ok: false, reason: 'grok status not given' };
+  if (input.writer === 'grok') return { use: false, reason: 'grok skipped: grok wrote the code' };
+  if (!available.includes('grok')) return { use: false, reason: 'grok skipped: CLI unavailable' };
+  if (!g.ok) return { use: false, reason: `grok skipped: ${g.reason}` };
+  return { use: true, reason: `grok first: ${g.reason}` };
+}
+
 function pick(table, family, tier) {
   const row = table.families[family]?.[tier];
   if (!row) throw new Error(`no ${tier} route for ${family}`);
   return { family, tier, model: row.model, effort: row.effort ?? null, agent: row.agent ?? null };
 }
 
-// input: {role, writer, deep, files, triageConflict, available}
+// input: {role, writer, deep, files, triageConflict, available, grok: {ok, reason}}
 export function route(input, table = loadTable()) {
   const { role, writer = 'unknown', deep = false, files = [], triageConflict = false } = input;
   const available = input.available ?? Object.keys(table.families);
   if (!ROLES.includes(role)) throw new Error(`role must be one of ${ROLES.join(', ')}`);
   if (!WRITERS.includes(writer)) throw new Error(`writer must be one of ${WRITERS.join(', ')}`);
-  if (!available.length) throw new Error('no reviewer CLI available');
   const reasons = [];
+  const grok = grokFirst({ ...input, role, writer }, table, available);
+  if (grok.reason) reasons.push(grok.reason);
+  const rest = available.filter(f => f !== 'grok');
 
   if (role === 'qa-rerun') {
     return { role, reviewers: [], cross_model: null, escalated: false, reasons: ['scripted scenarios re-run without a model'] };
   }
 
+  if (grok.use && role === 'qa-triage') {
+    return { role, reviewers: [pick(table, 'grok', 'qa_triage')], cross_model: writer === 'claude' || writer === 'codex' ? true : null, escalated: false, reasons };
+  }
   if (role === 'qa-author' || role === 'qa-triage') {
+    if (!rest.length) throw new Error(`no ${role} route: grok has no ${role} tier and no other CLI is available`);
     const tier = role === 'qa-author' ? 'qa_author' : 'qa_triage';
     const want = writer === 'claude' || writer === 'codex' ? other(writer) : 'claude';
-    const family = available.includes(want) ? want : available[0];
+    const family = rest.includes(want) ? want : rest[0];
     reasons.push(family === want ? `${family}: independent of the writer` : `${want} unavailable, using ${family}`);
     return { role, reviewers: [pick(table, family, tier)], cross_model: writer === 'claude' || writer === 'codex' ? family !== writer : null, escalated: false, reasons };
   }
@@ -79,26 +99,34 @@ export function route(input, table = loadTable()) {
   const escalated = triggers.length > 0;
   reasons.push(...triggers);
 
-  const reviewers = [];
-  if (writer === 'mixed' || writer === 'unknown') {
-    reasons.push(`writer ${writer}: dual review, one reviewer per family`);
-    for (const f of ['codex', 'claude'].filter(f => available.includes(f))) reviewers.push(pick(table, f, escalated ? 'review_up' : 'review'));
-    return { role, reviewers, cross_model: reviewers.length > 1, escalated, reasons };
-  }
-  const cross = other(writer);
-  if (available.includes(cross)) {
-    reviewers.push(pick(table, cross, escalated ? 'review_up' : 'review'));
-    reasons.push(`writer ${writer}: ${cross} reviews`);
-    // D3: a risk trigger buys a second opinion from the writer's own family.
-    if (escalated && available.includes(writer)) {
-      reviewers.push(pick(table, writer, 'review'));
-      reasons.push('risk trigger: dual review adds a same-family reviewer');
+  // Every available family that did not write the code reviews (Grok listed first when
+  // its weekly use allows it), so one CLI gives a same-family fallback, two give a cross
+  // pair, three give two cross reviewers. A risk trigger moves them all up one tier and,
+  // when only one cross reviewer exists, adds a same-family base reviewer (D3 dual).
+  const wrote = writer === 'mixed' || writer === 'unknown' ? ['claude', 'codex'] : [writer];
+  const pool = grok.use ? ['grok', ...rest] : rest;
+  if (!pool.length) throw new Error('no reviewer CLI available');
+  const others = pool.filter(f => !wrote.includes(f));
+  const tier = escalated ? 'review_up' : 'review';
+  const reviewers = others.map(f => pick(table, f, tier));
+  if (others.length) {
+    reasons.push(`writer ${writer}: ${others.join(' + ')} review${others.length > 1 ? ' (every available other family)' : ''}`);
+    const same = wrote.find(f => rest.includes(f));
+    if (escalated && others.length === 1 && same) {
+      reviewers.push(pick(table, same, 'review'));
+      reasons.push(`risk trigger: dual review adds ${same}`);
     }
     return { role, reviewers, cross_model: true, escalated, reasons };
   }
-  const fallback = available.includes(writer) ? writer : available[0];
-  reviewers.push(pick(table, fallback, escalated ? 'review_up' : 'review'));
-  reasons.push(`${cross} CLI unavailable: same-family fresh-context reviewer`);
+  // Only the writer's own families are installed.
+  if (wrote.length > 1 && wrote.every(f => rest.includes(f))) {
+    reasons.push(`writer ${writer}: dual review, one reviewer per family`);
+    for (const f of ['codex', 'claude']) reviewers.push(pick(table, f, tier));
+    return { role, reviewers, cross_model: true, escalated, reasons };
+  }
+  const fallback = rest.includes(wrote[0]) ? wrote[0] : rest[0];
+  reviewers.push(pick(table, fallback, tier));
+  reasons.push(`no other family installed: same-family fresh-context reviewer (${fallback})`);
   return { role, reviewers, cross_model: false, escalated, reasons };
 }
 
@@ -126,6 +154,7 @@ function parseArgs(argv) {
     else if (k === '--files') a.files = v().split(',').filter(Boolean);
     else if (k === '--triage') a.triage = v();
     else if (k === '--available') a.available = v().split(',').filter(Boolean);
+    else if (k === '--no-grok') a.noGrok = true;
     else if (k === '--help' || k === '-h') a.help = true;
     else throw new Error(`unknown argument ${k}`);
   }
@@ -133,8 +162,9 @@ function parseArgs(argv) {
 }
 
 const USAGE = `usage: gate-route.mjs --role qa-author|qa-rerun|qa-triage|review --writer claude|codex|mixed|unknown
-         [--deep] [--base <ref> | --files a,b] [--triage <triage-n.json>] [--available claude,codex]
-Prints the route as JSON. Never calls the network.`;
+         [--deep] [--base <ref> | --files a,b] [--triage <triage-n.json>] [--available claude,codex,grok] [--no-grok]
+Prints the route as JSON. Never calls the network; Grok's weekly use comes from local
+session files (grok.mjs status). --no-grok keeps the pre-Grok routes.`;
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   try {
@@ -148,7 +178,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
       files = r.stdout.split('\n').filter(Boolean);
     }
     const out = route({ role: a.role, writer: a.writer, deep: a.deep, files,
-      triageConflict: triageConflict(a.triage), available: a.available ?? detectAvailable(table) }, table);
+      triageConflict: triageConflict(a.triage), available: a.available ?? detectAvailable(table),
+      grok: a.noGrok ? { ok: false, reason: '--no-grok' } : budgetStatus({ table }) }, table);
     console.log(JSON.stringify(out, null, 2));
   } catch (e) {
     console.error(`gate-route: ${e.message}\n${USAGE}`);

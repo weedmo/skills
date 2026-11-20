@@ -39,6 +39,9 @@ Run from the repository root. `<out>` is a new file under `.review/<unit>/`.
   (the prompt goes on stdin: `--allowedTools` is variadic and would swallow a trailing prompt argument),
   then take `structured_output` and wrap it the same way with `"family":"claude"`.
   Add `--effort <effort>` only when the route names one.
+- Grok reviewer (route `family: grok`): the read-only launch and `grok.mjs extract` in
+  `$model-routing`'s [Grok priority](../../model-routing/references/grok-priority.md), with
+  `<schema>` = `<review-gate>/schemas/round.schema.json`. `extract` writes the wrapped output.
 - Inside herdr (`hc` on PATH and `HERDR_SPACE`/tab ids known): prefix the same command with
   `hc run --bg --name rg-<unit>-<n>-<family> --label herdr.space=<id> --label herdr.tab=<id> --`
   and wait with `hc wait rg-<unit>-<n>-<family>`.

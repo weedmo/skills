@@ -1,6 +1,6 @@
 {
   "name": "matt-loop",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "Matt Pocock design with the user via matt-design; confirmed-spec autonomous tickets, implementation, verification and independent review via matt-auto. Includes PR babysitting and conflict resolution. Requires weed-harness 6.0+.",
   "author": {
     "name": "weedmo"

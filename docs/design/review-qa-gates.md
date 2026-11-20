@@ -190,6 +190,7 @@ gate: `CHECK: node <skill>/scripts/run-scenarios.mjs .qa/<unit>` / `EXPECT: qa-g
 - `codex exec`가 `-s read-only`와 `--output-schema`를 지원하는 것을 로컬 `codex exec --help`로 확인했다. `claude -p`의 구조화 출력 방식은 구현 1단계에서 확인한다.
 - 사용자: "QA나 리뷰는 낮은 모델을". 검토 결과 QA는 작성/재실행/정리로 나눠 낮추고, 리뷰는 Sonnet·Sol medium을 하한으로 둠(D11). 가격 근거(정가, $/1M 입력·출력): Haiku 5.5 0.10/0.50, Sonnet 5.5 2/10, Opus 5.5 4/20, Fable 5.1 10/50; gpt-6-luna 약 0.10/0.50, gpt-6.1-sol 2/10, gpt-6-astra 10/50(GPT는 제3자 집계). 모델별 리뷰·QA 품질 측정치는 없음.
 - 설치된 `~/.codex/agents/*.toml`이 문서와 다름: `matt-reviewer`·`matt-standard`가 `gpt-5.6-sol`, `matt-default`·`matt-fast`가 `gpt-5.6-luna`, `experimenter-default`가 `gpt-5.6-terra`. 구현 1단계에서 재동기화.
+- 2026-11-20 사용자 요청으로 D12(제3 계열 리뷰어 미사용)를 바꿈: 리뷰·QA triage에서 Grok이 주간 토큰 사용 90% 미만일 때 먼저 선택되고, 90% 이상이거나 측정할 수 없으면 이 문서의 표 그대로 동작한다. D11의 "Astra는 QA·리뷰에 쓰지 않음"은 그대로다. 규칙은 `skills/model-routing/references/grok-priority.md`.
 - 모델 선택에 Jev(TypeSafe, 유료·저가)를 검토했으나 판정 입력이 모두 기계적이라 규칙 표로 대체(D13).
 
 ## 수용 기준

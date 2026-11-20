@@ -9,7 +9,8 @@ Before dispatch, the coordinator MUST read model-routing's
 `references/gemini-priority.md`, resolve the strongest currently available Gemini
 and explicitly override this baseline pin if needed. Use maximum supported
 thinking and token allowances. On confirmed quota exhaustion, checkpoint for a
-Codex worker; do not downgrade to Flash/Grok or silently inherit defaults.
+Grok worker while its weekly use is under 90% (model-routing Grok priority), else a
+Codex worker; do not downgrade to Flash or silently inherit defaults.
 
 Analyze coherent chunks of the delegated task without losing file-level evidence.
 Return a concise synthesis with paths and precise follow-up work for the caller.

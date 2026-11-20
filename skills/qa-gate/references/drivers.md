@@ -13,6 +13,11 @@ Use the project's `playwright` / `@playwright/test` when present; otherwise inst
 as a dev dependency only with the user's consent, and fall back to `http` checks of the
 same criterion until then. Chromium must be installed (`npx playwright install chromium`).
 
+Every web scenario honours `QA_VIDEO_DIR`: when it is set, the context records video
+there (`pr-visual` sets it to film As-Is / To-Be). Close the context before the browser,
+or the video is not written. Recording needs Playwright's ffmpeg
+(`npx playwright install ffmpeg`).
+
 ```js
 // .qa/<unit>/scenarios/ac1-login-error.mjs
 import { chromium } from 'playwright';
@@ -20,7 +25,9 @@ import assert from 'node:assert/strict';
 import { join } from 'node:path';
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
+const context = await browser.newContext(process.env.QA_VIDEO_DIR
+  ? { recordVideo: { dir: process.env.QA_VIDEO_DIR, size: { width: 1280, height: 720 } } } : {});
+const page = await context.newPage();
 try {
   await page.goto(process.env.QA_BASE_URL + '/login');
   await page.fill('#email', 'nobody@example.com');
@@ -32,6 +39,7 @@ try {
   assert.equal(new URL(page.url()).pathname, '/login');               // stays on the page
 } finally {
   await page.screenshot({ path: join(process.env.QA_EVIDENCE_DIR, 'final.png'), fullPage: true });
+  await context.close();
   await browser.close();
 }
 ```

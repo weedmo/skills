@@ -46,7 +46,8 @@ billing account/API key to continue using Gemini.
 Check exposed quota status before dispatch when available (Antigravity's
 interactive `/usage` or `/quota`). Model-list visibility alone proves no remaining
 quota. Explicit zero allowance or a provider-confirmed exhausted allocation
-triggers Codex continuation; do not try Grok or a cheaper Gemini model.
+triggers a Grok worker while `grok.mjs status` is `ok` ([Grok priority](grok-priority.md)),
+otherwise Codex continuation; never a cheaper Gemini model.
 
 Distinguish temporary request-rate limits from exhausted tokens/credits. A bare
 429, timeout, authentication failure or unavailable model is not proof of quota

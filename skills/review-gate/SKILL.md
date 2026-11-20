@@ -5,7 +5,9 @@ description: "Cross-model review node: a reviewer from the other model family re
 
 # review-gate
 
-A review loop with a fixed shape: **the writer never reviews its own work**, every
+A review loop with a fixed shape: **the writer never reviews its own work** when another
+family is installed (one CLI → a same-family fresh-context reviewer; two or three → every
+other family reviews, Grok only under its weekly cap), every
 handoff is a JSON file under `.review/<unit>/`, and the result counts only for the
 commit it reviewed. herdr is optional and only makes the reviewer visible.
 
@@ -14,7 +16,7 @@ commit it reviewed. herdr is optional and only makes the reviewer visible.
 - `base` — the fixed point; the range is `git diff <base>...HEAD`. Resolve it with
   `git rev-parse` and stop on an empty diff.
 - `unit` — a short slug (`matt-auto-<spec slug>`, `autocode-<slug>`, or the branch name standalone).
-- `writer` — `claude`, `codex`, `mixed` or `unknown`, from the loop's dispatch history
+- `writer` — `claude`, `codex`, `grok`, `mixed` or `unknown`, from the loop's dispatch history
   (implementation and fix routes, retries included). Standalone: the current session's family.
 - `spec` — optional fidelity reference; `deep` — true when any ticket in range is `[deep]`.
 - `max_cycles` — default 2 (matt-auto), 1 for autocode.
@@ -26,7 +28,7 @@ Keep `.review/` and `.qa/` out of git with `.git/info/exclude`, never the user's
 1. **Route** — `node <model-routing>/scripts/gate-route.mjs --role review --writer <w> --base <base> [--deep] [--triage .review/<unit>/triage-<n-1>.json]`.
    It returns the reviewers (family, model, effort, Codex agent role), `escalated`,
    `cross_model` and `reasons`. Use exactly those reviewers; never pick a model yourself.
-   Put `reasons` on the board.
+   Put `reasons` on the board; they include Grok's weekly use (Grok goes first under 90%).
 2. **Review round n** — run every routed reviewer in parallel with
    [the reviewer prompt](references/reviewer-prompt.md), each writing its own output file.
    Then merge: `node <review-gate>/scripts/rounds.mjs merge .review/<unit> <n> <outputs…>`.

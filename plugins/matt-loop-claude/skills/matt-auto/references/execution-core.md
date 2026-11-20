@@ -62,7 +62,8 @@ passing coordinator verification on the final integrated candidate.
 
 ## PR body and retro candidates
 
-In ship mode write the PR body with `$pr`: Summary from the spec and tickets,
+In ship mode first run `$pr-visual` (As-Is / To-Be shown before the PR, its section
+added to the body), then write the PR body with `$pr`: Summary from the spec and tickets,
 Evidence from measured results (`gateList`, the QA run, `git diff --numstat`),
 Merge Danger from the spec's externally visible changes.
 
