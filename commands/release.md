@@ -1,5 +1,5 @@
 ---
-description: "Automated release workflow: version bump, commit, tag, push, GitHub Release, marketplace sync, and cache update"
+description: "Automated release workflow: version bump, commit, tag, push, GitHub Release, Claude and Codex marketplace sync, and cache update that keeps the replaced version for open sessions"
 argument-hint: "<X.Y.Z | patch | minor | major>"
 ---
 
@@ -100,22 +100,72 @@ else
 fi
 ```
 
+### 7b. Codex Sync
+
+Codex reads a **local** clone as its `weed-plugins` marketplace (`source_type = "local"`
+in `~/.codex/config.toml`), so the GitHub release never reaches it by itself.
+Fast-forward that clone and reinstall the enabled plugins. Only a clean `main` that
+fast-forwards is touched; anything else is reported, never reset.
+
+```bash
+CODEX_CFG=~/.codex/config.toml
+CODEX_MKT=$(python3 - "$CODEX_CFG" <<'PY'
+import os, sys, tomllib
+try:
+    m = tomllib.load(open(os.path.expanduser(sys.argv[1]), 'rb')).get('marketplaces', {}).get('weed-plugins', {})
+except Exception:
+    m = {}
+print(m.get('source', '') if m.get('source_type') == 'local' else '')
+PY
+)
+if [ -n "$CODEX_MKT" ] && [ -d "$CODEX_MKT/.git" ] && command -v codex >/dev/null; then
+  git -C "$CODEX_MKT" fetch -q origin
+  if [ "$(git -C "$CODEX_MKT" branch --show-current)" = "main" ] \
+     && [ -z "$(git -C "$CODEX_MKT" status --porcelain)" ] \
+     && git -C "$CODEX_MKT" merge -q --ff-only origin/main; then
+    for p in weed-harness matt-loop auto-loop; do
+      grep -q "\"$p@weed-plugins\"" "$CODEX_CFG" && codex plugin add "$p@weed-plugins"
+    done
+    echo "Codex synced: $(git -C "$CODEX_MKT" log --oneline -1)"
+  else
+    echo "WARNING: Codex marketplace clone $CODEX_MKT is not a clean main that fast-forwards — not touched; update it by hand"
+  fi
+else
+  echo "Codex: no local weed-plugins marketplace or no codex CLI — skipping"
+fi
+```
+
 ### 8. Cache Update
 
-Update the local plugin cache so the new version is immediately available:
+Update the local plugin cache so the new version is immediately available.
+
+**Keep the version being replaced.** A running Claude Code session resolves skill
+paths when it starts and keeps reading that version's directory until it restarts;
+deleting it leaves every open session without weed-harness skills. So this step
+removes only versions older than the one being replaced, and the replaced one goes
+at the next release.
 
 ```bash
 CACHE_BASE=~/.claude/plugins/cache/weed-plugins/weed-harness
 INSTALLED=~/.claude/plugins/installed_plugins.json
 
-# Remove old cache versions
-rm -rf "$CACHE_BASE"/*/
+# The version open sessions are reading right now.
+PREV=$(python3 -c "
+import json
+print(json.load(open('$INSTALLED'))['plugins']['weed-harness@weed-plugins'][0]['version'])
+" 2>/dev/null)
 
-# Create new version cache directory
+# Remove only versions that are neither the new one nor the one being replaced.
+for d in "$CACHE_BASE"/*/; do
+  [ -d "$d" ] || continue
+  v=$(basename "$d")
+  [ "$v" = "NEW_VERSION" ] || [ "$v" = "$PREV" ] || rm -rf "$d"
+done
+
+# Create new version cache directory and copy plugin files (exclude .git, node_modules);
+# --delete keeps a re-run of the same version exact.
 mkdir -p "$CACHE_BASE/NEW_VERSION"
-
-# Copy plugin files to cache (exclude .git, plugins/, node_modules)
-rsync -a --exclude='.git' --exclude='node_modules/' $REPO/ "$CACHE_BASE/NEW_VERSION/"
+rsync -a --delete --exclude='.git' --exclude='node_modules/' $REPO/ "$CACHE_BASE/NEW_VERSION/"
 
 # Update installed_plugins.json version
 if [ -f "$INSTALLED" ]; then
@@ -163,7 +213,16 @@ print('✓ installed_plugins.json version matches' if v == 'NEW_VERSION'
       else '✗ installed_plugins.json version mismatch: ' + v)
 " 2>/dev/null || echo "✗ Could not verify installed_plugins.json"
 
+# Previous version kept for open sessions
+ls ~/.claude/plugins/cache/weed-plugins/weed-harness/ | tr '\n' ' '; echo "← cached versions (new + the one replaced)"
+
+# Codex cache (only when 7b synced it)
+ls -d ~/.codex/plugins/cache/weed-plugins/weed-harness/NEW_VERSION &>/dev/null \
+  && echo "✓ Codex has weed-harness NEW_VERSION" || echo "– Codex weed-harness NEW_VERSION not installed (see 7b)"
+
 echo "=== Release vNEW_VERSION complete ==="
 ```
 
-Report all results to the user. If any check fails, flag it clearly.
+Report all results to the user. If any check fails, flag it clearly. End with one line:
+open Claude Code and Codex sessions keep the previous version until restarted
+(`claude --continue` keeps the conversation).
