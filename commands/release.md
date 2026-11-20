@@ -1,5 +1,5 @@
 ---
-description: "Automated release workflow: version bump, commit, tag, push, GitHub Release, Claude and Codex marketplace sync, and cache update that keeps the replaced version for open sessions"
+description: "Automated release workflow: version bump, commit, tag, push, GitHub Release, Claude and Codex marketplace sync, and cache update for every installed weed plugin that keeps the replaced version for open sessions"
 argument-hint: "<X.Y.Z | patch | minor | major>"
 ---
 
@@ -137,54 +137,61 @@ fi
 
 ### 8. Cache Update
 
-Update the local plugin cache so the new version is immediately available.
+Update the local plugin cache so the new versions are immediately available —
+weed-harness, plus matt-loop and auto-loop when installed. Those two carry their own
+versions; a plugin whose version did not move is left alone.
 
 **Keep the version being replaced.** A running Claude Code session resolves skill
 paths when it starts and keeps reading that version's directory until it restarts;
-deleting it leaves every open session without weed-harness skills. So this step
-removes only versions older than the one being replaced, and the replaced one goes
-at the next release.
+deleting it leaves every open session without those skills. So this step removes
+only versions older than the one being replaced, and the replaced one goes at the
+next release.
 
 ```bash
-CACHE_BASE=~/.claude/plugins/cache/weed-plugins/weed-harness
 INSTALLED=~/.claude/plugins/installed_plugins.json
+[ -f "$INSTALLED" ] || echo "WARNING: installed_plugins.json not found — skipping"
 
-# The version open sessions are reading right now.
-PREV=$(python3 -c "
+# name:source — weed-harness is the repo root; the loops ship their Claude edition.
+for spec in "weed-harness:$REPO" \
+            "matt-loop:$REPO/plugins/matt-loop-claude" \
+            "auto-loop:$REPO/plugins/auto-loop-claude"; do
+  [ -f "$INSTALLED" ] || break
+  name=${spec%%:*}; src=${spec#*:}
+  CACHE_BASE=~/.claude/plugins/cache/weed-plugins/$name
+  VER=$(python3 -c "import json;print(json.load(open('$src/.claude-plugin/plugin.json'))['version'])")
+  # The version open sessions are reading right now; empty = not installed here.
+  PREV=$(python3 -c "
 import json
-print(json.load(open('$INSTALLED'))['plugins']['weed-harness@weed-plugins'][0]['version'])
+print(json.load(open('$INSTALLED'))['plugins']['$name@weed-plugins'][0]['version'])
 " 2>/dev/null)
+  [ -n "$PREV" ] || { echo "$name: not installed — skipping"; continue; }
+  [ "$PREV" = "$VER" ] && [ "$name" != weed-harness ] && { echo "$name: $VER unchanged"; continue; }
 
-# Remove only versions that are neither the new one nor the one being replaced.
-for d in "$CACHE_BASE"/*/; do
-  [ -d "$d" ] || continue
-  v=$(basename "$d")
-  [ "$v" = "NEW_VERSION" ] || [ "$v" = "$PREV" ] || rm -rf "$d"
-done
+  # Remove only versions that are neither the new one nor the one being replaced.
+  for d in "$CACHE_BASE"/*/; do
+    [ -d "$d" ] || continue
+    v=$(basename "$d")
+    [ "$v" = "$VER" ] || [ "$v" = "$PREV" ] || rm -rf "$d"
+  done
 
-# Create new version cache directory and copy plugin files (exclude .git, node_modules);
-# --delete keeps a re-run of the same version exact.
-mkdir -p "$CACHE_BASE/NEW_VERSION"
-rsync -a --delete --exclude='.git' --exclude='node_modules/' $REPO/ "$CACHE_BASE/NEW_VERSION/"
+  # Copy plugin files (exclude .git, node_modules); --delete keeps a re-run exact.
+  mkdir -p "$CACHE_BASE/$VER"
+  rsync -a --delete --exclude='.git' --exclude='node_modules/' "$src/" "$CACHE_BASE/$VER/"
 
-# Update installed_plugins.json version
-if [ -f "$INSTALLED" ]; then
+  # Format v2: plugins is a dict keyed '<name>@<marketplace>', each a list of installs
+  # carrying both version and installPath — both have to move.
   python3 -c "
 import json
 with open('$INSTALLED') as f:
     data = json.load(f)
-# Format v2: plugins is a dict keyed '<name>@<marketplace>', each a list of installs
-# carrying both version and installPath — both have to move.
-for entry in data['plugins']['weed-harness@weed-plugins']:
-    entry['version'] = 'NEW_VERSION'
-    entry['installPath'] = '$CACHE_BASE/NEW_VERSION'
+for entry in data['plugins']['$name@weed-plugins']:
+    entry['version'] = '$VER'
+    entry['installPath'] = '$CACHE_BASE/$VER'
 with open('$INSTALLED', 'w') as f:
     json.dump(data, f, indent=2)
-print('Updated installed_plugins.json')
 "
-else
-  echo "WARNING: installed_plugins.json not found — skipping"
-fi
+  echo "$name: $PREV → $VER"
+done
 ```
 
 ### 9. Verify
@@ -213,8 +220,10 @@ print('✓ installed_plugins.json version matches' if v == 'NEW_VERSION'
       else '✗ installed_plugins.json version mismatch: ' + v)
 " 2>/dev/null || echo "✗ Could not verify installed_plugins.json"
 
-# Previous version kept for open sessions
-ls ~/.claude/plugins/cache/weed-plugins/weed-harness/ | tr '\n' ' '; echo "← cached versions (new + the one replaced)"
+# Previous versions kept for open sessions
+for p in weed-harness matt-loop auto-loop; do
+  [ -d ~/.claude/plugins/cache/weed-plugins/$p ] && echo "$p: $(ls ~/.claude/plugins/cache/weed-plugins/$p | tr '\n' ' ')← cached (new + the one replaced)"
+done
 
 # Codex cache (only when 7b synced it)
 ls -d ~/.codex/plugins/cache/weed-plugins/weed-harness/NEW_VERSION &>/dev/null \
