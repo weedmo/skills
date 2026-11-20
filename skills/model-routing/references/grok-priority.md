@@ -25,7 +25,7 @@ or when the use cannot be measured — Grok drops out and every slot runs exactl
 table above without it. Data lives in `gate-routes.json` (`families.grok`, `grok_priority`);
 the check is `node <model-routing>/scripts/grok.mjs status`.
 
-| Slot | Under the cap | At/over the cap, budget unset, or `grok` missing |
+| Slot | Under the cap (default on) | At/over the cap, paused after a usage limit, or `grok` missing |
 |---|---|---|
 | Review (`review-gate`) | `grok-4.7` / medium, first of the reviewers above; `grok-4.7` / high on a risk trigger | The reviewers above without Grok |
 | QA triage (`qa-gate`) | `grok-4.7-build-fast` | Writer's other family, as before |
@@ -37,12 +37,22 @@ or takes first-choice implementation.
 ## Weekly use
 
 `grok.mjs status` sums `totalTokens` from `~/.grok/sessions/*/*/usage.json` updated in
-the last 7 days (TUI and headless sessions on this machine) and divides by
-`GROK_WEEKLY_TOKEN_BUDGET`, else `grok_priority.weekly_token_budget`. Neither set →
-`ok: false` (fail closed). `grok usage` cannot report the plan's own limit outside
-Grok's background service, so the budget is the plan's weekly allowance entered by the
-user; use on other machines or grok.com is not counted. `gate-route.mjs` reads the same
-status on every call (`--no-grok` forces the pre-Grok routes) and puts it in `reasons`.
+the last 7 days (TUI and headless sessions on this machine) and compares it with the
+weekly budget, cap 90% by default:
+
+1. `GROK_WEEKLY_TOKEN_BUDGET`, else `grok_priority.weekly_token_budget`, else
+2. the **learned** budget: when Grok reports its usage limit, `grok.mjs extract` records
+   the tokens counted at that moment as the allowance
+   (`~/.local/state/weed-harness/grok-budget.json`), and Grok pauses for
+   `pause_hours_after_limit` (24 h).
+3. No budget yet → Grok is **on**; the first usage-limit error teaches the budget, so
+   the first week can run to 100% and every later week stops at 90%.
+
+`grok usage` cannot report the plan's own limit outside Grok's background service,
+which is why the budget is learned. Use on other machines or grok.com is not counted,
+so a learned budget can come out low; set the variable to override it.
+`gate-route.mjs` reads the same status on every call (`--no-grok` forces the routes
+without Grok) and puts it in `reasons`.
 
 ## Launch
 
@@ -51,8 +61,8 @@ Read-only reviewer or triage, from the repository root (`<schema>` is the role's
 ```
 grok --prompt-file <prompt.txt> -m <model> [--reasoning-effort <effort>] --permission-mode plan \
   --tools read_file,list_dir,grep --deny 'MCPTool(*)' --disable-web-search --no-subagents \
-  --output-format json --json-schema "$(cat <schema>)" > <out>.raw
-node <model-routing>/scripts/grok.mjs extract <out>.raw <out> --model <model> [--effort <effort>]
+  --output-format json --json-schema "$(cat <schema>)" > <out>.raw 2> <out>.err
+node <model-routing>/scripts/grok.mjs extract <out>.raw <out> --model <model> [--effort <effort>] --stderr <out>.err
 ```
 
 The launch has no shell, so `<prompt.txt>` is the filled prompt followed by the material
@@ -62,7 +72,8 @@ $0.18, about 6 minutes; budget the wait accordingly.
 
 `extract` refuses an envelope with fewer than two turns: Grok can return a
 schema-valid empty answer without opening a file. A refusal counts as a schema failure
-(one re-run, then the gate's normal `ERROR`).
+(one re-run, then the gate's normal `ERROR`). A usage-limit failure is recorded instead:
+route the round again with `gate-route.mjs`, which now leaves Grok out.
 
 Gemini-exhaustion worker: `grok -p --prompt-file <brief> -m grok-4.7 --reasoning-effort high
 -w <name> --permission-mode acceptEdits --deny 'MCPTool(*)' --output-format json`. It
