@@ -75,7 +75,7 @@ matt-auto --spec PATH [--core | --full]
 | # | 조건 | 모드 |
 |---|---|---|
 | 1 | `--full` 또는 `--core` 플래그 | 플래그대로 |
-| 2 | spec frontmatter `mode: core \| full` | 그 값 |
+| 2 | spec frontmatter `mode: core \| full`, 또는 brief(`## 결정` 절 없음) | 그 값, `mode:` 없는 brief는 core |
 | 3 | 구현 단계에 `[deep]` 태그가 있다 | full |
 | 4 | `--parallel`이 주어졌거나 `followup:`이 있다 | full |
 | 5 | 서로 독립적으로 검증되는 산출물이 2개 이상이다(티켓이 2개 이상으로 나뉜다) | full |
@@ -201,6 +201,7 @@ brief는 full에서도 유효한 spec이다. `## 큰 틀`과 `## 결정`이 없�
 - `node bin/check-words.mjs` 현재 값: matt-auto claude 3627/4200, codex 3446/3800, chain 8418/8700. 스크립트 주석이 "상한은 올리지 않는다"이므로 core 본문은 참조 파일로 뺀다(D11). 참조 파일이 chain 집계에 들어가는지는 구현 2단계에서 `CHAIN` 목록으로 확인한다.
 - 비용 차이는 구조에서 읽은 것이고 측정치가 아니다.
 - 2026-11-20 구현 후 Grok(grok-4.7/medium) 교차 리뷰 1회: major 4, minor 1. 반영: 모드 선택을 1단계의 tracker 설정 전으로 옮김, core는 어느 플랫폼에서도 리포트 페이지를 열지 않음, brief에 `## 확인` 절을 명시. 남은 것: 수용 기준 1~6을 자동으로 확인하는 테스트 없음(수동 확인 항목), 수용 기준 7(비용 측정) 미실시.
+- 2026-11-20 사용자 요청 "brief면 당연히 core": 모드 표 2행이 `mode:` 필드에만 기대지 않도록, `## 결정` 절이 없는 spec(brief)은 `mode:`가 빠져도 core로 고정.
 - 2026-11-20 main(7.2.0)의 execution core·hc 구조 위로 다시 적용: core의 QA·리뷰·수정 담당은 `references/execution-core.md`를 따르고, Orca용 "Standalone Codex execution" 절은 main에서 Orca가 빠져 옮기지 않음.
 
 ## 확인

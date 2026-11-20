@@ -47,7 +47,8 @@ Required sections:
 ## Brief (`--brief`)
 
 A brief is a confirmed spec for small work that matt-auto runs in `core` mode.
-Same frontmatter with `mode: core`; the body has only these sections:
+Same frontmatter with `mode: core` always; matt-auto also runs a spec with no
+`## 결정` as a brief in core. The body has only these sections:
 
 - `## 목표`: what and why, three to five sentences.
 - `## 수용 기준`: numbered; each item names its verify command and expected result.

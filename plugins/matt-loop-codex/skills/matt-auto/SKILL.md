@@ -37,7 +37,7 @@ In step 1, before its tracker setup, pick the mode by the first matching row and
 | # | Condition | Mode |
 |---|---|---|
 | 1 | `--core` or `--full` | that flag |
-| 2 | spec frontmatter `mode:` | that value |
+| 2 | spec frontmatter `mode:`, or the spec is a brief (no `## 결정`) | that value; a brief without one → core |
 | 3 | an implementation step tagged `[deep]` | full |
 | 4 | `--parallel` given, or `followup:` present | full |
 | 5 | two or more independently verified deliverables (your call; log the list) | full |
