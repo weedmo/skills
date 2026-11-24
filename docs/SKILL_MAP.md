@@ -137,7 +137,9 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
   Sol review, and optional Antigravity support.
 - **rust-port** — every platform: oracle-first porting of any codebase to Rust (profile →
   frozen differential gates → boundary design → stepwise port → equivalence + scaling benchmarks),
-  with per-language pitfall references (Python/PyO3, C/C++, Go, JS/TS, JVM, C#)
+  with per-language pitfall references (Python/PyO3, C/C++, Go, JS/TS, JVM, C#). Optional
+  `fast-anything` path for a few hot pure functions when that CLI is available; rust-port
+  gates it does not cover still apply.
 
 On top of it, two loops with different graphs:
 

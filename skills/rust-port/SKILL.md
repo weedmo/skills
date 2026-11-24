@@ -11,13 +11,15 @@ errors and ordering, and **beats it on the measured curve** that motivated the p
 The Rust compiler guarantees memory safety. It does not guarantee correct logic or
 speed, so both need their own gate.
 
-Read the reference for the source language before step 3:
+Read the reference for the source language before step 3, and the
+fast-anything note if you take that path in step 1:
 
 | Source | Reference |
 |---|---|
 | Python (PyO3 / maturin) | [references/python-pyo3.md](references/python-pyo3.md) |
 | C, C++, Go, JS/TS, Java/Kotlin, C# | [references/other-languages.md](references/other-languages.md) |
 | Tests, benchmarks, scaling, agent guardrails (all languages) | [references/verification.md](references/verification.md) |
+| Optional `fast-anything` CLI (hot pure functions) | [references/fast-anything.md](references/fast-anything.md) |
 
 ## Workflow
 
@@ -39,6 +41,16 @@ Report each step's evidence (command plus output) before moving to the next.
   - **Incremental strangler**: leaves first, a working binary at every step.
   - **Full rewrite**: only with a strong reason. Industry rewrites run 2–3× over
     estimate (fish: 6 months planned, about 2 years to beta).
+- **Optional `fast-anything` path.** If the target is a few hot pure functions
+  in a supported host (Python, Node/TypeScript, Ruby, Java, Go, PHP, C, C++ or
+  C#; see the reference for the full list) and the `fast-anything` CLI is on
+  `PATH`, follow [references/fast-anything.md](references/fast-anything.md):
+  `scan` → `port <id>` → write Rust → `verify <id>` → `enable <id>` →
+  `bench`/`report` (same steps as MCP tools `fast_scan`, `fast_port`,
+  `fast_verify`, `fast_enable`, `fast_bench`, `fast_report`). Functions it
+  marks ✗ (I/O, randomness, globals, entry script), and full rewrites or
+  boundary-heavy work, stay on this workflow. That path does not waive the
+  rust-port gates it does not cover (steps 2, 5 and 6).
 - **Write the reason down** as a number: latency p99, throughput at N threads, memory,
   or a safety goal. That number is the goal the speed gate checks.
 
