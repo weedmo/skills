@@ -32,15 +32,20 @@ You authored these commands, so approve the ledger yourself (`gate-check.mjs --a
 
 ## Routing (Claude Code)
 
-When invoked directly, run the coordinator workflow in this session; do not delegate the whole skill to a subagent. Fresh-context subtasks go through the plugin agents, which fix model and effort:
+When invoked directly, run the coordinator and deterministic PR commands in this session; do not delegate the whole skill. Fresh-context subtasks go through plugin agents (spawn by name, no `model` override). Include the PR context and `ROUTED_EXECUTION=1; use $pr-babysit and shepherd this PR to merge-ready.` in every child prompt. If `ROUTED_EXECUTION=1` is already present, execute locally. If the plugin agents are unavailable, use the Agent tool with `model: opus`, `effort: medium` (default) or `model: fable`, `effort: high` (deep) and say so once.
 
 | Work | Agent |
 |---|---|
-| Normal CI diagnosis, review response, focused implementation, mechanical fixes | `matt-loop:matt-default` |
+| PR metadata, status/check commands | Direct tools |
+| Trivial edit, small fix, test update, mechanical conflict, moderate work | `matt-loop:matt-default` |
 | Difficult CI failure, semantic conflict, architecture-sensitive review | `matt-loop:matt-deep` |
-| Very large logs or repository-wide evidence | Chunk the material, summarize each chunk with `matt-loop:matt-deep` (keep check names and source links in each summary), synthesize, then hand the focused fix to default or deep |
+| Very large logs or repository-wide evidence | Chunk and summarize with `matt-loop:matt-deep` (keep check names and source links), then hand the fix to default or deep |
 
-Default to `matt-default` when uncertain; escalate to `matt-deep` only when the lower tier reports a concrete limit. Spawn agents by name and never add a `model` override; the agent files carry the pair. Put all required PR and repository context in each child prompt. If the plugin agents are unavailable on this machine, use the Agent tool with `model: opus`, `effort: medium` (default) or `model: fable`, `effort: high` (deep) and say so once.
+Default to `matt-default`; escalate to `matt-deep` only on a concrete limit. A conflict alone does not justify deep.
+
+## Running as an hc worker
+
+When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto step 10 usually stays in-session), run this workflow with `ROUTED_EXECUTION=1` and `$hc-workers`: `hc send` blocking `QUESTION:` / `ESCALATION:` lines, then finish once by writing the result file (`outcome: succeeded|failed`, ledger tally, stop condition) and `hc send <coordinator> "DONE|FAILED: <result_path>"`. A non-merge-ready stop is `outcome: failed` with unmet ids, never prose-only. The coordinator re-verifies its ship ledger after your report.
 
 ## Workflow
 
