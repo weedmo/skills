@@ -1,13 +1,17 @@
 ---
 name: resolving-merge-conflicts
-description: "Use when you need to resolve an in-progress git merge/rebase conflict. Claude Code edition: direct invocation delegates the resolution to the matt-deep plugin agent."
+description: "Use when you need to resolve an in-progress git merge/rebase conflict. Claude Code edition: inspect first, then route mechanical conflicts to matt-default and intent-sensitive ones to matt-deep."
 ---
 
 ## Routing (Claude Code)
 
-When this skill is invoked directly, delegate the entire resolution to `matt-loop:matt-deep` before inspecting or editing conflicts: spawn it by name with no `model` override, put the merge/rebase state, the repository path, and the user's request in the prompt with the instruction `use $resolving-merge-conflicts and complete the conflict resolution`, wait for it, and report its result without duplicating its work. If the plugin agent is unavailable, use the Agent tool with `model: fable`, `effort: high` and report the fallback.
+When invoked directly, inspect the merge state and conflicting hunks before routing. Mechanical conflicts (imports, formatting, lockfile regeneration) start on `matt-loop:matt-default`; intent-sensitive conflicts start on `matt-loop:matt-deep`. Never escalate solely because Git reports a conflict.
 
-When already running inside a routed agent (the prompt carries that instruction, or another skill dispatched this as one of its steps), execute the steps below locally and do not delegate again.
+- Spawn the plugin agent by name with no `model` override. If that agent is unavailable, use the Agent tool with `model: opus`, `effort: medium` (default) or `model: fable`, `effort: high` (deep) and report the fallback.
+- Include the user's request, merge/rebase state, repository path, and the exact instruction: `ROUTED_EXECUTION=1; use $resolving-merge-conflicts and complete the conflict resolution.`
+- Wait for the routed agent and report its result. Do not duplicate its work in the caller.
+
+If `ROUTED_EXECUTION=1` is present, or this is an internally routed step, execute the steps below locally and do not delegate again.
 
 1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
 

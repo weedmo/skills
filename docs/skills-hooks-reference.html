@@ -211,9 +211,9 @@
   <div class="props">
     <div class="prop"><span class="k">📦 저장소</span><span class="v"><code>weedmo/skills</code> (구 autofree) → weed-harness 플러그인 소스</span></div>
     <div class="prop"><span class="k">🧩 리포 플러그인</span><span class="v">3개 — weed-harness(공통 루프 런타임 + Claude setup) · matt-loop · auto-loop</span></div>
-    <div class="prop"><span class="k">🖥️ 로컬 스킬</span><span class="v">현재 1개 활성(<code>graft</code>). Orca 3개는 2026-07-30 머신 스냅샷으로만 기록</span></div>
+    <div class="prop"><span class="k">🖥️ 로컬 스킬</span><span class="v">현재 1개 활성(<code>graft</code>). 루프 워커 런타임은 herdr <code>hc</code>. 과거 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷으로만 기록</span></div>
     <div class="prop"><span class="k">🪝 훅 스크립트</span><span class="v">3개 + <code>hooks.json</code> (<code>hooks/</code>)</span></div>
-    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-18 (weed-harness 7.1.0, herdr hc 리팩터 이후)</span></div>
+    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-24 (weed-harness 7.3.4, herdr hc)</span></div>
   </div>
 
   <div class="callout">
@@ -235,6 +235,8 @@
       <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 <code>view.html</code> + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
     <tr><td class="name">model-routing</td><td><span class="tag blue">라우팅</span></td>
       <td>Fast / Default / Deep / Max 티어 표 하나 — Codex <code>spawn_agent</code>, Claude Code agent, OpenCode, hc 에이전트 명령별 정확한 model/effort 쌍, 디스패치 규칙, 에스컬레이션 사다리. 각 루프는 자기 역할을 이 티어에 매핑만 한다.</td></tr>
+    <tr><td class="name">hc-workers</td><td><span class="tag blue">워커</span></td>
+      <td>위임 루프(matt-auto, autocode, pr-babysit)가 서브에이전트를 herdr <code>hc</code> 워커로 돌리는 규약 — 루프 role 파일에서 템플릿 생성, 실행당 보이는 탭, <code>hc send</code>로 파일 기반 보고, 대기 루프. Claude Code와 Codex 모두 <code>hc</code>가 있을 때 사용. 참조 스킬이라 단독 호출하지 않음.</td></tr>
     <tr><td class="name">loop-gates</td><td><span class="tag blue">완료 게이트</span></td>
       <td>루프가 unlazy 스킬(Leonxlnx/unlazy, 벤더링하지 않고 npx로 설치)을 쓰는 규약 — 작업 단위별 GATES.md, 코디네이터가 직접 <code>--reverify</code>, 재시도 2회 후 핸드오프, hc 워커와의 경계.</td></tr>
     <tr><td class="name">interview-report</td><td><span class="tag blue">보고</span></td>
@@ -351,7 +353,7 @@
   </div>
 
   <p class="footer-note">
-    2026-11-18 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 7.1.0) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
+    2026-11-24 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 7.3.4) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
   </p>
 </div>
 
