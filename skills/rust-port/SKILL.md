@@ -114,9 +114,17 @@ Report each step's evidence (command plus output) before moving to the next.
   - Benchmark release builds only. Debug is 10–100× slower, and `maturin develop`
     defaults to debug.
   - Pin `rust-toolchain.toml`.
+  - A step is not done until `cargo check` and
+    `cargo clippy --all-targets -- -D warnings` report 0 warnings.
   - Add `clippy::unwrap_used` to library crates and `#![forbid(unsafe_code)]` where
-    possible.
-  - Every `unsafe` block needs a justification comment and a Miri run.
+    possible. No `unwrap`/`expect` on fallible paths: in batch or CLI work, report
+    the reason for a per-item failure and continue; in a library port, keep error
+    parity with the original (same class/message) instead of swallowing errors.
+  - Every `unsafe` block needs a justification comment and a Miri run. List each
+    one in the final report with file:line and why it is necessary; no `unsafe`
+    without that justification.
+  - Do not commit `target/`. It grows quickly with dependencies; run `cargo clean`
+    on finished or unused projects, and as CI cache hygiene.
 - **Delegated to agents:**
   - The translator gets the frozen gates and the reference file. A separate reviewer
     gets the diff plus the checklist in [references/verification.md](references/verification.md) §4.
@@ -169,4 +177,5 @@ A panic that reaches the caller is a failure, even if the output was "right".
 4. Equivalence results.
 5. Old-vs-new results table.
 6. Intentional deviations.
-7. Remaining risks (unsafe count, unverified edge classes, platforms not built).
+7. Every `unsafe` block: file:line and why it is necessary (not just a count).
+8. Remaining risks (unverified edge classes, platforms not built).

@@ -105,3 +105,18 @@ Tools: `cargo flamegraph` / `perf record`, `samply`, `perf c2c`, `perf sched` an
 - Common failure modes: compile errors, ownership/lifetime fights fixed with clones,
   `unsafe` to silence the borrow checker, silent semantic drift on edge inputs.
   <https://arxiv.org/abs/2503.12511>
+- **Zero warnings before a step is done.** `cargo check` and
+  `cargo clippy --all-targets -- -D warnings` must both be clean. Compiling is not
+  enough. Keep `clippy::unwrap_used` (and `expect_used` in libraries) on, plus
+  `#![forbid(unsafe_code)]` where possible.
+- **Error handling.** No `unwrap`/`expect` on fallible paths. In batch or CLI
+  processing, on a per-item failure report the reason and continue to the next
+  item. In a library port, return the same error class (and message where callers
+  parse it) as the original; do not swallow errors just to keep going. A panic
+  that reaches the caller is a failure.
+- **`unsafe` in the final report.** Every remaining `unsafe` block is listed with
+  file:line and why it is necessary. A count alone is not enough; no block
+  without that justification, and each one gets a Miri run.
+- **`target/` hygiene.** The folder grows quickly as crates accumulate. Never
+  commit it. Run `cargo clean` on finished or unused projects, and as CI cache
+  hygiene after a job that does not need the artefacts.
