@@ -1,6 +1,6 @@
 # Optional fast-anything path
 
-Use this only as a **step-1 branch** of rust-port, never as a replacement for
+Use this only as a **step-1 branch** of rust-rewrite, never as a replacement for
 its gates. The tool is [EL4CTEO/fast-anything](https://github.com/EL4CTEO/fast-anything)
 (MIT). Install if the user wants this path and the binary is missing:
 
@@ -27,7 +27,7 @@ on Node 22+, Bun or Deno 2+ (napi-rs), Ruby 3.3+, Java 22+ and Kotlin/JVM
 C# / .NET 8+, R 4.0+. Bindings other than Python and Node go through a C
 bridge (JSON in/out).
 
-**Stay on the normal rust-port workflow** when any of these hold:
+**Stay on the normal rust-rewrite workflow** when any of these hold:
 
 - The CLI is not available and the user does not want it installed.
 - `scan` marks the function ✗ (I/O, randomness, globals, or it lives in the
@@ -42,7 +42,7 @@ bridge (JSON in/out).
 
 ## Loop
 
-Prefer the stepped commands so rust-port gates can run between `verify` and
+Prefer the stepped commands so rust-rewrite gates can run between `verify` and
 `enable`. `fast-anything go --agent claude -- <cmd>` exists as a one-shot;
 do not let it skip those gates.
 
@@ -59,7 +59,7 @@ do not let it skip those gates.
    float operation order, error cases. Prefer borrow, no
    needless allocation, ASCII fast paths, `with_capacity`. A write step is not
    done until `cargo check` and `cargo clippy --all-targets -- -D warnings`
-   report 0 warnings in the crate. Still follow rust-port step 4 hygiene
+   report 0 warnings in the crate. Still follow rust-rewrite step 4 hygiene
    (release builds for timing, no `unwrap`/`expect` on fallible paths,
    `#![forbid(unsafe_code)]` where possible, list any remaining `unsafe` with
    file:line and reason, `cargo clean` on finished projects, a separate
@@ -71,7 +71,7 @@ do not let it skip those gates.
    empty and up to 16× larger inputs, plus shrunk slices) and checks floats
    within 1e-9 and that errors occur where the original errors. That is
    necessary, not sufficient — see the gates below.
-5. **Enable only after the rust-port gates below pass.** Then
+5. **Enable only after the rust-rewrite gates below pass.** Then
    `fast-anything enable <id>`, `fast-anything bench` (end-to-end, original
    vs Rust, interleaved) and `fast-anything report`. A port that is correct
    but slower per call than the original is not enabled. Do not enable a
@@ -84,7 +84,7 @@ module does the swap and can be removed byte for byte.
 
 ## Gates this path does not cover (still required)
 
-fast-anything does not replace rust-port steps 2, 5 and 6. Before calling
+fast-anything does not replace rust-rewrite steps 2, 5 and 6. Before calling
 `enable`, still:
 
 - **Lock a golden corpus** from real samples plus the edge corpus in the
@@ -94,11 +94,11 @@ fast-anything does not replace rust-port steps 2, 5 and 6. Before calling
 - **Fuzz** parsers and decoders, and run a differential fuzzer / property
   tests, on classes those recordings and derived cases miss (`cargo-fuzz`,
   host-side differential fuzzing — see [verification.md](verification.md) §1).
-- **Error parity** as in rust-port: same error or exception type (and message
+- **Error parity** as in rust-rewrite: same error or exception type (and message
   where callers parse it). A panic that reaches the caller is a failure.
 - **Determinism** (three identical repeats) and **API parity** (signature,
   module path, serialization, stubs).
-- **Fill the rust-port results table**: 1 thread vs N threads, small vs large
+- **Fill the rust-rewrite results table**: 1 thread vs N threads, small vs large
   inputs, p50/p99 latency, peak RSS, build flags. `bench` is a useful
   end-to-end original-vs-Rust number; it is not that table. If N-thread
   throughput is flat or lower than 1-thread, work through the scaling
