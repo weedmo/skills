@@ -74,7 +74,7 @@ skills/                               # repository root = weed-harness plugin
 │   ├── review-gate/                  # cross-model review loop node (verdict bound to HEAD)
 │   ├── qa-gate/                      # behavioural QA node (re-runnable scenarios + evidence)
 │   ├── design-map/                   # existing design → artifact visualization
-│   ├── rust-port/                    # oracle-first port of any codebase to Rust
+│   ├── rust-rewrite/                 # oracle-first rewrite or port of any codebase to Rust
 │   └── setup/                        # Claude setup, hooks and HUD
 ├── plugins/
 │   ├── matt-loop-claude/              # Claude orchestration + native manifest
@@ -249,7 +249,7 @@ workflow guidance.
 | `pr-visual` | all | As-Is / To-Be before every loop PR: a web change is filmed on the base commit and on HEAD (qa-gate scenarios with `QA_VIDEO_DIR`) and shown side by side before the PR (Codex via `deliver.py` first, Claude Artifact second, local window last); a pipeline change gets As-Is / To-Be mermaid diagrams in the PR body. Nothing goes to GitHub |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
-| `rust-port` | all | Port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers. An optional `fast-anything` loop covers a few hot pure functions when that CLI is available; rust-port gates it does not cover still apply. |
+| `rust-rewrite` | all | Rewrite or port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers. An optional `fast-anything` loop covers a few hot pure functions when that CLI is available; rust-rewrite gates it does not cover still apply. |
 
 #### The mod (Claude Code 2.1.287+)
 

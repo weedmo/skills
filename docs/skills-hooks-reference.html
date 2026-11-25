@@ -213,7 +213,7 @@
     <div class="prop"><span class="k">🧩 리포 플러그인</span><span class="v">3개 — weed-harness(공통 루프 런타임 + Claude setup) · matt-loop · auto-loop</span></div>
     <div class="prop"><span class="k">🖥️ 로컬 스킬</span><span class="v">현재 1개 활성(<code>graft</code>). 루프 워커 런타임은 herdr <code>hc</code>. 과거 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷으로만 기록</span></div>
     <div class="prop"><span class="k">🪝 훅 스크립트</span><span class="v">3개 + <code>hooks.json</code> (<code>hooks/</code>)</span></div>
-    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-25 (weed-harness 7.3.6, herdr hc)</span></div>
+    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-25 (weed-harness 7.3.7, herdr hc)</span></div>
   </div>
 
   <div class="callout">
@@ -267,8 +267,8 @@
       <td>Claude Code 전용. 터미널 UI + 기본 설정만 담당 — statusLine HUD 설치, 커스텀 훅(language-rule, auto-update) 등록. 스킬 설치는 하지 않으며 멱등이라 반복 실행해도 안전.</td></tr>
     <tr><td class="name">design-map</td><td><span class="tag orange">설계</span></td>
       <td>Claude Code·Codex 공용. Claude는 Artifact, Codex는 로컬 HTML로 설계 페이지를 유지한다. 확정된 Codex direct spec은 deep이면 Astra, 그 외에는 Gemini(Antigravity)가 구현하며 Gemini 인증 토큰이 없거나 토큰 할당량이 소진됐을 때만 Grok으로 대체하고 Sol이 독립 리뷰한다. Antigravity는 조사·문서·기계적 보조 작업에 사용한다.</td></tr>
-    <tr><td class="name">rust-port</td><td><span class="tag orange">이식</span></td>
-      <td>모든 플랫폼. 기존 코드베이스나 핫 패스를 Rust로 이식(Python/PyO3, C/C++, Go, JS/TS, JVM, C#). 프로파일로 대상을 고르고, 이식 전에 동등성 테스트를 고정한 뒤 FFI 경계를 설계하고, 미분 테스트와 1스레드 vs N스레드 릴리스 벤치마크로 게이트. 핫한 순수 함수 몇 개이고 <code>fast-anything</code> CLI가 있으면 그 루프를 쓸 수 있지만, 커버하지 못하는 rust-port 게이트는 그대로 적용한다.</td></tr>
+    <tr><td class="name">rust-rewrite</td><td><span class="tag orange">이식</span></td>
+      <td>모든 플랫폼. 기존 코드베이스나 핫 패스를 Rust로 재작성·이식(Python/PyO3, C/C++, Go, JS/TS, JVM, C#). 프로파일로 대상을 고르고, 이식 전에 동등성 테스트를 고정한 뒤 FFI 경계를 설계하고, 미분 테스트와 1스레드 vs N스레드 릴리스 벤치마크로 게이트. 핫한 순수 함수 몇 개이고 <code>fast-anything</code> CLI가 있으면 그 루프를 쓸 수 있지만, 커버하지 못하는 rust-rewrite 게이트는 그대로 적용한다.</td></tr>
   </table>
   </div>
 
@@ -353,7 +353,7 @@
   </div>
 
   <p class="footer-note">
-    2026-11-25 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 7.3.6) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
+    2026-11-25 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 7.3.7) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
   </p>
 </div>
 

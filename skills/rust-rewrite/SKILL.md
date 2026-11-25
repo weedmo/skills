@@ -1,9 +1,9 @@
 ---
-name: rust-port
-description: "Port an existing codebase or hot path to Rust from any language (Python, C, C++, Go, JS/TS, Java/Kotlin, C#) with an oracle-first workflow: profile to pick targets, freeze equivalence tests before porting, design the FFI boundary, then gate on differential tests and 1-thread vs N-thread release benchmarks. Use when the user asks to rewrite, port, migrate, or speed up code in Rust (PyO3/maturin, napi-rs, jni-rs, cxx, c2rust), or to review such a port."
+name: rust-rewrite
+description: "Rewrite or port an existing codebase or hot path to Rust from any language (Python, C, C++, Go, JS/TS, Java/Kotlin, C#) with an oracle-first workflow: profile to pick targets, freeze equivalence tests before porting, design the FFI boundary, then gate on differential tests and 1-thread vs N-thread release benchmarks. Use when the user asks to rewrite, port, migrate, or speed up code in Rust (PyO3/maturin, napi-rs, jni-rs, cxx, c2rust), or to review such a rewrite."
 ---
 
-# Rust Port
+# Rust Rewrite
 
 The original code is the **oracle**. Nothing is "done" because it compiles or because
 the agent says tests pass. A port is done when it **matches the oracle** on outputs,
@@ -50,7 +50,7 @@ Report each step's evidence (command plus output) before moving to the next.
   `fast_verify`, `fast_enable`, `fast_bench`, `fast_report`). Functions it
   marks ✗ (I/O, randomness, globals, entry script), and full rewrites or
   boundary-heavy work, stay on this workflow. That path does not waive the
-  rust-port gates it does not cover (steps 2, 5 and 6).
+  rust-rewrite gates it does not cover (steps 2, 5 and 6).
 - **Write the reason down** as a number: latency p99, throughput at N threads, memory,
   or a safety goal. That number is the goal the speed gate checks.
 
