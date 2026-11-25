@@ -57,9 +57,12 @@ do not let it skip those gates.
    generated glue). Keep function and module names. Match oracle semantics: Unicode code
    points (`.chars()`; JavaScript compares UTF-16 units), integer ranges,
    float operation order, error cases. Prefer borrow, no
-   needless allocation, ASCII fast paths, `with_capacity`. Run `cargo check`
-   in the crate. Still follow rust-port step 4 hygiene (release builds for
-   timing, `clippy`, `#![forbid(unsafe_code)]` where possible, a separate
+   needless allocation, ASCII fast paths, `with_capacity`. A write step is not
+   done until `cargo check` and `cargo clippy --all-targets -- -D warnings`
+   report 0 warnings in the crate. Still follow rust-port step 4 hygiene
+   (release builds for timing, no `unwrap`/`expect` on fallible paths,
+   `#![forbid(unsafe_code)]` where possible, list any remaining `unsafe` with
+   file:line and reason, `cargo clean` on finished projects, a separate
    reviewer).
 4. **Verify.** `fast-anything verify <id>` release-builds the port and replays
    every recorded call. On mismatch, read the failing call, fix, and verify
