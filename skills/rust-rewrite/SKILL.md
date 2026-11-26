@@ -21,6 +21,20 @@ fast-anything note if you take that path in step 1:
 | Tests, benchmarks, scaling, agent guardrails (all languages) | [references/verification.md](references/verification.md) |
 | Optional `fast-anything` CLI (hot pure functions) | [references/fast-anything.md](references/fast-anything.md) |
 
+## Place in the performance loop
+
+This skill is the rulebook both sessions of the performance loop read
+(`docs/design/purpose-loops.md`):
+
+- **Plan session** (`$matt-design`, `kind: optimize`) runs steps 1–3 and writes the
+  spec's `metric` block: `command` is the step-2 benchmark printing one number,
+  `guard` the differential harness, `forbidden` the frozen corpus and tests.
+- **Build session** runs `$autocode init --spec <path>`, then `run`. Steps 4–6 are its
+  experiments: one is kept only when the guard passes and the benchmark beats the
+  noise band. Step 7 is autocode's PR.
+
+Used on its own, outside a loop, follow steps 1–7 in order.
+
 ## Workflow
 
 Report each step's evidence (command plus output) before moving to the next.

@@ -24,10 +24,10 @@ test('codex-written code gets a sonnet reviewer', () => {
   assert.deepEqual(models(r), ['claude:sonnet']);
 });
 
-test('each risk trigger escalates once and adds a same-family second opinion', () => {
+test('each risk trigger moves the one reviewer up a tier without adding a second', () => {
   for (const extra of [{ deep: true }, { files: ['src/auth/session.ts'] }, { triageConflict: true }]) {
     const r = route({ role: 'review', writer: 'claude', files: ['src/app.ts'], available: both, ...extra }, table);
-    assert.deepEqual(models(r), ['codex:gpt-6.2-sol/high', 'claude:sonnet'], JSON.stringify(extra));
+    assert.deepEqual(models(r), ['codex:gpt-6.2-sol/high'], JSON.stringify(extra));
     assert.equal(r.escalated, true);
     assert.ok(r.reasons.length >= 2);
   }
@@ -56,7 +56,8 @@ test('QA roles split author, rerun and triage tiers', () => {
 
 test('no reviewer or QA route uses a top-tier model or a weak reviewer', () => {
   for (const f of Object.values(table.families)) {
-    for (const tier of ['review', 'review_up']) assert.ok(!/haiku|luna|astra|fable/.test(f[tier].model), f[tier].model);
+    // Grok has no review tier: it never reviews.
+    for (const tier of ['review', 'review_up']) if (f[tier]) assert.ok(!/haiku|luna|astra|fable/.test(f[tier].model), f[tier].model);
     // A family may omit a QA tier it is never routed to (grok has no qa_author).
     for (const tier of ['qa_author', 'qa_triage']) if (f[tier]) assert.ok(!/astra|fable|opus/.test(f[tier].model), f[tier].model);
   }
@@ -98,47 +99,53 @@ const under = { ok: true, reason: 'grok weekly use 40% < 90% of 1000 tokens' };
 const over = { ok: false, reason: 'grok weekly use 91% >= 90% of 1000 tokens' };
 const review = (writer, available, extra = {}) => route({ role: 'review', writer, files: ['src/app.ts'], available, grok: under, ...extra }, table);
 
-test('three CLIs: every family that did not write the code reviews, grok first', () => {
-  assert.deepEqual(models(review('claude', all)), ['grok:grok-4.7/medium', 'codex:gpt-6.2-sol/medium']);
-  assert.deepEqual(models(review('codex', all)), ['grok:grok-4.7/medium', 'claude:sonnet']);
-  for (const w of ['mixed', 'unknown']) assert.deepEqual(models(review(w, all)), ['grok:grok-4.7/medium'], w);
-  assert.deepEqual(models(review('grok', all)), ['claude:sonnet', 'codex:gpt-6.2-sol/medium']);
-  for (const w of ['claude', 'codex', 'mixed', 'grok']) assert.equal(review(w, all).cross_model, true, w);
+test('three CLIs: exactly one cross-family reviewer, grok never reviews', () => {
+  assert.deepEqual(models(review('claude', all)), ['codex:gpt-6.2-sol/medium']);
+  assert.deepEqual(models(review('codex', all)), ['claude:sonnet']);
+  assert.deepEqual(models(review('grok', all)), ['codex:gpt-6.2-sol/medium']);
+  for (const w of ['mixed', 'unknown']) assert.deepEqual(models(review(w, all)), ['codex:gpt-6.2-sol/medium', 'claude:sonnet'], w);
+  for (const w of ['claude', 'codex', 'grok', 'mixed']) assert.equal(review(w, all).cross_model, true, w);
+  for (const w of ['claude', 'codex']) assert.ok(!review(w, all).reasons.some(x => /grok/.test(x)), w);
 });
 
-test('three CLIs on a risk trigger: all cross reviewers move up, no extra same-family', () => {
+test('a risk trigger with three CLIs still yields one reviewer, one tier up', () => {
   const r = review('claude', all, { files: ['src/auth/x.ts'] });
-  assert.deepEqual(models(r), ['grok:grok-4.7/high', 'codex:gpt-6.2-sol/high']);
+  assert.deepEqual(models(r), ['codex:gpt-6.2-sol/high']);
   assert.equal(r.escalated, true);
 });
 
-test('two CLIs: the other one reviews; a lone cross reviewer gets the D3 same-family second opinion', () => {
-  assert.deepEqual(models(review('claude', ['claude', 'grok'])), ['grok:grok-4.7/medium']);
-  assert.deepEqual(models(review('codex', ['codex', 'grok'])), ['grok:grok-4.7/medium']);
-  assert.deepEqual(models(review('claude', ['claude', 'grok'], { deep: true })), ['grok:grok-4.7/high', 'claude:sonnet']);
-  assert.deepEqual(models(review('claude', both)), ['codex:gpt-6.2-sol/medium']);
-});
-
-test('one CLI: the loop still runs with a same-family fresh-context reviewer', () => {
+test('missing preferred reviewer: the other installed family, then same-family', () => {
+  assert.deepEqual(models(review('claude', ['claude', 'grok'])), ['claude:sonnet']);
+  assert.equal(review('claude', ['claude', 'grok']).cross_model, false);
+  assert.deepEqual(models(review('grok', ['claude', 'grok'])), ['claude:sonnet']);
+  assert.equal(review('grok', ['claude', 'grok']).cross_model, true);
   for (const [w, only, expect] of [['claude', 'claude', 'claude:sonnet'], ['codex', 'codex', 'codex:gpt-6.2-sol/medium'], ['mixed', 'codex', 'codex:gpt-6.2-sol/medium']]) {
     const r = review(w, [only]);
     assert.deepEqual(models(r), [expect], `${w}/${only}`);
     assert.equal(r.cross_model, false);
   }
-  const g = review('claude', ['grok']);
-  assert.deepEqual(models(g), ['grok:grok-4.7/medium']);
-  assert.equal(g.cross_model, true);
+  assert.throws(() => review('claude', ['grok']), /no reviewer CLI/);
 });
 
-test('at or over 90%, paused after a usage limit, or missing CLI: grok drops out and the rest is unchanged', () => {
-  for (const g of [over, { ok: false, reason: 'grok usage limit hit 2026-11-20T00:00:00Z; paused until 2026-11-21T00:00:00Z' }]) {
-    for (const w of ['claude', 'codex', 'mixed']) {
-      const r = review(w, all, { grok: g });
-      assert.deepEqual(models(r), models(route({ role: 'review', writer: w, files: ['src/app.ts'], available: both }, table)), w);
-      assert.match(r.reasons[0], /^grok skipped: /);
-    }
-  }
-  assert.match(review('claude', both).reasons[0], /CLI unavailable/);
+test('lookup goes to grok under the cap, else the host route', () => {
+  const look = (extra) => route({ role: 'lookup', available: all, grok: under, ...extra }, table);
+  assert.deepEqual(models(look({})), ['grok:grok-4.7-build-fast']);
+  assert.deepEqual(models(look({ grok: over })), ['claude:haiku']);
+  assert.equal(look({ grok: over }).reviewers[0].agent, 'Explore');
+  assert.deepEqual(models(look({ grok: over, host: 'codex' })), ['codex:gpt-6-luna/low']);
+  assert.deepEqual(models(look({ available: both })), ['claude:haiku']);
+  assert.match(look({ available: both }).reasons[0], /CLI unavailable/);
+  assert.throws(() => look({ host: 'grok' }), /host must be/);
+  assert.deepEqual(models(look({ writer: 'grok' })), ['grok:grok-4.7-build-fast']);
+  const paused = look({ grok: { ok: false, reason: 'grok usage limit hit 2026-11-20T00:00:00Z; paused until 2026-11-21T00:00:00Z' } });
+  assert.deepEqual(models(paused), ['claude:haiku']);
+  assert.match(paused.reasons[0], /^grok skipped: grok usage limit hit/);
+});
+
+test('lookup CLI accepts --host', () => {
+  const ok = spawnSync(process.execPath, [script, '--role', 'lookup', '--host', 'codex', '--available', 'claude,codex', '--no-grok'], { encoding: 'utf8' });
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.equal(JSON.parse(ok.stdout).reviewers[0].family, 'codex');
 });
 
 test('qa-triage goes to grok fast under the cap; qa-author never does', () => {

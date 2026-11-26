@@ -26,7 +26,7 @@ requests execution. Confirming a design in `$matt-design` alone does not start i
   already approved choice is not a new escalation. Do not invoke `$to-spec`
   or re-publish the source design as a different authoritative spec.
 - No PR without a ship flag; never merge a PR. Preserve routing, coordinator-run
-  verification, isolated workers, retry bounds and measured reports below.
+  verification, isolated workers in full mode, retry bounds and measured reports below.
 - Read the [execution core](references/execution-core.md) before any side effect: frontier dispatch, worker contract, coordinator merge, QA/review with fix workers, PR body, retro candidates, Change control, red flags.
 - Use Claude Code built-ins and packaged agents below; `$interview-report`, `$loop-report`, and `$loop-gates` supply reporting and ship checks. Missing delivery falls back to a local report; unavailable gates means report checks directly, never claim ledger verification.
 ## Modes
@@ -44,8 +44,8 @@ In step 1, before its tracker setup, pick the mode by the first matching row and
 | 7 | otherwise | core |
 
 `full` is the pipeline below. `core` follows [core mode](references/core-mode.md):
-one ticket, no delegate or report page, the same verification and `$review-gate`
-(one cycle), automatic promotion to full when the work outgrows it.
+one ticket implemented and fixed in this session, no delegate or report page, the same
+verification and `$review-gate` (one cycle), automatic promotion to full when the work outgrows it.
 
 ## Pipeline
 
@@ -137,7 +137,7 @@ Step 7 plans the task graph; step 8 records the engine; step 9 keeps the frontie
 
 **Planning (step 7)** — your call, recorded as the page's `plan` block: forecast waves from `$to-tickets`' blocking edges, every wave with its reason, and the tickets that must not run together (same files or section, dependent assumptions, exploratory work, a colliding merge). Give every ticket an honest `estimateMin`.
 
-**Engines** — with hc available, every implementation ticket and review-fix worker, alone or not, is an hc worker; step 3's delegate and read-only lookups stay in-session:
+**Engines** (full mode) — with hc available, every implementation ticket and review-fix worker is an hc worker; step 3's delegate stays in-session and read-only lookups take the lookup route (`gate-route.mjs --role lookup --host claude`):
 
 - **hc workers** (default whenever the probe succeeded). Per `$hc-workers`: a worktree from the integration branch tip, the template `matt-default-claude` or `matt-deep-claude` for the ticket's route, and a task that is the in-session prompt plus the worker contract and the lifecycle lines. Start the frontier up to the cap, then wait; each `DONE` is a frontier event: read the result file, send its open decisions to the delegate, apply the coordinator merge, then dispatch what became ready before waiting again. A verification failure returns to that worker (`hc send`) with the failing output, at most twice, then handoff.
 

@@ -18,12 +18,20 @@ artifact: none
 
 - `status`: `draft` until the user confirms the current content; then `confirmed`.
 - `revision`: increment for design changes; record confirmation of that revision.
-- `kind`: `feature` or `optimize`. Feature execution uses `loop: matt-auto`.
-- For measured optimization the user may choose `loop: autocode` or optional
-  `followup: autocode`. Include `metric` with `name`, `command` (last line one
+- `kind` names the purpose (purpose-loops):
+  - `feature` — build a capability; `loop: matt-auto`.
+  - `optimize` — make a measured number better, Rust ports included; `loop: autocode`,
+    or `loop: matt-auto` with optional `followup: autocode`.
+  - `research` — autoresearch-style experiments against a fixed evaluation;
+    `loop: autocode`.
+- `optimize` and `research` include `metric` with `name`, `command` (last line one
   number), `direction` (`lower` / `higher`), `target`, `target_files`, `guard`,
-  and `forbidden`. The command is `$autocode init --spec <path>`; confirming
-  this spec still does not launch that loop.
+  and `forbidden`. For `research`, `forbidden` lists the evaluation script and its
+  data, and `command` runs one experiment within a fixed budget (time or steps), so
+  results compare. A Rust port fills these from `$rust-rewrite` steps 1–3: `command`
+  is its benchmark, `guard` its differential harness, `forbidden` the frozen corpus
+  and tests. The command is `$autocode init --spec <path>`; confirming this spec
+  still does not launch that loop.
 - `artifact`: design-map's delivered page route, or `none`; no page is required.
 - `mode` (optional): `core` or `full`. It pins matt-auto's execution mode;
   omitted, matt-auto selects one from its mode table.

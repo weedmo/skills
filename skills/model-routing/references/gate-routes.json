@@ -1,5 +1,5 @@
 {
-  "comment": "Rule table for review-gate and qa-gate model choice. Read only by scripts/gate-route.mjs. Change models here, not in skill prose.",
+  "comment": "Rule table for review-gate, qa-gate and lookup model choice. Read only by scripts/gate-route.mjs. Change models here, not in skill prose.",
   "families": {
     "claude": {
       "cli": "claude",
@@ -8,6 +8,10 @@
       },
       "qa_triage": {
         "model": "haiku"
+      },
+      "lookup": {
+        "model": "haiku",
+        "agent": "Explore"
       },
       "review": {
         "model": "sonnet"
@@ -29,6 +33,11 @@
         "effort": "low",
         "agent": "matt-fast"
       },
+      "lookup": {
+        "model": "gpt-6-luna",
+        "effort": "low",
+        "agent": "matt-fast"
+      },
       "review": {
         "model": "gpt-6.2-sol",
         "effort": "medium",
@@ -45,20 +54,15 @@
       "qa_triage": {
         "model": "grok-4.7-build-fast"
       },
-      "review": {
-        "model": "grok-4.7",
-        "effort": "medium"
-      },
-      "review_up": {
-        "model": "grok-4.7",
-        "effort": "high"
+      "lookup": {
+        "model": "grok-4.7-build-fast"
       }
     }
   },
   "grok_priority": {
     "comment": "Grok goes first for these roles while its weekly token use is under cap_pct. Budget: env GROK_WEEKLY_TOKEN_BUDGET, else weekly_token_budget here, else the budget learned at Grok's last usage-limit error (grok.mjs state). With none yet Grok stays on; a usage-limit error pauses it for pause_hours_after_limit.",
     "roles": [
-      "review",
+      "lookup",
       "qa-triage"
     ],
     "cap_pct": 90,

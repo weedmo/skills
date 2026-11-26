@@ -33,7 +33,7 @@ if (text !== 'new greeting') process.exit(1);
   return { dir, base, qa };
 }
 
-test('records the base worktree as As-Is and the working tree as To-Be, side by side', async () => {
+test('records the exported base tree as As-Is and the working tree as To-Be, side by side', async () => {
   const { dir, base, qa } = repo();
   try {
     const out = join(dir, '.pr-visual', 'u');
@@ -53,10 +53,24 @@ test('records the base worktree as As-Is and the working tree as To-Be, side by 
     assert.match(share, /data:video\/webm;base64,/, 'videos inlined for an artifact link');
     assert.doesNotMatch(share, /src="(as-is|to-be)\//, 'no file references left in share.html');
     assert.equal(s.fits_artifact, true);
-    assert.equal(existsSync(join(out, 'as-is-tree')), false, 'base worktree removed');
+    assert.equal(existsSync(join(out, 'as-is-tree')), false, 'base export removed');
     const wt = spawnSync('git', ['worktree', 'list'], { cwd: dir, encoding: 'utf8' }).stdout.trim().split('\n');
     assert.equal(wt.length, 1);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('works when .git is read-only, as in a Codex workspace-write sandbox', async () => {
+  const { dir, base, qa } = repo();
+  const lock = mode => spawnSync('chmod', ['-R', mode, join(dir, '.git')]);
+  try {
+    lock('a-w');
+    const out = join(dir, '.pr-visual', 'u');
+    const s = await record({ qaDir: qa, outDir: out, base, root: dir });
+    assert.equal(s.scenarios[0].as_is_exit, 1);
+    assert.equal(s.scenarios[0].to_be_exit, 0);
+    assert.equal(existsSync(join(out, 'as-is-tree')), false);
+    assert.equal(existsSync(join(out, 'as-is-tree.tar')), false);
+  } finally { lock('u+w'); rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('where it is shown: codex (deliver.py) first, claude artifact second, local last', () => {

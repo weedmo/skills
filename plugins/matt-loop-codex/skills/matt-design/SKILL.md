@@ -1,6 +1,6 @@
 ---
 name: matt-design
-description: "Collaboratively design a feature or change using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; --brief writes a short confirmed spec for small work run in matt-auto core mode. design-map renders the current design as an artifact."
+description: "Plan session for every loop: collaboratively design a feature, a performance change or Rust port, or an autoresearch-style experiment using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; --brief writes a short confirmed spec for small work run in matt-auto core mode. design-map renders the current design as an artifact."
 ---
 
 # Matt Design
@@ -53,10 +53,14 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
    reuse it. Record the confirmation and revision in the spec. End with the
    spec path and the command selected by `loop`: `$matt-auto --spec <path>`
    or `$autocode init --spec <path>`; describe any followup separately.
+   Recommend running it in a new session that receives only the spec path, started
+   on the Default pair from model routing (Claude Code: `/model opus`), so the build
+   starts without the design conversation in context (purpose-loops D4, D6).
    Do not create tickets, switch
    branches, commit, launch a terminal, implement, or ship merely because the
    design was confirmed. A separate explicit execution request starts the
-   execution skill, including when the user gives it in this same session.
+   execution skill; if the user gives it in this same session, repeat the
+   new-session recommendation once, then follow the user's choice.
 
 ## Brief mode (`--brief`)
 

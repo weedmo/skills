@@ -27,7 +27,7 @@ requests execution. Confirming a design in `$matt-design` alone does not start i
   already approved choice is not a new escalation. Do not invoke `$to-spec`
   or re-publish the source design as a different authoritative spec.
 - No PR without a ship flag; never merge a PR. Preserve routing, coordinator-run
-  verification, isolated workers, retry bounds and measured reports below.
+  verification, isolated workers in full mode, retry bounds and measured reports below.
 - Read the [execution core](references/execution-core.md) before any side effect: frontier dispatch, worker contract, coordinator merge, QA/review with fix workers, PR body, retro candidates, Change control, red flags.
 - Shared runtime: `$model-routing`, `$interview-report`, `$loop-report`, and `$loop-gates`. Missing routing stops dispatch; unavailable page delivery falls back to the local report; unavailable gates means report checks directly, never claim ledger verification.
 ## Modes
@@ -45,8 +45,8 @@ In step 1, before its tracker setup, pick the mode by the first matching row and
 | 7 | otherwise | core |
 
 `full` is the pipeline below. `core` follows [core mode](references/core-mode.md):
-one ticket, no delegate or report page, the same verification and `$review-gate`
-(one cycle), automatic promotion to full when the work outgrows it.
+one ticket implemented and fixed in this session, no delegate or report page, the same
+verification and `$review-gate` (one cycle), automatic promotion to full when the work outgrows it.
 
 ## Pipeline
 

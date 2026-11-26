@@ -45,6 +45,8 @@ Scan the repo before asking anything: language and build system, test command, e
 
 ### 2B: Interview (one question at a time, dynamic follow-ups)
 
+Without `--spec`, first suggest planning in `$matt-design` in its own session (`kind: optimize` or `research`); this interview is the fallback.
+
 Ask with `AskUserQuestion`, one question at a time, proposing the recon-derived answer as the recommended option; loop until every required field is filled. The fields — `target_files`, `metric_name`, `metric_command` (prints the metric as a single number on the last line), `metric_direction` (default lower), `guard_command` (default: detected test command), `worktree_setup`, `scope` (function / module / system, default module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (default: the current branch; `none` = no PR) — with their wording, defaults, and the five follow-ups (hot-path files, interface compatibility, external systems, typecheck/lint in the guard, optional `screen_command` when the metric runs > 60 s) are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
 With `--spec` there is no interview — the design discussion and user confirmation were it: the `metric` block fills its keys (§ Interview fields), the rest take their defaults, follow-ups are answered from recon or left at default, nothing is asked.

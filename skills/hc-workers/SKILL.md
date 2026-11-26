@@ -6,9 +6,10 @@ description: "How the delegated loops (matt-auto, autocode, pr-babysit) run thei
 # hc workers (shared)
 
 Herdr's core, `hc`, runs agents in terminals that stay alive, that a person can
-watch and take over. A loop that finds `hc` runs every implementation worker,
-experimenter and long-lived specialist there instead of in its platform's
-hidden subagents. `hc --skill` is the live manual and overrides any flag
+watch and take over. A loop that finds `hc` runs every worker it spawns —
+full-mode implementation and fix workers, experimenters, long-lived specialists —
+there instead of in its platform's hidden subagents. Work a loop does in its own
+session (matt-auto core) spawns nothing. `hc --skill` is the live manual and overrides any flag
 written here. `<this skill's dir>` is the directory holding this file.
 
 ## Probe (once, at the loop's probe step)

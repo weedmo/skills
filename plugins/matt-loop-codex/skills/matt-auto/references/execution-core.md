@@ -52,7 +52,8 @@ reference. Its rule table picks the other-family reviewer and tier, never you.
 Both gates go in the run's ledger; record each pass as a `review.passes` entry
 with its finding count.
 
-**Fixes go to one fresh implementation worker, not the coordinator.** Hand it
+**In full mode, fixes go to one fresh implementation worker, not the coordinator**
+(core fixes in-session). Hand it
 the pass's confirmed findings by pointer, on Deep when any ticket was `[deep]`,
 otherwise Default. Then re-run the affected tickets' commands and the QA scripts
 yourself and repeat independent review, at most two fix/review cycles.
@@ -62,7 +63,7 @@ passing coordinator verification on the final integrated candidate.
 
 ## PR body and retro candidates
 
-In ship mode first run `$pr-visual` (As-Is / To-Be shown before the PR, its section
+In ship mode first run `$pr-visual` (change-point page shown before the PR, its text section
 added to the body), then write the PR body with `$pr`: Summary from the spec and tickets,
 Evidence from measured results (`gateList`, the QA run, `git diff --numstat`),
 Merge Danger from the spec's externally visible changes.
@@ -95,6 +96,6 @@ pending edit until resolved, then mark it consumed so it is not applied twice.
 - Interviewing or authoring a new spec here; treating design confirmation alone as execution authorization.
 - Dispatching on a draft or changed spec, guessing a design answer, or reversing a settled D-id without a user-confirmed revision.
 - Skipping ticket verification or independent review for small work, claiming completion with open findings, or trusting worker reports without running checks yourself.
-- Holding a ready ticket for a wave, fixing review findings yourself, or accepting a worker report without the integration tip merged.
+- Holding a ready ticket for a wave, fixing review findings yourself in full mode, or accepting a worker report without the integration tip merged.
 - Stale report state, edits silently consumed, or counts not measured from git.
 - A PR without a ship flag, before its measured conditions, or a merge, force-push or rebase of the PR branch.
