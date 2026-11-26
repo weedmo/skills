@@ -81,8 +81,9 @@ export function budgetStatus({ table = loadTable(), env = process.env, usage, st
     : p.weekly_token_budget ? [Number(p.weekly_token_budget), 'table']
     : st.learned_budget ? [Number(st.learned_budget), 'learned'] : [0, null];
   if (!budget) return { ok: true, tokens, sessions, reason: `grok on: weekly budget not learned yet (${tokens} tokens this week); the first usage-limit error sets it` };
+  // Decide on the exact share; round only for display (8,999 of 10,000 is under 90%).
+  const ok = (tokens / budget) * 100 < p.cap_pct;
   const pct = Math.round((tokens / budget) * 1000) / 10;
-  const ok = pct < p.cap_pct;
   return { ok, pct, tokens, budget, budget_source: source, sessions, cap_pct: p.cap_pct,
     reason: `grok weekly use ${pct}% ${ok ? '<' : '>='} ${p.cap_pct}% of ${budget} tokens (${source})` };
 }

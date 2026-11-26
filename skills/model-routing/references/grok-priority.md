@@ -1,38 +1,36 @@
 # Grok priority
 
-## Families by what is installed
-
-Review uses every installed family that did not write the code; `gate-route.mjs`
-detects the CLIs (`claude`, `codex`, `grok`) on each call.
-
-| Installed (writer Claude) | Reviewers | `cross_model` |
-|---|---|---|
-| `claude` only | Claude, fresh context | false |
-| `codex` only | Codex | true |
-| `claude` + `codex` | Codex | true |
-| `claude` + `grok` | Grok (+ Claude base on a risk trigger) | true |
-| `claude` + `codex` + `grok` | Grok + Codex, both one tier up on a risk trigger | true |
-
-The same holds with the families swapped for a Codex writer. Mixed (Claude + Codex)
-work goes to Grok when it is usable, otherwise to one Claude and one Codex reviewer.
-Implementation stays on the host's own agents (Claude Code agents, Codex roles), so a
-loop needs only its host CLI; the other CLIs only widen review.
+Grok is the first choice for **lookups**: read-only searches whose result the main
+session needs but whose path through files and pages it does not (purpose-loops D8).
+It also triages QA. It never reviews code and never takes first-choice implementation;
+review is one cross-family reviewer, Codex (Claude for Codex-written code), routed by
+`gate-route.mjs --role review`.
 
 ## Grok slots
 
-Grok joins three slots while its weekly token use stays under 90%. At 90% or above —
-or when the use cannot be measured — Grok drops out and every slot runs exactly as the
-table above without it. Data lives in `gate-routes.json` (`families.grok`, `grok_priority`);
-the check is `node <model-routing>/scripts/grok.mjs status`.
+Grok joins these slots while its weekly token use stays under 90%. At 90% or above,
+paused after a usage limit, or when `grok` is missing, the slot uses its fallback.
+Data lives in `gate-routes.json` (`families.grok`, `grok_priority`); the check is
+`node <model-routing>/scripts/grok.mjs status`.
 
 | Slot | Under the cap (default on) | At/over the cap, paused after a usage limit, or `grok` missing |
 |---|---|---|
-| Review (`review-gate`) | `grok-4.7` / medium, first of the reviewers above; `grok-4.7` / high on a risk trigger | The reviewers above without Grok |
-| QA triage (`qa-gate`) | `grok-4.7-build-fast` | Writer's other family, as before |
-| Gemini quota exhausted (design-map / large-context slots) | Grok worker, then Codex | Codex continuation, as before |
+| Lookup (`gate-route.mjs --role lookup --host <claude\|codex>`) | `grok-4.7-build-fast`, code and web | The host's lookup route: Claude Code `Explore` agent; Codex `matt-fast` |
+| QA triage (`qa-gate`) | `grok-4.7-build-fast` | Writer's other family |
+| Gemini quota exhausted (design-map / large-context slots) | Grok worker, then Codex | Codex continuation |
 
-Grok never reviews code Grok wrote (`--writer grok`), and never authors QA scenarios
-or takes first-choice implementation.
+Grok never authors QA scenarios.
+
+## Lookups
+
+A lookup is worth a subagent only when its answer is short and its search is long:
+sweeping files for where something lives, reading external docs or release notes,
+checking a fact on the web. Anything the main session will edit next it reads itself.
+Send independent lookups in parallel, one prompt each, and ask for paths, lines and
+source URLs so the answer can be checked.
+
+Measured 2026-11-26: one code + web lookup took 17 s, 3 turns and $0.07 on
+`grok-4.7-build-fast`.
 
 ## Weekly use
 
@@ -51,12 +49,25 @@ weekly budget, cap 90% by default:
 `grok usage` cannot report the plan's own limit outside Grok's background service,
 which is why the budget is learned. Use on other machines or grok.com is not counted,
 so a learned budget can come out low; set the variable to override it.
-`gate-route.mjs` reads the same status on every call (`--no-grok` forces the routes
-without Grok) and puts it in `reasons`.
+`gate-route.mjs` reads the same status on every call (`--no-grok` forces the
+fallbacks) and puts it in `reasons`.
 
 ## Launch
 
-Read-only reviewer or triage, from the repository root (`<schema>` is the role's JSON schema):
+Lookup, from the repository root. Plan mode keeps it read-only; web search stays on:
+
+```
+grok --prompt-file <prompt.txt> -m grok-4.7-build-fast --permission-mode plan \
+  --deny 'MCPTool(*)' --no-subagents --no-memory --output-format json > <out>.json 2> <out>.err
+```
+
+Read the answer from `.text` in `<out>.json`. A lookup that comes back without the
+paths or URLs it was asked for is re-asked once, then done in the main session. A
+usage-limit error → `node <model-routing>/scripts/grok.mjs extract <out>.json <out>.x
+--model grok-4.7-build-fast --stderr <out>.err` records it, and the lookup is routed
+again with `gate-route.mjs`, which now leaves Grok out.
+
+QA triage, read-only (`<schema>` is the role's JSON schema):
 
 ```
 grok --prompt-file <prompt.txt> -m <model> [--reasoning-effort <effort>] --permission-mode plan \
@@ -66,14 +77,10 @@ node <model-routing>/scripts/grok.mjs extract <out>.raw <out> --model <model> [-
 ```
 
 The launch has no shell, so `<prompt.txt>` is the filled prompt followed by the material
-the prompt says to run: for review, a line "You have no shell; the diff follows" and the
-output of `git diff <base>...HEAD`. Measured on a 44 KB prompt: 6 turns, 318k tokens,
-$0.18, about 6 minutes; budget the wait accordingly.
-
-`extract` refuses an envelope with fewer than two turns: Grok can return a
-schema-valid empty answer without opening a file. A refusal counts as a schema failure
-(one re-run, then the gate's normal `ERROR`). A usage-limit failure is recorded instead:
-route the round again with `gate-route.mjs`, which now leaves Grok out.
+the prompt says to run. `extract` refuses an envelope with fewer than two turns: Grok
+can return a schema-valid empty answer without opening a file. A refusal counts as a
+schema failure (one re-run, then the gate's normal `ERROR`). A usage-limit failure is
+recorded instead: route again with `gate-route.mjs`, which now leaves Grok out.
 
 Gemini-exhaustion worker: `grok -p --prompt-file <brief> -m grok-4.7 --reasoning-effort high
 -w <name> --permission-mode acceptEdits --deny 'MCPTool(*)' --output-format json`. It

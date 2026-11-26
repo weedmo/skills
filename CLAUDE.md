@@ -61,13 +61,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Parallel Execution
 
-Always run **independent tasks in parallel**. Never serialize work that has no dependencies.
+Run **independent read-only work in parallel** (lookups, analysis, test runs). Writing
+stays with one owner: the main session edits, and subagents are used only for lookups
+whose path the main session does not need, truly independent parallel deliverables,
+and independent review (`docs/design/purpose-loops.md`).
 
 | Parallel OK | Must be Sequential |
 |-------------|-------------------|
-| Editing different files/modules | Edit A → test A |
+| Lookups across different files/docs | Edit A → test A |
 | Code analysis + doc analysis | Analysis → implementation plan |
-| Independent module refactors | DB schema change → ORM update |
+| Independent deliverables in separate worktrees | DB schema change → ORM update |
 
 ## Branch Workflow (Mandatory)
 
@@ -85,11 +88,12 @@ Do NOT include `Co-Authored-By` lines in commit messages.
 
 ## Auto-Fix After Review (Mandatory)
 
-When reviewing code and finding issues:
-1. **Fix all issues immediately** without asking the user for permission.
+When review findings come back to you as the writer (an independent reviewer only
+reports and never edits):
+1. **Fix blocker and major issues immediately** without asking the user for permission.
+   Record minor issues (style, naming, small smells) in the report instead of fixing them.
 2. After fixing, **run relevant tests**. If tests fail, fix them too.
 3. Never say "수정할까요?" or "진행할까요?" — just fix it.
-4. The Edit/Write PostToolUse hook will trigger auto-review on your fixes.
 
 # graft (code context graph)
 

@@ -45,6 +45,8 @@ Scan the repo before asking anything: language and build system, test command, e
 
 ### 2B: Interview (one question at a time, dynamic follow-ups)
 
+Without `--spec`, first suggest planning in `$matt-design` in its own session (`kind: optimize` or `research`); this interview is the fallback.
+
 Reuse user and reconnaissance answers. Ask only unresolved choices affecting the outcome, using Codex's available clarification tool (e.g. `request_user_input_async`) or chat; `AskUserQuestion` requires a platform exposing it. Continue independent work while required answers are pending. Fields and defaults: `target_files`, `metric_name`, `metric_command` (last line: one number), `metric_direction` (lower), `guard_command` (detected tests), `worktree_setup`, `scope` (module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (current branch; `none` disables PR). Wording, spec keys, and follow-ups are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
 
 With `--spec` skip the interview: the design discussion and user confirmation were it; the `metric` block fills its keys (§ Interview fields), the rest and the follow-ups take recon or defaults; nothing is asked.

@@ -7,15 +7,15 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { weeklyTokens, budgetStatus, extract, recordLimit, readState, isLimitError } from '../scripts/grok.mjs';
 
-const table = { grok_priority: { roles: ['review'], cap_pct: 90, weekly_token_budget: null, window_days: 7, pause_hours_after_limit: 24 } };
+const table = { grok_priority: { roles: ['lookup'], cap_pct: 90, weekly_token_budget: null, window_days: 7, pause_hours_after_limit: 24 } };
 const now = Date.parse('2026-11-20T00:00:00Z');
 
-function sessions(rows) {
+function sessions(rows, at = now) {
   const dir = mkdtempSync(join(tmpdir(), 'grok-sessions-'));
   rows.forEach(([daysAgo, tokens], i) => {
     const d = join(dir, '%2Frepo', `s${i}`);
     mkdirSync(d, { recursive: true });
-    writeFileSync(join(d, 'usage.json'), JSON.stringify({ updatedAt: new Date(now - daysAgo * 86400000).toISOString(), session: { totalTokens: tokens } }));
+    writeFileSync(join(d, 'usage.json'), JSON.stringify({ updatedAt: new Date(at - daysAgo * 86400000).toISOString(), session: { totalTokens: tokens } }));
   });
   return dir;
 }
@@ -30,6 +30,7 @@ test('weekly tokens count only sessions updated inside the window', () => {
 test('budget status: under 90% ok, at 90% not ok; env beats table', () => {
   const at = t => budgetStatus({ table, env: { GROK_WEEKLY_TOKEN_BUDGET: '1000' }, usage: { tokens: t, sessions: 1 }, state: {} });
   assert.equal(at(899).ok, true);
+  assert.equal(budgetStatus({ table, env: { GROK_WEEKLY_TOKEN_BUDGET: '10000' }, usage: { tokens: 8999, sessions: 1 } }).ok, true);
   assert.equal(at(900).ok, false);
   assert.match(at(900).reason, /90% >= 90% of 1000 tokens \(env\)/);
   const fromTable = budgetStatus({ table: { grok_priority: { ...table.grok_priority, weekly_token_budget: 1000 } }, env: {}, usage: { tokens: 10, sessions: 1 }, state: {} });
@@ -84,7 +85,8 @@ test('extract refuses an answer that never read the repository', () => {
 });
 
 test('CLI extract: a non-JSON usage-limit failure is recorded and learns the budget', () => {
-  const dir = sessions([[1, 3000]]);
+  // The CLI counts the real last 7 days, so the session is dated from the real clock.
+  const dir = sessions([[1, 3000]], Date.now());
   const work = mkdtempSync(join(tmpdir(), 'grok-cli-'));
   try {
     const script = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'grok.mjs');

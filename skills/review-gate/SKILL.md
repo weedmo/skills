@@ -1,13 +1,15 @@
 ---
 name: review-gate
-description: "Cross-model review node: a reviewer from the other model family reviews a diff, the writer triages and fixes, the reviewer re-checks, at most N cycles. The verdict is a file bound to the reviewed commit and checked as one unlazy gate. Called by matt-auto step 9 and autocode before its PR; also runs standalone as `review-gate <base> [--spec PATH] [--cycles N]` for any branch."
+description: "Cross-model review node: one reviewer from the other model family (Codex; Claude for Codex-written code) reviews a diff, read-only and comment-only, the writer triages and fixes, the reviewer re-checks, at most N cycles. The verdict is a file bound to the reviewed commit and checked as one unlazy gate. Called by matt-auto step 9 and autocode before its PR; also runs standalone as `review-gate <base> [--spec PATH] [--cycles N]` for any branch."
 ---
 
 # review-gate
 
 A review loop with a fixed shape: **the writer never reviews its own work** when another
-family is installed (one CLI → a same-family fresh-context reviewer; two or three → every
-other family reviews, Grok only under its weekly cap), every
+family is installed. Exactly one reviewer runs: Codex for Claude- or Grok-written code,
+Claude for Codex-written code, one per family for mixed work, a same-family
+fresh-context reviewer when only one CLI is installed. The reviewer only comments; the
+writer fixes. Every
 handoff is a JSON file under `.review/<unit>/`, and the result counts only for the
 commit it reviewed. herdr is optional and only makes the reviewer visible.
 
@@ -28,19 +30,22 @@ Keep `.review/` and `.qa/` out of git with `.git/info/exclude`, never the user's
 1. **Route** — `node <model-routing>/scripts/gate-route.mjs --role review --writer <w> --base <base> [--deep] [--triage .review/<unit>/triage-<n-1>.json]`.
    It returns the reviewers (family, model, effort, Codex agent role), `escalated`,
    `cross_model` and `reasons`. Use exactly those reviewers; never pick a model yourself.
-   Put `reasons` on the board; they include Grok's weekly use (Grok goes first under 90%).
+   Put `reasons` on the board.
 2. **Review round n** — run every routed reviewer in parallel with
    [the reviewer prompt](references/reviewer-prompt.md), each writing its own output file.
    Then merge: `node <review-gate>/scripts/rounds.mjs merge .review/<unit> <n> <outputs…>`.
    Findings both families raise land once with `agreed_by` naming both.
 3. **Decide** — `node <review-gate>/scripts/rounds.mjs decide .review/<unit> --writer <w> --max-cycles <N>`
    writes `verdict.json` for HEAD and prints `review-gate: PASS | CONTINUE | STOP`.
-   - `PASS` → done. Minor findings are listed in the report, never block.
+   - `PASS` → done. Minor findings are listed in the report, never block, and are not
+     fixed in this loop unless the fix is one line inside a file the unit already changed.
    - `STOP` → hand off with the open findings and the reasons (cycles exhausted, or a
      finding returning after fixes). Never mark the unit done.
    - `CONTINUE` → step 4.
 4. **Triage and fix** — the writer (the coordinator, not the reviewer) writes
    `.review/<unit>/triage-<n>.json`: `{"round": n, "decisions": [{"id", "severity", "decision": "fix" | "reject", "reason"}]}`.
+   Fix blocker/major findings that hold against the spec and the code; reject one only
+   with a concrete reason. Minor findings stay in the report.
    A blocker/major in `agreed_by` of two families cannot be rejected (`decide` refuses).
    Fix through the loop's own implementation route, commit, then re-run the units'
    verification commands and `qa-gate`'s scripted scenarios when QA ran. Go to step 1
@@ -69,6 +74,7 @@ and minor findings with file:line.
 ## Red flags
 
 - Choosing or upgrading a reviewer model by hand instead of `gate-route.mjs`.
+- Letting the reviewer edit code, or fixing every minor finding to "get a clean review".
 - Reading a reviewer's terminal screen instead of its output file.
 - A second escalation, or a third cycle, to "get it to pass" — that is the STOP.
 - Treating `CONTINUE` or a delegate's "fixed" as the gate passing; only `verdict.mjs` decides.

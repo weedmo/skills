@@ -19,6 +19,19 @@ harness (superpowers + graft) and the native Workflow tool.
 These are orthogonal. A task can be *clear + large + high-risk* (skip interview,
 fan out with a workflow, but add adversarial verification gates).
 
+### weed-harness purpose loops
+
+Each loop is two main sessions joined by one confirmed spec file
+(`docs/design/purpose-loops.md`). The main session writes; subagents only do lookups
+(Grok first), independent parallel deliverables, the one Codex review, and the Codex
+As-Is / To-Be visuals.
+
+| Purpose | Plan session | Build session |
+| :-- | :-- | :-- |
+| Feature | `matt-design` → `kind: feature` | `matt-auto --spec` (core implements in-session) |
+| Performance / Rust | `matt-design` + `rust-rewrite` steps 1–3 → `kind: optimize` | `autocode init --spec` → `run` |
+| Autoresearch | `matt-design` → `kind: research` (fixed evaluation) | `autocode init --spec` → `run` |
+
 ---
 
 ## 1. TL;DR decision flow
@@ -124,14 +137,14 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
   generated from the role files, one visible tab per run, file-based reports, a bounded wait loop
 - **loop-gates** — how the loops use the upstream unlazy skill so "done" is a re-verified
   ledger, not a report
-- **review-gate** — cross-model review node: the writer's other family reviews on the route
+- **review-gate** — cross-model review node: one reviewer from the writer's other family (Codex, or Claude for Codex-written code) reviews on the route
   `model-routing/scripts/gate-route.mjs` returns, findings and triage as JSON under `.review/`,
   a verdict that counts only for the reviewed HEAD
 - **qa-gate** — behavioural QA node: acceptance criteria as re-runnable scenario scripts against
   the running app, evidence under `.qa/`, judged criteria as manual gates
-- **pr-visual** — As-Is / To-Be before every loop PR: web changes filmed on base and HEAD and shown
-  before the PR (Codex via `deliver.py`, else a Claude Artifact, else locally), pipeline changes drawn as
-  mermaid diagram pairs in the PR body
+- **pr-visual** — As-Is / To-Be change-point page before every loop PR, built by Codex: change points
+  side by side, flow diagrams, web recordings inlined; shown as an Artifact (Codex via `deliver.py`, else
+  locally). The PR body gets text only
 - **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
   a page only on request; Codex delivers it as local HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (on Gemini quota exhaustion a Grok worker while Grok's weekly use is under 90%, else Codex), independent
   Sol review, and optional Antigravity support.

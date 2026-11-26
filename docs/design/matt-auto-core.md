@@ -23,6 +23,8 @@ matt-auto는 작업 크기와 무관하게 같은 10단계를 돈다. confirmed 
 
 세 단계의 자리는 다음과 같다.
 
+> 2026-11-26 갱신: core의 구현과 리뷰 수정은 워커 없이 세션 안에서 한다 (`docs/design/purpose-loops.md`). 아래 표의 "세션 내 에이전트 1개"는 그 이전 설계다.
+
 | | `implement` | matt-auto **core** | matt-auto **full** |
 |---|---|---|---|
 | 입력 | spec(게이트 없음) | confirmed spec 또는 confirmed brief | confirmed spec |

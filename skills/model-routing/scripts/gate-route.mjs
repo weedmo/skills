@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Rule-table model choice for review-gate and qa-gate. Deterministic, no network:
+// Rule-table model choice for review-gate, qa-gate and read-only lookups. Deterministic, no network:
 // the same input always yields the same route, and every route carries its reasons.
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -9,7 +9,8 @@ import { budgetStatus } from './grok.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const TABLE_PATH = join(here, '..', 'references', 'gate-routes.json');
-export const ROLES = ['qa-author', 'qa-rerun', 'qa-triage', 'review'];
+export const ROLES = ['qa-author', 'qa-rerun', 'qa-triage', 'review', 'lookup'];
+const HOSTS = ['claude', 'codex'];
 const WRITERS = ['claude', 'codex', 'grok', 'mixed', 'unknown'];
 
 export function loadTable(path = TABLE_PATH) {
@@ -44,15 +45,17 @@ export function matchingFiles(files, globs) {
 }
 
 const other = family => (family === 'claude' ? 'codex' : 'claude');
+// One cross-family reviewer per writer (purpose-loops D2/D7): Codex reviews Claude and
+// Grok code, Claude reviews Codex code. Grok never reviews.
+const REVIEWER = { claude: 'codex', codex: 'claude', grok: 'codex' };
 
-// Grok goes first for table.grok_priority.roles while input.grok.ok (weekly use under
-// the cap, computed by grok.mjs). Otherwise Grok is invisible and the routes below are
-// exactly the pre-Grok ones.
+// Grok goes first for table.grok_priority.roles (lookup, qa-triage) while input.grok.ok
+// (weekly use under the cap, computed by grok.mjs). Otherwise Grok is invisible.
 function grokFirst(input, table, available) {
   const p = table.grok_priority;
   if (!p || !p.roles.includes(input.role)) return { use: false };
   const g = input.grok ?? { ok: false, reason: 'grok status not given' };
-  if (input.writer === 'grok') return { use: false, reason: 'grok skipped: grok wrote the code' };
+  if (input.writer === 'grok' && input.role !== 'lookup') return { use: false, reason: 'grok skipped: grok wrote the code' };
   if (!available.includes('grok')) return { use: false, reason: 'grok skipped: CLI unavailable' };
   if (!g.ok) return { use: false, reason: `grok skipped: ${g.reason}` };
   return { use: true, reason: `grok first: ${g.reason}` };
@@ -64,7 +67,7 @@ function pick(table, family, tier) {
   return { family, tier, model: row.model, effort: row.effort ?? null, agent: row.agent ?? null };
 }
 
-// input: {role, writer, deep, files, triageConflict, available, grok: {ok, reason}}
+// input: {role, writer, host, deep, files, triageConflict, available, grok: {ok, reason}}
 export function route(input, table = loadTable()) {
   const { role, writer = 'unknown', deep = false, files = [], triageConflict = false } = input;
   const available = input.available ?? Object.keys(table.families);
@@ -74,6 +77,14 @@ export function route(input, table = loadTable()) {
   const grok = grokFirst({ ...input, role, writer }, table, available);
   if (grok.reason) reasons.push(grok.reason);
   const rest = available.filter(f => f !== 'grok');
+
+  if (role === 'lookup') {
+    const host = input.host ?? 'claude';
+    if (!HOSTS.includes(host)) throw new Error(`host must be one of ${HOSTS.join(', ')}`);
+    if (grok.use) return { role, reviewers: [pick(table, 'grok', 'lookup')], cross_model: null, escalated: false, reasons };
+    reasons.push(`lookup on the ${host} host route`);
+    return { role, reviewers: [pick(table, host, 'lookup')], cross_model: null, escalated: false, reasons };
+  }
 
   if (role === 'qa-rerun') {
     return { role, reviewers: [], cross_model: null, escalated: false, reasons: ['scripted scenarios re-run without a model'] };
@@ -99,35 +110,33 @@ export function route(input, table = loadTable()) {
   const escalated = triggers.length > 0;
   reasons.push(...triggers);
 
-  // Every available family that did not write the code reviews (Grok listed first when
-  // its weekly use allows it), so one CLI gives a same-family fallback, two give a cross
-  // pair, three give two cross reviewers. A risk trigger moves them all up one tier and,
-  // when only one cross reviewer exists, adds a same-family base reviewer (D3 dual).
-  const wrote = writer === 'mixed' || writer === 'unknown' ? ['claude', 'codex'] : [writer];
-  const pool = grok.use ? ['grok', ...rest] : rest;
-  if (!pool.length) throw new Error('no reviewer CLI available');
-  const others = pool.filter(f => !wrote.includes(f));
+  // Exactly one reviewer from the family that did not write the code, one tier up on a
+  // risk trigger. Mixed or unknown authorship gets one reviewer per family. A missing
+  // reviewer CLI falls back to the other installed family, then to a same-family
+  // fresh-context reviewer, and says so.
+  if (!rest.length) throw new Error('no reviewer CLI available');
   const tier = escalated ? 'review_up' : 'review';
-  const reviewers = others.map(f => pick(table, f, tier));
-  if (others.length) {
-    reasons.push(`writer ${writer}: ${others.join(' + ')} review${others.length > 1 ? ' (every available other family)' : ''}`);
-    const same = wrote.find(f => rest.includes(f));
-    if (escalated && others.length === 1 && same) {
-      reviewers.push(pick(table, same, 'review'));
-      reasons.push(`risk trigger: dual review adds ${same}`);
+  if (writer === 'mixed' || writer === 'unknown') {
+    const fams = ['codex', 'claude'].filter(f => rest.includes(f));
+    if (fams.length === 2) {
+      reasons.push(`writer ${writer}: one reviewer per family`);
+      return { role, reviewers: fams.map(f => pick(table, f, tier)), cross_model: true, escalated, reasons };
     }
-    return { role, reviewers, cross_model: true, escalated, reasons };
+    reasons.push(`writer ${writer}: only ${fams[0]} installed, same-family fresh-context reviewer`);
+    return { role, reviewers: [pick(table, fams[0], tier)], cross_model: false, escalated, reasons };
   }
-  // Only the writer's own families are installed.
-  if (wrote.length > 1 && wrote.every(f => rest.includes(f))) {
-    reasons.push(`writer ${writer}: dual review, one reviewer per family`);
-    for (const f of ['codex', 'claude']) reviewers.push(pick(table, f, tier));
-    return { role, reviewers, cross_model: true, escalated, reasons };
+  const want = REVIEWER[writer];
+  if (rest.includes(want)) {
+    reasons.push(`writer ${writer}: ${want} reviews (one cross-family reviewer)`);
+    return { role, reviewers: [pick(table, want, tier)], cross_model: true, escalated, reasons };
   }
-  const fallback = rest.includes(wrote[0]) ? wrote[0] : rest[0];
-  reviewers.push(pick(table, fallback, tier));
-  reasons.push(`no other family installed: same-family fresh-context reviewer (${fallback})`);
-  return { role, reviewers, cross_model: false, escalated, reasons };
+  const alt = rest.find(f => f !== writer);
+  if (alt) {
+    reasons.push(`${want} unavailable, ${alt} reviews`);
+    return { role, reviewers: [pick(table, alt, tier)], cross_model: true, escalated, reasons };
+  }
+  reasons.push(`${want} unavailable: same-family fresh-context reviewer (${rest[0]})`);
+  return { role, reviewers: [pick(table, rest[0], tier)], cross_model: false, escalated, reasons };
 }
 
 export function triageConflict(triagePath) {
@@ -149,6 +158,7 @@ function parseArgs(argv) {
     const v = () => argv[++i];
     if (k === '--role') a.role = v();
     else if (k === '--writer') a.writer = v();
+    else if (k === '--host') a.host = v();
     else if (k === '--deep') a.deep = true;
     else if (k === '--base') a.base = v();
     else if (k === '--files') a.files = v().split(',').filter(Boolean);
@@ -161,10 +171,11 @@ function parseArgs(argv) {
   return a;
 }
 
-const USAGE = `usage: gate-route.mjs --role qa-author|qa-rerun|qa-triage|review --writer claude|codex|mixed|unknown
+const USAGE = `usage: gate-route.mjs --role qa-author|qa-rerun|qa-triage|review --writer claude|codex|grok|mixed|unknown
          [--deep] [--base <ref> | --files a,b] [--triage <triage-n.json>] [--available claude,codex,grok] [--no-grok]
+       gate-route.mjs --role lookup [--host claude|codex] [--available …] [--no-grok]
 Prints the route as JSON. Never calls the network; Grok's weekly use comes from local
-session files (grok.mjs status). --no-grok keeps the pre-Grok routes.`;
+session files (grok.mjs status). --no-grok skips Grok for lookup and qa-triage.`;
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   try {
@@ -177,7 +188,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
       if (r.status !== 0) throw new Error(`git diff failed: ${r.stderr.trim()}`);
       files = r.stdout.split('\n').filter(Boolean);
     }
-    const out = route({ role: a.role, writer: a.writer, deep: a.deep, files,
+    const out = route({ role: a.role, writer: a.writer, host: a.host, deep: a.deep, files,
       triageConflict: triageConflict(a.triage), available: a.available ?? detectAvailable(table),
       grok: a.noGrok ? { ok: false, reason: '--no-grok' } : budgetStatus({ table }) }, table);
     console.log(JSON.stringify(out, null, 2));

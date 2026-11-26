@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // As-Is / To-Be recording for a web change. Runs qa-gate's scripted scenarios twice with
-// QA_VIDEO_DIR set: once against the app started from a detached worktree at <base>
+// QA_VIDEO_DIR set: once against the app started from an exported tree of <base>
 // (As-Is), once from the working tree (To-Be). Writes compare.html with the two videos
 // side by side per scenario. Scenario exit codes are recorded, never enforced: an As-Is
 // run is expected to fail the new acceptance criteria.
@@ -89,7 +89,14 @@ export async function record({ qaDir, outDir, base, root = process.cwd() }) {
   mkdirSync(outDir, { recursive: true });
   const tree = join(outDir, 'as-is-tree');
   rmSync(tree, { recursive: true, force: true });
-  git(['worktree', 'add', '--detach', tree, baseSha], root);
+  // Export the base tree instead of `git worktree add`: it only reads objects, so it
+  // also works where .git is read-only (Codex's workspace-write sandbox).
+  mkdirSync(tree, { recursive: true });
+  const tar = join(outDir, 'as-is-tree.tar');
+  git(['archive', '--format=tar', '-o', tar, baseSha], root);
+  const x = spawnSync('tar', ['-xf', tar, '-C', tree], { encoding: 'utf8' });
+  rmSync(tar, { force: true });
+  if (x.status !== 0) throw new Error(`tar -xf: ${x.stderr.trim()}`);
   try {
     // The base checkout has no installed dependencies; reuse the working tree's.
     for (const dep of ['node_modules', '.venv']) {
@@ -124,7 +131,7 @@ export async function record({ qaDir, outDir, base, root = process.cwd() }) {
     writeFileSync(join(outDir, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
     return summary;
   } finally {
-    spawnSync('git', ['worktree', 'remove', '--force', tree], { cwd: root });
+    rmSync(tree, { recursive: true, force: true });
   }
 }
 

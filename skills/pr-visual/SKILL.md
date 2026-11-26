@@ -1,21 +1,50 @@
 ---
 name: pr-visual
-description: "As-Is / To-Be visuals for every PR a loop opens: a web change is filmed on the base commit and on HEAD and shown side by side before the PR (Codex first, Claude Artifact second); a pipeline change gets As-Is / To-Be mermaid diagrams in the PR body. Called by matt-auto and autocode right before `gh pr create`; also standalone as `pr-visual <base>` for any branch."
+description: "As-Is / To-Be change-point page for every PR a loop opens, made by one headless Codex run: each change point side by side (code at the base commit and at HEAD, what and why), the As-Is / To-Be flow diagrams, and for web changes the base and HEAD recordings, all in one self-contained page shown as an Artifact before the PR. The PR body gets text only — no videos. Called by matt-auto and autocode right before `gh pr create`; also standalone as `pr-visual <base>` for any branch."
 ---
 
 # pr-visual
 
-A reviewer should understand the change from pictures before reading the diff. Every
-PR gets an **As-Is / To-Be** section; which kind depends on what changed. A change can
-be both: then do both.
+A reviewer should understand the change from one page before reading the diff. Codex
+builds a **change-point page** (`.pr-visual/<unit>/changes.html`) and the main session
+shows it as an Artifact before the PR:
 
-| Change | Evidence | Where it goes |
+| Part | Content | When |
 |---|---|---|
-| **web** — a UI a person opens in a browser changed (qa-gate surface `web`) | Video of each web scenario on the base commit and on HEAD | Shown before the PR (order below); the PR body gets a text table |
-| **pipeline** — any flow: loop/skill steps, CI, data or job pipelines, request paths, module wiring | As-Is and To-Be mermaid diagrams | PR body (GitHub renders mermaid) and printed before the PR |
+| Change points | Each changed spot: As-Is code at `base`, To-Be code at HEAD, side by side, with what changed and why | Always |
+| Flow | As-Is and To-Be mermaid diagrams | A flow changed: loop/skill steps, CI, data or job pipelines, request paths, module wiring |
+| Screen | Each web scenario recorded on `base` and on HEAD, inlined | A UI a person opens in a browser changed (qa-gate surface `web`) |
 
-Nothing goes to GitHub: no assets branch, no committed media. Keep `.pr-visual/` out of
-git with `.git/info/exclude`.
+The PR gets **text only**: no videos, no images, no assets branch, no committed media.
+Keep `.pr-visual/` out of git with `.git/info/exclude`.
+
+## Who makes it
+
+One headless Codex run builds the page, on either host; the loop's main session only
+shows it and puts the text section in the PR body (purpose-loops D10). Recording logs,
+code excerpts and diagram drafts stay out of the main session's context. From the
+repository root (the Standard pair from model routing; `<host>` is the main session's,
+`claude` or `codex`):
+
+```
+codex exec -m gpt-6.2-sol -c model_reasoning_effort=low -s workspace-write \
+  -c sandbox_workspace_write.network_access=true -o .pr-visual/<unit>/codex.md \
+  "Follow <pr-visual>/SKILL.md for base <base>, unit <unit>, spec <spec or none>,
+   host <host>. Build .pr-visual/<unit>/changes.html and write the PR text to
+   .pr-visual/<unit>/section.md. Do not commit, push, or open a PR." < /dev/null
+```
+
+`< /dev/null` matters: with an open stdin `codex exec` waits for more input and never
+starts. Measured 2026-11-26 on a two-commit web fixture: about 70 s and 36k tokens for
+two recordings, two diagrams and the section.
+
+Then the main session shows `changes.html` (the last line `changes.mjs` printed names
+where): Claude host → the Artifact tool, same path each run so the URL stays; Codex
+host → `python3 <loop-report>/assets/deliver.py publish --page .pr-visual/<unit>/changes.html`;
+over the Artifact cap or neither app → open it locally, or print its path without a
+display. Put `section.md` in the PR body with one line `변경 지점 페이지: <Artifact URL or
+local path>`. No `changes.html` → one re-run with the error appended; still none →
+write `시각 보고: 생략 — <reason>` in the body and continue. The PR never waits on it.
 
 ## Inputs
 
@@ -23,63 +52,61 @@ git with `.git/info/exclude`.
 - `unit` — the same slug as qa-gate / review-gate.
 - `spec` — optional; its `## 확정 구조` and the current-structure notes seed the diagrams.
 
-## Web: film As-Is and To-Be
+## Steps (the Codex run)
 
-1. Use qa-gate's `.qa/<unit>/plan.json` and scripted Playwright scenarios; they honour
-   `QA_VIDEO_DIR` ([drivers](../qa-gate/references/drivers.md)). No QA plan yet → write one
-   through qa-gate first (its QA author route), web scenarios only.
-2. From the repository root:
-   `node <pr-visual>/scripts/record.mjs .qa/<unit> .pr-visual/<unit> --base <base>`.
-   It starts the app from a temporary worktree at `base` (As-Is), then from the working
-   tree (To-Be), runs every scripted scenario with recording on, writes
-   `.pr-visual/<unit>/compare.html` (videos side by side, one "play both" button),
-   `share.html` (the same page with the videos inlined, for a Claude Artifact; shrunk with
-   Playwright's ffmpeg when over 15 MB) and `summary.json`, and removes the worktree.
-   Pass `--host codex` or `--host claude` for the session you run in. As-Is is expected to
-   fail the new criteria; its exit code is shown, not enforced.
-3. **Show it before the PR, in this order.**
-   1. **Codex** — in a Codex session, `python3 <loop-report>/assets/deliver.py publish
-      --page .pr-visual/<unit>/compare.html` (opened once with the system opener; under
-      Herdr it lands in Herdr's Artifact panel), exactly as loops deliver their report page.
-   2. **Claude** — in Claude Code, publish `share.html` with the Artifact tool (the same
-      path each run keeps the URL; it is private until the user shares it).
-   3. **Local** — neither app: the script opens `compare.html` in the local browser, or
-      prints its path when there is no display.
-   Then print one line per scenario (`<id>: As-Is <what the video shows> → To-Be <what
-   changes>`), written from watching the result, not from the spec.
-4. PR body: a table `시나리오 · As-Is · To-Be` from step 3, and the note that the
-   recordings were reviewed locally (`compare.html`, not attached).
-
-Recording fails (no Playwright, no ffmpeg, the base app does not start) → one retry
-after `npx playwright install chromium ffmpeg` when that is the cause; then print the
-reason, put `영상: 생략 — <reason>` in the body, and continue. Never block the PR on media.
-
-## Pipeline: draw As-Is and To-Be
-
-For each changed flow, two mermaid `flowchart` blocks under `### As-Is` and `### To-Be`:
-
-- Same node ids and the same direction in both, so the eye compares like with like.
-- Mark what changed in To-Be with `classDef added` (new), `classDef changed` (altered),
-  and in As-Is `classDef removed` (gone); add a one-line legend.
-- At most 12 nodes per diagram; split a larger flow into an overview plus one detail
-  pair rather than shrinking labels. Quote labels (`A["…"]`), Korean prose, real identifiers.
-- Draw from the code at `base` and at HEAD (`git show <base>:<path>`), the spec, and the
-  repository's docs; a node you cannot ground in one of them is left out.
-- Below the pair, a table `무엇이 · As-Is · To-Be` with one row per changed node.
-
-autocode adds one `xychart-beta` of the metric per kept experiment (baseline first).
-
-Print the section in the terminal before the PR, then put it in the body.
+1. **Screen (web only).** Use qa-gate's `.qa/<unit>/plan.json` and scripted Playwright
+   scenarios; they honour `QA_VIDEO_DIR` ([drivers](../qa-gate/references/drivers.md)).
+   No QA plan yet → write one through qa-gate first (its QA author route), web
+   scenarios only. Then `node <pr-visual>/scripts/record.mjs .qa/<unit> .pr-visual/<unit>
+   --base <base> --host <host> --no-open`. It starts the app from an export of `base`
+   (`git archive`, so a read-only `.git` is fine) as As-Is, then from the working tree
+   as To-Be, records every scripted scenario, and writes `summary.json` beside the
+   videos. As-Is is expected to fail the new criteria; its exit code is shown, not
+   enforced. Recording fails (no Playwright, no ffmpeg, the base app does not start) →
+   one retry after `npx playwright install chromium ffmpeg` when that is the cause; then
+   continue without the screen part and say why in `section.md`.
+2. **Change points.** Read `git diff <base>...HEAD` and pick the spots a reviewer must
+   understand — behaviour, interfaces, data, flow — not every hunk. Write
+   `.pr-visual/<unit>/changes.json`:
+   `{"title", "summary", "points": [{"title", "file", "as_is": {"start", "end"} | null,
+   "to_be": {"start", "end"} | null, "what", "why"}], "diagrams": {"as_is", "to_be"}}`.
+   Line ranges are 1-based and inclusive: `as_is` in the file at `base`, `to_be` in the
+   working tree; `null` for a file that was added or deleted. Keep each excerpt short
+   (under about 30 lines). `what` and `why` are Korean prose grounded in the diff and the
+   spec.
+3. **Flow (when a flow changed).** Put one mermaid `flowchart` per side in
+   `diagrams.as_is` / `diagrams.to_be`:
+   - Same node ids and direction in both, so the eye compares like with like.
+   - Mark To-Be with `classDef added` (new) and `classDef changed` (altered), As-Is with
+     `classDef removed` (gone).
+   - At most 12 nodes; quote labels (`A["…"]`), Korean prose, real identifiers.
+   - Draw from the code at `base` and HEAD (`git show <base>:<path>`), the spec and the
+     repository's docs; a node you cannot ground in one of them is left out.
+4. **Build.** `node <pr-visual>/scripts/changes.mjs .pr-visual/<unit> --base <base>
+   --host <host>`. It validates `changes.json`, cuts the excerpts, inlines the
+   recordings from `summary.json` (shrunk with Playwright's ffmpeg when over 15 MB, left
+   out with a note when still over), and writes `changes.html`. The diagrams render with
+   mermaid from a CDN; where the viewer blocks it, their source text shows instead. A validation error is
+   fixed in `changes.json` and the build re-run.
+5. **PR text.** Write `section.md`:
+   - `## As-Is / To-Be` with a table `변경 지점 · As-Is · To-Be`, one row per point.
+   - For web, a table `시나리오 · As-Is · To-Be`, written from watching the recordings,
+     not from the spec, and the note that the recordings are in the change-point page.
+   - The same two mermaid diagrams under `### As-Is` and `### To-Be` (GitHub renders
+     them; they are text, not media).
+   - autocode adds one `xychart-beta` of the metric per kept experiment (baseline first).
+   - No page link: the main session adds it after showing the page.
 
 ## Report
 
-One line on the progress board: `pr-visual: web <n> scenarios (compare.html) · pipeline <n> diagrams`,
+One line on the progress board: `pr-visual: <n> change points · web <n> scenarios · flow <yes|no> (changes.html)`,
 or the reason a part was skipped.
 
 ## Red flags
 
-- Opening the PR before the visuals were shown.
-- Diagrams that restate the file list, or a To-Be with no As-Is to compare against.
-- Committing `.pr-visual/`, putting media on GitHub, or pushing an extra branch for assets.
+- Opening the PR before the page was shown.
+- Videos, images or any media in the PR body, on GitHub, or on an extra branch; committing `.pr-visual/`.
+- Change points that restate the file list, or a To-Be with no As-Is to compare against.
 - Opening the page yourself on Codex instead of `deliver.py publish`.
+- Recording, cutting excerpts or drawing in the main session instead of handing it to the Codex run.
 - Describing a video you did not watch the result of, or claiming a recording that failed.
