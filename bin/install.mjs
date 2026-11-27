@@ -9,7 +9,7 @@
 //
 // weed-harness (the shared loop runtime: loop-report, model-routing,
 // loop-gates) is always installed on every selected platform; its Claude
-// Code-only setup is skipped elsewhere; design-map also ships to Codex. Loop plugins
+// Code-only setup is skipped elsewhere. Loop plugins
 // are opt-in and available on every platform. The unlazy skill the loops
 // verify with is ensured via `npx skills add` unless --no-unlazy is given.
 
@@ -42,7 +42,7 @@ const PLATFORMS = {
   },
   antigravity: {
     dir: (home) => path.join(home, ".antigravity", "skills"),
-    note: "no native skill discovery confirmed - reference the skill files yourself; the loop plugins install only the shared PR skills here (pr-babysit, resolving-merge-conflicts).",
+    note: "no native skill discovery confirmed - reference the skill files yourself; the loop plugins install only the shared PR skill here (pr-babysit).",
   },
   agents: {
     dir: (home) => path.join(home, ".agents", "skills"),
@@ -57,7 +57,6 @@ const PLUGINS = {
     desc: "shared loop runtime (loop-report, model-routing, loop-gates) + Claude Code setup",
     skillPlatforms: {
       setup: ["claude-code"],
-      "design-map": ["claude-code", "codex"],
     },
   },
   // Loop plugins ship two roots: plugins/<name>-claude (Claude Code edition,
@@ -68,7 +67,7 @@ const PLUGINS = {
   "matt-loop": {
     src: (platform) => path.join(ROOT, "plugins", `matt-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
     desc: "matt-design + matt-auto (collaborative design, autonomous execution) + Matt skills",
-    restrictSkills: { antigravity: ["pr-babysit", "resolving-merge-conflicts"] },
+    restrictSkills: { antigravity: ["pr-babysit"] },
   },
   "auto-loop": {
     src: (platform) => path.join(ROOT, "plugins", `auto-loop-${platform === "claude-code" ? "claude" : "codex"}`, "skills"),
@@ -119,6 +118,12 @@ const LEGACY_SKILLS = [
   "merging-pr-queue",
   "qa",
   "request-refactor-plan",
+  // weed-owned skills folded into loop-report, matt-design and pr-babysit (skill diet).
+  // Dropped vendored Matt skills are not listed: their generic names may be the user's own install.
+  "interview-report",
+  "autocode-board",
+  "design-map",
+  "resolving-merge-conflicts",
   "auto_research",
   "find-skills",
   "harness-sync",
@@ -278,7 +283,6 @@ for (const platform of platforms) {
   const legacySkills = [
     ...LEGACY_SKILLS,
     ...(platform === "claude-code" ? [] : ["setup"]),
-    ...(platform === "claude-code" || platform === "codex" ? [] : ["design-map"]),
   ];
   const legacyDirs = platform === "opencode"
     ? [dest, path.join(HOME, ".config", "opencode", "skill")]

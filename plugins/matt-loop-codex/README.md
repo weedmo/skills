@@ -5,13 +5,13 @@ This directory is the Codex · OpenCode root of the **matt loop**; the Claude Co
 ## Contents
 
 - `.codex-plugin/plugin.json` for Codex plugin metadata
-- `skills/matt-auto` — conductor that drives Matt Pocock's main flow end to end (grilling interview → spec → tracer-bullet tickets → per-ticket implementation); a decision delegate answers implementation-level questions, unresolved material decisions escalate to the human, and prior approval is reused (`--confirm` requests fresh review gates); with `--dev` / `--main` / `--pr <base>` it also opens a PR against that base and shepherds it to merge-ready (pr-babysit, conflict resolution, push); when `hc` (herdr-core) is available, ready tickets automatically run as parallel visible hc workers, each starting as soon as its blockers merge (`--parallel N` / `--on <machine>` override concurrency and placement) in separate worktrees, optionally on another connected machine, while verification and merging stay with the coordinator
+- `skills/matt-auto` — conductor that drives Matt Pocock's main flow end to end (grilling interview → spec → tracer-bullet tickets → per-ticket implementation); a decision delegate answers implementation-level questions, unresolved material decisions escalate to the human, and prior approval is reused (`--confirm` requests fresh review gates); with `--dev` / `--main` / `--pr <base>` it also opens a PR against that base and shepherds it to merge-ready (pr-babysit with its conflict resolution, push); when `hc` (herdr-core) is available, ready tickets automatically run as parallel visible hc workers, each starting as soon as its blockers merge (`--parallel N` / `--on <machine>` override concurrency and placement) in separate worktrees, optionally on another connected machine, while verification and merging stay with the coordinator
 - `skills/matt-auto/references/execution-core.md` — the execution rules both editions share (frontier dispatch, worker contract, QA/review, change control); the same file ships in `../matt-loop-claude` and `npm test` fails when the copies differ
-- `skills/pr-babysit` — shepherds one GitHub PR through review and CI without merging it
-- `skills/resolving-merge-conflicts` — routed fork of the upstream conflict-resolution skill
+- `skills/pr-babysit` — shepherds one GitHub PR through review and CI without merging it; `references/merge-conflicts.md` is the routed conflict-resolution procedure
+- `skills/matt-design` — the plan session; `references/visualize.md` renders the current design as a page on request
 - Routing — questions select Astra low/xhigh per difficulty; implementation uses `model-routing`'s six Codex pairs and designated Gemini-priority slots with Codex quota fallback; QA and review run through weed-harness `qa-gate` / `review-gate`, whose rule table makes the writer's other model family review (Sol medium / Sonnet by default, one step up on risk)
 - `codex/agents/` — Codex roles for `matt-fast`, `matt-default`, `matt-batch`, `matt-standard`, `matt-deep`, `matt-deep-max`, `matt-reviewer`, `matt-answer`, and `matt-answer-deep`, installed to `~/.codex/agents/`; each pins model and effort, while Default also pins standard service tier and low verbosity
-- `skills/interview-report` — matt-auto's decision-graph view (`assets/view.html` + `validate.py`); the page around it and its delivery (opened once with the system opener, or the path) come from weed-harness's shared `loop-report` skill, and completion gates follow its `loop-gates` convention — matt-loop requires weed-harness 4.x
+- matt-auto's decision-graph page — the view lives in weed-harness's shared `loop-report` skill (`views/matt-auto`, with `contract.md`), together with the page shell and its delivery (opened once with the system opener, or the path); completion gates follow `loop-gates` — matt-loop requires weed-harness 8.0+
 - `opencode/agents/` — task-tier agents installed only for OpenCode; Codex execution uses six allowed pairs, with separate Astra low/xhigh answer roles; large context prioritizes strongest Gemini/max thinking, then Codex on quota exhaustion; unavailable allowed pairs stop dispatch
 - Remaining skill directories are vendored from [mattpocock/skills](https://github.com/mattpocock/skills) and remain directly invocable for partial work
 - `mattpocock.lock.json` — pinned upstream commit and the list of vendored skills
@@ -24,7 +24,7 @@ The vendored skills are managed automatically: the `sync-mattpocock.yml`
 GitHub Actions workflow runs daily, re-runs `scripts/sync-upstream.sh`, and —
 when upstream changed — bumps the matt-loop patch version and commits. Do not
 hand-edit the vendored skill directories; changes will be overwritten on the
-next sync. matt-auto, pr-babysit, and resolving-merge-conflicts are
+next sync. matt-design, matt-auto, and pr-babysit are
 weedmo-authored and are never touched by the sync.
 
 ## Installation

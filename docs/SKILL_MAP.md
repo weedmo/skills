@@ -127,7 +127,8 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 `skills/`, installed on every platform):
 
 - **loop-report** — the live progress page of a run and its delivery (system opener →
-  path); each loop plugs in its own view
+  path), plus each loop's view under `views/` (`matt-auto` with its data contract, `autocode`
+  with its templates and prompts)
 - **model-routing** — Codex · OpenCode · hc only: the Default / Deep task tiers plus the review/QA rule table (`gate-route.mjs`), with the model and
   reasoning-effort pair per platform (Codex `spawn_agent` by role name — the roles live in
   `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, hc
@@ -145,9 +146,6 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 - **pr-visual** — As-Is / To-Be change-point page before every loop PR, built by Codex: change points
   side by side, flow diagrams, web recordings inlined; shown as an Artifact (Codex via `deliver.py`, else
   locally). The PR body gets text only
-- **design-map** — Claude Code and Codex terminal-first design (ASCII tree + mermaid in chat,
-  a page only on request; Codex delivers it as local HTML). Codex routes confirmed direct specs to Astra or Gemini implementation (on Gemini quota exhaustion a Grok worker while Grok's weekly use is under 90%, else Codex), independent
-  Sol review, and optional Antigravity support.
 - **rust-rewrite** — every platform: oracle-first rewrite or port of any codebase to Rust (profile →
   frozen differential gates → boundary design → stepwise port → equivalence + scaling benchmarks),
   with per-language pitfall references (Python/PyO3, C/C++, Go, JS/TS, JVM, C#). Optional
@@ -156,15 +154,15 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 
 On top of it, two loops with different graphs:
 
-- **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit` and `resolving-merge-conflicts`): **matt-auto** conducts Matt Pocock's main flow
+- **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit`): **matt-design** is the plan session (it also renders the current design as a page on request); **matt-auto** conducts Matt Pocock's main flow
   (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
-  starts from a confirmed design-map spec whose step tags fix the ticket tiers; a rule table picks
+  starts from a confirmed matt-design spec whose step tags fix the ticket tiers; a rule table picks
   `full` or the one-ticket `core` mode, see `matt-auto/references/core-mode.md`), publishing
   its decision graph through loop-report and running independent tickets as parallel hc
-  workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging; **resolving-merge-conflicts**
-  resolves an active merge/rebase on the Deep tier
+  workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging and
+  resolves an active merge/rebase (`references/merge-conflicts.md`)
 - **auto-loop** (`plugins/auto-loop-claude/skills/` on Claude Code, `plugins/auto-loop-codex/skills/` elsewhere): **autocode** runs a hypothesis-driven parallel
-  improvement loop (`init --spec` replaces its interview with a design-map spec), publishing its
+  improvement loop (`init --spec` replaces its interview with a matt-design spec), publishing its
   experiment board through loop-report and ending in a PR of the kept changes (one squash
   commit each, on a worktree branch; `run --pr <base>` / `--no-pr`)
 - **graft** (`graft mcp`, registered in `~/.codex/config.toml` by `auto-update.sh`) stays a standalone install

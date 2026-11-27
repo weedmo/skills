@@ -21,7 +21,7 @@ const CAPS = {
 const CHAIN = [
   "plugins/matt-loop-codex/skills/matt-auto/SKILL.md",
   "plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md",
-  "skills/interview-report/SKILL.md",
+  "skills/loop-report/views/matt-auto/contract.md",
   "skills/loop-report/SKILL.md",
   "skills/model-routing/SKILL.md",
   "skills/loop-gates/SKILL.md",

@@ -1,7 +1,7 @@
 {
   "name": "weed-harness",
-  "version": "7.4.0",
-  "description": "Design artifacts plus shared progress-page delivery, model routing, completion gates, and Claude Code hooks. Design conversations and autonomous execution live in matt-loop.",
+  "version": "8.0.0",
+  "description": "Shared progress pages, model routing, completion gates, and Claude Code hooks. Design conversations and autonomous execution live in matt-loop.",
   "author": {
     "name": "weedmo",
     "url": "https://github.com/weedmo"
@@ -18,8 +18,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "weed-harness",
-    "shortDescription": "Visual design plus shared progress, routing, and completion runtime",
-    "longDescription": "Visualize existing designs with design-map. Shared runtime for matt-design/matt-auto and auto-loop: progress pages, model routing, and completion gates. design-map no longer interviews, confirms specs, or implements.",
+    "shortDescription": "Shared progress, routing, and completion runtime",
+    "longDescription": "Shared runtime for matt-design/matt-auto and auto-loop: progress pages and the loops' views, model routing, and completion gates.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [

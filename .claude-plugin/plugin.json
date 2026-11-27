@@ -1,7 +1,7 @@
 {
   "name": "weed-harness",
-  "version": "7.4.0",
-  "description": "Design artifacts plus shared progress-page delivery, model routing, completion gates, and Claude Code hooks. Design conversations and autonomous execution live in matt-loop.",
+  "version": "8.0.0",
+  "description": "Shared progress pages, model routing, completion gates, and Claude Code hooks. Design conversations and autonomous execution live in matt-loop.",
   "author": {
     "name": "weedmo"
   },

@@ -1,6 +1,6 @@
 ---
 name: matt-design
-description: "Plan session for every loop: collaboratively design a feature, a performance change or Rust port, or an autoresearch-style experiment using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; --brief writes a short confirmed spec for small work run in matt-auto core mode. design-map renders the current design as an artifact."
+description: "Plan session for every loop: collaboratively design a feature, a performance change or Rust port, or an autoresearch-style experiment using Matt Pocock's grilling, domain-modeling, codebase-design, prototype, and to-spec skills. Iterate decisions with the user and write a local confirmed spec for matt-auto. Use for design before implementation; --brief writes a short confirmed spec for small work run in matt-auto core mode. Also renders the current design as an artifact page on request."
 ---
 
 # Matt Design
@@ -8,7 +8,8 @@ description: "Plan session for every loop: collaboratively design a feature, a p
 Own the conversation from an idea to a design the user understands and confirms.
 The user is the decision maker. Matt's stage skills provide the investigation,
 questions, module vocabulary, prototypes, and spec synthesis. `$matt-auto`
-owns tickets and implementation; `$design-map` visualizes what is known so far.
+owns tickets and implementation. A page of the design so far comes from
+[visualize.md](references/visualize.md).
 
 ## Workflow
 
@@ -16,8 +17,8 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
    docs, and any supplied spec. Reuse settled answers. With an existing spec,
    retain its slug and stable D-ids; distinguish user decisions from proposals
    and facts. Do not set up a tracker just to design.
-2. **Interview with Matt's skills.** Use `$grill-with-docs` for an existing
-   codebase (`$grilling` plus `$domain-modeling`); otherwise `$grill-me`.
+2. **Interview with Matt's skills.** Use `$grilling`, plus `$domain-modeling`
+   for an existing codebase so terms and ADRs are captured as you go.
    Investigate discoverable facts yourself or with read-only exploration.
    Collect the full unresolved decision frontier before requesting choices.
    Use the consolidated decision report below; do not pause for individual
@@ -33,8 +34,8 @@ owns tickets and implementation; `$design-map` visualizes what is known so far.
 4. **Iterate with the user.** Explain the current structure and changed
    decisions in one report. Collect user corrections after the report is complete;
    there is no arbitrary round cap. A correction reopens only the affected
-   decisions and dependents. When the user requests a diagram/artifact, invoke
-   `$design-map` with the current design, decision table, and open questions;
+   decisions and dependents. When the user requests a diagram/artifact, follow
+   [visualize.md](references/visualize.md) with the current design, decision table, and open questions;
    draft designs can be visualized. Return here for the next decision round.
    A page or a reviewer cannot confirm a design.
 5. **Draft the spec.** Use `$to-spec` to synthesize the discussion and review
@@ -105,12 +106,12 @@ revision until the user confirms the replacement and resumes execution.
 When matt-auto raises a design question, show the affected D-ids, implementation
 impact, recommendation, and alternatives to the user. Investigate the blocker
 and repeat the relevant steps above. Do not silently expand scope to make
-implementation pass. A user request to visualize changes goes to design-map;
+implementation pass. A user request to visualize changes follows visualize.md;
 the decision and spec remain here.
 
 ## Availability
 
 Read the named stage skills from this package; do not assume a host-specific
 Skill tool. If a required Matt skill is missing, report which one and stop the
-affected stage rather than silently replacing the Matt workflow. If design-map
-is unavailable, keep designing in chat and report the unavailable visualization.
+affected stage rather than silently replacing the Matt workflow. If the page
+cannot be published, keep designing in chat and report the unavailable visualization.

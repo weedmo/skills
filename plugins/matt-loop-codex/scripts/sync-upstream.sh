@@ -5,8 +5,8 @@
 #   Without an argument, clones a fresh shallow copy of the upstream repo.
 #
 # Only the skills listed in SKILLS are managed, in both plugin roots
-# (plugins/matt-loop-codex and plugins/matt-loop-claude). matt-auto, pr-babysit,
-# and the routed resolving-merge-conflicts fork are weedmo-authored and never touched.
+# (plugins/matt-loop-codex and plugins/matt-loop-claude). matt-design, matt-auto and
+# pr-babysit (with its routed merge-conflicts reference) are weedmo-authored and never touched.
 # The upstream commit is recorded in mattpocock.lock.json for provenance.
 set -euo pipefail
 
@@ -27,15 +27,10 @@ SKILLS=(
   code-review
   diagnosing-bugs
   domain-modeling
-  grill-me
-  grill-with-docs
   grilling
-  handoff
-  implement
   improve-codebase-architecture
   pr
   prototype
-  research
   retro
   setup-matt-pocock-skills
   tdd

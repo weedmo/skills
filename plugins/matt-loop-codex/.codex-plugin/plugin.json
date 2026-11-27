@@ -1,7 +1,7 @@
 {
   "name": "matt-loop",
-  "version": "5.3.1",
-  "description": "Matt Pocock design with the user via matt-design; confirmed-spec autonomous tickets, implementation, verification and independent review via matt-auto. Includes PR babysitting and conflict resolution. Requires weed-harness 6.0+.",
+  "version": "6.0.0",
+  "description": "Matt Pocock design with the user via matt-design; confirmed-spec autonomous tickets, implementation, verification and independent review via matt-auto. Includes PR babysitting and conflict resolution. Requires weed-harness 8.0+.",
   "author": {
     "name": "weedmo",
     "url": "https://github.com/weedmo"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "matt-loop",
     "shortDescription": "Collaborative Matt design and autonomous confirmed-spec execution",
-    "longDescription": "Use matt-design to iterate design decisions with the user and produce a confirmed local spec. Invoke matt-auto --spec separately to create tickets, implement, verify and independently review. design-map in weed-harness visualizes the current design. Optional flags enable PR shipping.",
+    "longDescription": "Use matt-design to iterate design decisions with the user and produce a confirmed local spec. Invoke matt-auto --spec separately to create tickets, implement, verify and independently review. matt-design also renders the current design as a page on request. Optional flags enable PR shipping.",
     "developerName": "weedmo",
     "category": "Coding",
     "capabilities": [

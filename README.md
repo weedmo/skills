@@ -5,8 +5,8 @@ for **Claude Code, Codex, opencode, and gemini-cli**.
 
 | Plugin | Where | What | Required |
 |--------|-------|------|----------|
-| `weed-harness` | repo root | The shared runtime every loop builds on — `loop-report` (live progress page; Artifact on Claude Code, local HTML elsewhere), `interview-report` and `autocode-board` (the loops' page views), `model-routing` (Codex-side model/effort tiers), `loop-gates` (unlazy-backed completion) — plus the Claude Code-only setup, hooks, and HUD | yes, every platform |
-| `matt-loop` | `plugins/matt-loop-claude/` · `plugins/matt-loop-codex/` | matt-design + matt-auto + vendored Matt Pocock skills; one edition per platform | optional, needs weed-harness 6.0+ |
+| `weed-harness` | repo root | The shared runtime every loop builds on — `loop-report` (live progress page and the loops' views; Artifact on Claude Code, local HTML elsewhere), `model-routing` (Codex-side model/effort tiers), `loop-gates` (unlazy-backed completion) — plus the Claude Code-only setup, hooks, and HUD | yes, every platform |
+| `matt-loop` | `plugins/matt-loop-claude/` · `plugins/matt-loop-codex/` | matt-design + matt-auto + vendored Matt Pocock skills; one edition per platform | optional, needs weed-harness 8.0+ |
 | `auto-loop` | `plugins/auto-loop-claude/` · `plugins/auto-loop-codex/` | autocode hypothesis-driven parallel code improvement loop with a live experiment board; one edition per platform | optional, needs weed-harness 6.0+ |
 
 The split: **weed-harness is the loop runtime** (what every long delegated run
@@ -36,8 +36,8 @@ Each loop family nevertheless has **one shared `view.html`**:
 
 | Loop editions | Shared view | What it displays |
 |---------------|-------------|------------------|
-| `matt-loop-claude` + `matt-loop-codex` | [`interview-report/assets/view.html`](skills/interview-report/assets/view.html) | Decisions, stages, ticket waves, review and PR lanes |
-| `auto-loop-claude` + `auto-loop-codex` | [`autocode-board/assets/view.html`](skills/autocode-board/assets/view.html) | Hypotheses, experiments, metric trends and kept changes |
+| `matt-loop-claude` + `matt-loop-codex` | [`loop-report/views/matt-auto/view.html`](skills/loop-report/views/matt-auto/view.html) | Decisions, stages, ticket waves, review and PR lanes |
+| `auto-loop-claude` + `auto-loop-codex` | [`loop-report/views/autocode/view.html`](skills/loop-report/views/autocode/view.html) | Hypotheses, experiments, metric trends and kept changes |
 
 A graph-edge fix in either shared view therefore reaches both editions of
 that loop when their runtime installation is updated and the page regenerated.
@@ -67,13 +67,12 @@ skills/                               # repository root = weed-harness plugin
 ├── .agents/plugins/marketplace.json   # Codex catalog → root + Codex loop roots
 ├── skills/
 │   ├── loop-report/assets/           # shell.html, render.py, deliver.py
-│   ├── interview-report/assets/      # matt-auto view.html + validator
-│   ├── autocode-board/assets/        # autocode view.html + validator + reference
+│   ├── loop-report/views/matt-auto/  # matt-auto view.html + validator + contract
+│   ├── loop-report/views/autocode/   # autocode view.html + validator + reference
 │   ├── model-routing/                # model / effort / review policies
 │   ├── loop-gates/                   # completion evidence via upstream unlazy
 │   ├── review-gate/                  # cross-model review loop node (verdict bound to HEAD)
 │   ├── qa-gate/                      # behavioural QA node (re-runnable scenarios + evidence)
-│   ├── design-map/                   # existing design → artifact visualization
 │   ├── rust-rewrite/                 # oracle-first rewrite or port of any codebase to Rust
 │   └── setup/                        # Claude setup, hooks and HUD
 ├── plugins/
@@ -119,19 +118,19 @@ that CI workflow.**
 
 | Skill / read chain | Words | Cap | Remaining |
 |--------------------|------:|----:|----------:|
-| `model-routing` | 681 | 700 | 19 |
+| `model-routing` | 700 | 700 | 0 |
 | `loop-gates` | 697 | 700 | 3 |
-| Codex `matt-auto` | 2,986 | 3,800 | 814 |
-| Codex `autocode` | 4,184 | 4,250 | 66 |
-| Claude `matt-auto` | 3,508 | 4,200 | 692 |
-| Claude `pr-babysit` | 1,018 | 1,100 | 82 |
-| Claude `autocode` | 4,168 | 4,200 | 32 |
-| Codex matt-auto read chain | 8,571 | 8,700 | 129 |
+| Codex `matt-auto` | 3,034 | 3,800 | 766 |
+| Codex `autocode` | 4,190 | 4,250 | 60 |
+| Claude `matt-auto` | 3,561 | 4,200 | 639 |
+| Claude `pr-babysit` | 1,100 | 1,100 | 0 |
+| Claude `autocode` | 4,173 | 4,200 | 27 |
+| Codex matt-auto read chain | 8,525 | 8,700 | 175 |
 
 Counts come from [`bin/check-words.mjs`](bin/check-words.mjs), using
 whitespace-separated words. The chain includes Codex `matt-auto`, its
 [`execution-core.md`](plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md),
-`interview-report`, `loop-report`, `model-routing`, and `loop-gates`.
+the matt-auto view's `contract.md`, `loop-report`, `model-routing`, and `loop-gates`.
 Keep additions within the applicable budgets; splitting design from execution
 reduces the execution read chain.
 
@@ -145,8 +144,8 @@ plugin manifests and Claude marketplace entries, **but does not check
 ## Install (recommended): npx installer
 
 One command installs skill packs to any combination of the supported
-platforms. `weed-harness` is always installed (`setup` is Claude-only;
-`design-map` ships to Claude Code and Codex); the loop plugins are opt-in.
+platforms. `weed-harness` is always installed (`setup` is Claude-only); the
+loop plugins are opt-in.
 Unless `--no-unlazy` is given, the installer also ensures the unlazy skill.
 
 ```bash
@@ -170,11 +169,11 @@ npx github:weedmo/skills --yes --dry-run
 
 | Platform | Skill directory | Notes |
 |----------|-----------------|-------|
-| `claude-code` | `~/.claude/skills/` | Installs weed-harness, including artifact visualization with `design-map` and Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
-| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. Includes `design-map` to visualize the current design as a delivered artifact; matt-loop supplies collaborative `matt-design` and autonomous `matt-auto`. Restart Codex after install. |
+| `claude-code` | `~/.claude/skills/` | Installs weed-harness, including Claude-only `setup`, plus selected loop plugins. If you already installed these via `/plugin install`, skip this platform to avoid duplicates. |
+| `codex` | `~/.codex/skills/` | Native SKILL.md discovery. matt-loop supplies collaborative `matt-design` (which also renders the current design as a page) and autonomous `matt-auto`. Restart Codex after install. |
 | `opencode` | `~/.config/opencode/skills/` | Native SKILL.md discovery. Invalid underscores in skill IDs are normalized to hyphens. matt-loop also installs routing agents under `~/.config/opencode/agents/` and slash commands for every Matt Loop skill under `~/.config/opencode/command/`. |
 | `gemini-cli` | `~/.gemini/skills/` | No native skill discovery — reference the skill files from `~/.gemini/GEMINI.md` yourself. |
-| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skills; auto-loop is skipped. Eligible Codex design implementation/support prioritizes the strongest Gemini with maximum supported thinking; exhausted quota falls back to Codex. |
+| `antigravity` | `~/.antigravity/skills/` | Antigravity CLI (`agy`). Installs weed-harness's shared skills plus the shared PR skill (`pr-babysit`); auto-loop is skipped. Eligible Codex design implementation/support prioritizes the strongest Gemini with maximum supported thinking; exhausted quota falls back to Codex. |
 | `agents` | `~/.agents/skills/` | Universal agent-skills directory, read by tools that follow the `~/.agents/skills` convention. Skip this platform if you installed the plugins natively via Claude/Codex to avoid duplicates. |
 
 Re-running the installer overwrites installed skills with the latest versions,
@@ -239,16 +238,13 @@ workflow guidance.
 
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
-| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
+| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view (`views/matt-auto`, `views/autocode`) + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
 | `model-routing` | Codex · OpenCode · hc | Cost/time-efficient model and effort pairs, Astra question answering, independent review, dispatch, and escalation. Reference skill, never invoked standalone |
-| `interview-report` | all | matt-auto's decision-graph view (`assets/view.html` + `validate.py`) — stages, editable decision nodes with the `<slug>.edits.json` round-trip, ticket waves, the execution plan, review and PR lanes — rendered by `loop-report` |
-| `autocode-board` | all | autocode's experiment board view, data checks, and the templates / schemas / prompts autocode reads (`assets/reference.md`) |
 | `loop-gates` | all | How the delegated loops (pr-babysit, autocode, matt-auto's ship step) use the upstream unlazy skill so "done" is a measured verdict: a runnable GATES.md ledger per unit, coordinator-approved, re-verified with gate-check.mjs, a retry bound, and hc boundaries. Reference skill, never invoked standalone |
 | `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: one read-only, comment-only reviewer from the other family — Codex, or Claude for Codex-written code (models from `model-routing`'s `gate-route.mjs` rule table) — the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
 | `qa-gate` | all | Behavioural QA node for matt-auto: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
 | `pr-visual` | all | As-Is / To-Be change-point page before every loop PR, built by one headless Codex run: each change point side by side (code at base and HEAD, what and why), flow diagrams, and for web changes the base/HEAD recordings inlined; shown as a Claude Artifact (Codex: `deliver.py`, else locally). The PR body gets text only — no videos or media on GitHub |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
-| `/design-map` | Claude Code · Codex | Render the design discussed so far as an artifact: architecture, decisions, alternatives, and open questions. Accepts draft designs; no interview, spec confirmation, or implementation. |
 | `rust-rewrite` | all | Rewrite or port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers. An optional `fast-anything` loop covers a few hot pure functions when that CLI is available; rust-rewrite gates it does not cover still apply. |
 
 #### The mod (Claude Code 2.1.287+)
@@ -268,8 +264,8 @@ uses native agents/Workflow and reviews; Codex/OpenCode use model-routing and
 visible hc workers. Both retain coordinator verification and independent review.
 `--confirm` optionally adds a ticket/execution-plan gate on either platform.
 
-Typical flow: `$matt-design` → iterate in chat (call `$design-map` when a page
-helps) → confirm the local spec → separately invoke `$matt-auto --spec <path>`.
+Typical flow: `$matt-design` → iterate in chat (ask for a page when it
+helps; `references/visualize.md`) → confirm the local spec → separately invoke `$matt-auto --spec <path>`.
 Small work: `$matt-design --brief` writes a short confirmed brief (목표 · 수용 기준 ·
 비목표) and matt-auto runs it in `core` mode.
 Confirming a design alone never starts implementation. Existing confirmed
@@ -278,11 +274,10 @@ returns to the user through matt-design; it cannot be settled by a delegate.
 
 | Skill | Description |
 |-------|-------------|
-| `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. `--brief` writes a three-section spec for small work. |
+| `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. On request it renders the current design as an artifact page. `--brief` writes a three-section spec for small work. |
 | `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. Two modes from a rule table (`--core` / `--full` override): `core` is one ticket implemented and fixed in the session itself, with no worker, delegate or report page, keeping coordinator verification and one `review-gate` cycle, and promotes itself to `full` when the work outgrows it. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (one reviewer: Codex, or Claude for Codex-written code; one CLI falls back to same-family; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
-| `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code |
-| `resolving-merge-conflicts` | Resolve an active merge/rebase conflict; direct OpenCode / Claude Code use routes to a deep model |
-| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `grill-me`, `grill-with-docs`, `to-spec`, `to-tickets`, `handoff`, `tdd`, `implement`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `research`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
+| `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code; also resolves an active merge/rebase conflict (`references/merge-conflicts.md`) |
+| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `to-spec`, `to-tickets`, `tdd`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
 
 The vendored skills come from
 [mattpocock/skills](https://github.com/mattpocock/skills) and are auto-synced:
@@ -295,7 +290,7 @@ skill to `~/.codex/skills/`.
 
 ### auto-loop
 
-Two editions as well: `plugins/auto-loop-claude` (in-session experimenters, plugin agents, Artifact board) and `plugins/auto-loop-codex` (hc placement, `model-routing`, `deliver.py`); both render `autocode-board`.
+Two editions as well: `plugins/auto-loop-claude` (in-session experimenters, plugin agents, Artifact board) and `plugins/auto-loop-codex` (hc placement, `model-routing`, `deliver.py`); both render loop-report's `views/autocode`.
 
 | Skill | Description |
 |-------|-------------|
