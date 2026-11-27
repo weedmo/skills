@@ -1,6 +1,6 @@
 ---
 name: pr-babysit
-description: Use when the user wants you to babysit, watch, monitor, or shepherd one open GitHub PR until it is merge-ready by handling its checks, review feedback, and PR-caused failures. Does not merge unless explicitly requested. On Codex, OpenCode, and Claude Code, direct invocation automatically routes work by complexity (model and reasoning effort).
+description: Use when the user wants you to babysit, watch, monitor, or shepherd one open GitHub PR until it is merge-ready by handling its checks, review feedback, and PR-caused failures. Resolves merge/rebase conflicts. Does not merge unless explicitly requested. On Codex, OpenCode, and Claude Code, direct invocation automatically routes work by complexity (model and reasoning effort).
 ---
 
 # PR Babysit
@@ -28,7 +28,7 @@ When the [unlazy](https://github.com/Leonxlnx/unlazy) skill is installed (locate
   EVIDENCE: pending
 ```
 
-You authored these commands, so approve the ledger yourself (`gate-check.mjs --approve`) and run it between cycles. Wire gate failures to the existing machinery: G1 red → the fix cycle (step 5), G2 unmergeable → dispatch `$resolving-merge-conflicts` in the isolated worktree, G3 changes-requested → address the review feedback. A stop condition that is not merge-readiness (external blocker, material decision, repeated failure) becomes `ABANDON: <id> <reason>` — the run ends as an honest handoff, never as a quiet success. Report merge-ready only after `--reverify` prints `ALL MET`; unresolved-but-nonblocking review threads still go in the report as before.
+You authored these commands, so approve the ledger yourself (`gate-check.mjs --approve`) and run it between cycles. Wire gate failures to the existing machinery: G1 red → the fix cycle (step 5), G2 unmergeable → [merge conflicts](references/merge-conflicts.md) in the isolated worktree, G3 changes-requested → address the review feedback. A stop condition that is not merge-readiness (external blocker, material decision, repeated failure) becomes `ABANDON: <id> <reason>` — the run ends as an honest handoff, never as a quiet success. Report merge-ready only after `--reverify` prints `ALL MET`; unresolved-but-nonblocking review threads still go in the report as before.
 
 ## Standalone routing (Codex, OpenCode, Claude Code)
 

@@ -9,7 +9,7 @@ receive the code-review brief instead; they do not implement or commit changes.
 Order the routed prompt with the stable part first — the skill text and this preamble — and the ticket-specific tail last; the prefix is what the 30-minute prompt cache reuses across a wave.
 
 ```
-Read ticket <ref> and pinned spec <path/revision/hash>, then use $implement to build it. Defer $implement's code-review step to the coordinator. Report open decisions back instead of guessing; never reverse settled D-ids.
+Read ticket <ref> and pinned spec <path/revision/hash>, then build it to its acceptance criteria, test-first with $tdd when the acceptance names tests. Leave code review to the coordinator. Report open decisions back instead of guessing; never reverse settled D-ids.
 
 You are an hc worker for ticket <ref>, started by terminal <coordinator>. Work only in this worktree and commit to its branch. Start no other agents.
 - Before any change, confirm this worktree is based on the tip of integration branch <branch>; reset onto it if not.

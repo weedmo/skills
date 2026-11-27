@@ -35,7 +35,8 @@ When a worker reports, run the ticket's verification commands yourself in its
 worktree, then `git merge --no-ff <branch>` into the integration branch. If the
 tip moved after the worker merged it, re-run that ticket's commands on the
 merged branch. A conflict returns to the same worker once; a second goes to
-`$resolving-merge-conflicts` on the Deep route. Then complete the ticket, remove
+pr-babysit's
+[merge conflicts](../../pr-babysit/references/merge-conflicts.md) on the Deep route. Then complete the ticket, remove
 its worktree and recompute the frontier. Earlier tickets' commands re-run once, below, not
 per merge.
 

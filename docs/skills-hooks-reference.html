@@ -213,13 +213,13 @@
     <div class="prop"><span class="k">🧩 리포 플러그인</span><span class="v">3개 — weed-harness(공통 루프 런타임 + Claude setup) · matt-loop · auto-loop</span></div>
     <div class="prop"><span class="k">🖥️ 로컬 스킬</span><span class="v">현재 1개 활성(<code>graft</code>). 루프 워커 런타임은 herdr <code>hc</code>. 과거 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷으로만 기록</span></div>
     <div class="prop"><span class="k">🪝 훅 스크립트</span><span class="v">3개 + <code>hooks.json</code> (<code>hooks/</code>)</span></div>
-    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-25 (weed-harness 7.3.7, herdr hc)</span></div>
+    <div class="prop"><span class="k">📅 기준일</span><span class="v">2026-11-27 (weed-harness 8.0.0, herdr hc)</span></div>
   </div>
 
   <div class="callout">
     <span class="ico">💡</span>
     <div>
-      <p><strong>스킬은 3계층으로 나뉩니다.</strong> ① 이 저장소의 <code>skills/</code> — weed-harness 공통 루프 런타임과 Claude Code·Codex 공용 design-map(단 setup은 Claude 전용), ② <code>~/.claude/skills/</code> — 플러그인과 무관하게 로컬에 직접 설치된 스킬, ③ superpowers·unlazy 등 다른 플러그인이 제공하는 스킬(이 문서 범위 밖).</p>
+      <p><strong>스킬은 3계층으로 나뉩니다.</strong> ① 이 저장소의 <code>skills/</code> — weed-harness 공통 루프 런타임(단 setup은 Claude 전용), ② <code>~/.claude/skills/</code> — 플러그인과 무관하게 로컬에 직접 설치된 스킬, ③ superpowers·unlazy 등 다른 플러그인이 제공하는 스킬(이 문서 범위 밖).</p>
       <p>훅은 이 저장소의 <code>hooks/</code>에 스크립트로 보관되고, <code>settings.json</code>(사용자 전역)과 <code>hooks.json</code>(플러그인)에 이벤트별로 등록되어 실행됩니다.</p>
     </div>
   </div>
@@ -232,17 +232,13 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">loop-report</td><td><span class="tag blue">진행 페이지</span></td>
-      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 <code>view.html</code> + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
+      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 view(<code>views/matt-auto</code>는 결정 그래프와 데이터 계약, <code>views/autocode</code>는 실험 보드와 템플릿·프롬프트) + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
     <tr><td class="name">model-routing</td><td><span class="tag blue">라우팅</span></td>
       <td>Fast / Default / Deep / Max 티어 표 하나 — Codex <code>spawn_agent</code>, Claude Code agent, OpenCode, hc 에이전트 명령별 정확한 model/effort 쌍, 디스패치 규칙, 에스컬레이션 사다리. 각 루프는 자기 역할을 이 티어에 매핑만 한다.</td></tr>
     <tr><td class="name">hc-workers</td><td><span class="tag blue">워커</span></td>
       <td>위임 루프(matt-auto, autocode, pr-babysit)가 서브에이전트를 herdr <code>hc</code> 워커로 돌리는 규약 — 루프 role 파일에서 템플릿 생성, 실행당 보이는 탭, <code>hc send</code>로 파일 기반 보고, 대기 루프. Claude Code와 Codex 모두 <code>hc</code>가 있을 때 사용. 참조 스킬이라 단독 호출하지 않음.</td></tr>
     <tr><td class="name">loop-gates</td><td><span class="tag blue">완료 게이트</span></td>
       <td>루프가 unlazy 스킬(Leonxlnx/unlazy, 벤더링하지 않고 npx로 설치)을 쓰는 규약 — 작업 단위별 GATES.md, 코디네이터가 직접 <code>--reverify</code>, 재시도 2회 후 핸드오프, hc 워커와의 경계.</td></tr>
-    <tr><td class="name">interview-report</td><td><span class="tag blue">보고</span></td>
-      <td>matt-auto의 결정 그래프 뷰(<code>assets/view.html</code> + <code>validate.py</code>) — 스테이지, 편집 가능한 결정 노드와 <code>&lt;slug&gt;.edits.json</code> 왕복, 티켓 웨이브, 리뷰·PR 레인. 페이지 조립과 전달은 loop-report. 스킬 자체는 weed-harness <code>skills/</code>에 있다.</td></tr>
-    <tr><td class="name">autocode-board</td><td><span class="tag blue">보고</span></td>
-      <td>autocode 루프의 실험 보드 — 뷰(<code>assets/view.html</code>), render.py가 쓰기 전에 돌리는 데이터 검사(<code>assets/validate.py</code>), autocode가 각 단계에서 읽는 템플릿·스키마·프롬프트(<code>assets/reference.md</code>). Claude·Codex 에디션 모두 이 스킬과 loop-report로 렌더. 참조 스킬이라 단독 호출하지 않음.</td></tr>
     <tr><td class="name">review-gate</td><td><span class="tag blue">리뷰</span></td>
       <td>크로스 모델 리뷰 노드. 작성자의 다른 모델 계열이 diff를 리뷰하고, 작성자가 분류·수정한 뒤 재검토하며 최대 N사이클. 판정은 리뷰한 커밋에 묶인 파일이며 unlazy 게이트 하나로 검사. matt-auto 9단계와 autocode의 PR 전에 호출되며, <code>review-gate &lt;base&gt;</code>로 단독 실행도 가능.</td></tr>
     <tr><td class="name">qa-gate</td><td><span class="tag blue">QA</span></td>
@@ -255,7 +251,7 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">autocode</td><td><span class="tag purple">루프</span></td>
-      <td>가설 주도 병렬 코드 개선 루프. 고비용 티어의 Strategist가 가설(맞으면/틀리면 다음 행동 포함)을 세우고, 난이도별로 라우팅된 Experimenter가 worktree에서 동시에 구현·guard, 측정은 직렬. 결과 1건마다 가설을 갱신하고, 메트릭 추이·프론티어·실험 기록을 담은 실험 보드를 loop-report로 매 상태 변화마다 재발행. 종료는 loop-gates(unlazy) 재검증으로 확정. 채택된 변경은 사용자 checkout을 옮기지 않고 <code>.autocode/worktrees/best</code>의 <code>autocode/&lt;slug&gt;</code> 브랜치에 keep마다 측정치를 담은 squash 커밋 1개로 쌓이고, 종료 시 시작 브랜치로 PR을 연다(병합은 사람). 서브커맨드: init [--spec &lt;path&gt;] / run [--pr &lt;base&gt; | --no-pr] / status / resume — <code>--spec</code>은 확정된 design-map spec의 metric 블록으로 인터뷰를 선채운다.</td></tr>
+      <td>가설 주도 병렬 코드 개선 루프. 고비용 티어의 Strategist가 가설(맞으면/틀리면 다음 행동 포함)을 세우고, 난이도별로 라우팅된 Experimenter가 worktree에서 동시에 구현·guard, 측정은 직렬. 결과 1건마다 가설을 갱신하고, 메트릭 추이·프론티어·실험 기록을 담은 실험 보드를 loop-report로 매 상태 변화마다 재발행. 종료는 loop-gates(unlazy) 재검증으로 확정. 채택된 변경은 사용자 checkout을 옮기지 않고 <code>.autocode/worktrees/best</code>의 <code>autocode/&lt;slug&gt;</code> 브랜치에 keep마다 측정치를 담은 squash 커밋 1개로 쌓이고, 종료 시 시작 브랜치로 PR을 연다(병합은 사람). 서브커맨드: init [--spec &lt;path&gt;] / run [--pr &lt;base&gt; | --no-pr] / status / resume — <code>--spec</code>은 확정된 matt-design spec의 metric 블록으로 인터뷰를 선채운다.</td></tr>
   </table>
   </div>
 
@@ -265,8 +261,6 @@
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">setup</td><td><span class="tag orange">유지관리</span></td>
       <td>Claude Code 전용. 터미널 UI + 기본 설정만 담당 — statusLine HUD 설치, 커스텀 훅(language-rule, auto-update) 등록. 스킬 설치는 하지 않으며 멱등이라 반복 실행해도 안전.</td></tr>
-    <tr><td class="name">design-map</td><td><span class="tag orange">설계</span></td>
-      <td>Claude Code·Codex 공용. Claude는 Artifact, Codex는 로컬 HTML로 설계 페이지를 유지한다. 확정된 Codex direct spec은 deep이면 Astra, 그 외에는 Gemini(Antigravity)가 구현하며 Gemini 인증 토큰이 없거나 토큰 할당량이 소진됐을 때만 Grok으로 대체하고 Sol이 독립 리뷰한다. Antigravity는 조사·문서·기계적 보조 작업에 사용한다.</td></tr>
     <tr><td class="name">rust-rewrite</td><td><span class="tag orange">이식</span></td>
       <td>모든 플랫폼. 기존 코드베이스나 핫 패스를 Rust로 재작성·이식(Python/PyO3, C/C++, Go, JS/TS, JVM, C#). 프로파일로 대상을 고르고, 이식 전에 동등성 테스트를 고정한 뒤 FFI 경계를 설계하고, 미분 테스트와 1스레드 vs N스레드 릴리스 벤치마크로 게이트. 핫한 순수 함수 몇 개이고 <code>fast-anything</code> CLI가 있으면 그 루프를 쓸 수 있지만, 커버하지 못하는 rust-rewrite 게이트는 그대로 적용한다.</td></tr>
   </table>
@@ -278,13 +272,11 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">matt-design</td><td><span class="tag brown">설계</span></td>
-      <td>Matt Pocock의 grilling, domain-modeling, codebase-design, prototype, to-spec으로 기능·변경을 사용자와 함께 설계. 결정을 반복해 matt-auto가 쓸 로컬 확정 스펙을 작성. 구현 전 설계용이며, design-map이 현재 설계를 아티팩트로 렌더한다. 설계 확정만으로 구현이 시작되지는 않는다.</td></tr>
+      <td>Matt Pocock의 grilling, domain-modeling, codebase-design, prototype, to-spec으로 기능·변경을 사용자와 함께 설계. 결정을 반복해 matt-auto가 쓸 로컬 확정 스펙을 작성. 구현 전 설계용이며, 요청하면 현재 설계를 아티팩트 페이지로 렌더한다(<code>references/visualize.md</code>). 설계 확정만으로 구현이 시작되지는 않는다.</td></tr>
     <tr><td class="name">matt-auto</td><td><span class="tag brown">Codex</span></td>
-      <td>Matt Pocock 메인 플로우(grilling 인터뷰 → spec → 티켓 → 티켓별 구현)를 처음부터 끝까지 지휘. 결정 위임자가 일상 질문에 답하고 인터뷰 게이트 하나만 사람이 승인. 모델은 model-routing 티어로 자동 라우팅, 결정 그래프와 티켓 보드는 interview-report → loop-report로 발행, 병렬 티켓은 hc 워커. <code>--spec &lt;path&gt;</code>로 확정된 design-map spec을 받으면 그 결정은 읽기 전용 design 단계가 되고 인터뷰는 열린 질문만 묻는다.</td></tr>
+      <td>Matt Pocock 메인 플로우(grilling 인터뷰 → spec → 티켓 → 티켓별 구현)를 처음부터 끝까지 지휘. 결정 위임자가 일상 질문에 답하고 인터뷰 게이트 하나만 사람이 승인. 모델은 model-routing 티어로 자동 라우팅, 결정 그래프와 티켓 보드는 loop-report의 <code>views/matt-auto</code>로 발행, 병렬 티켓은 hc 워커. <code>--spec &lt;path&gt;</code>로 확정된 matt-design spec을 받으면 그 결정은 읽기 전용 design 단계가 되고 인터뷰는 열린 질문만 묻는다.</td></tr>
     <tr><td class="name">pr-babysit</td><td><span class="tag brown">PR</span></td>
-      <td>열린 PR 하나를 격리된 worktree에서 CI와 리뷰가 완료될 때까지 관리. 명시적으로 요청하지 않으면 merge하지 않음.</td></tr>
-    <tr><td class="name">resolving-merge-conflicts</td><td><span class="tag brown">Git</span></td>
-      <td>진행 중인 merge/rebase 충돌을 해결. OpenCode에서 단독 호출하면 deep 모델로 자동 라우팅.</td></tr>
+      <td>열린 PR 하나를 격리된 worktree에서 CI와 리뷰가 완료될 때까지 관리. 진행 중인 merge/rebase 충돌 해결(<code>references/merge-conflicts.md</code>)도 맡는다. 명시적으로 요청하지 않으면 merge하지 않음.</td></tr>
   </table>
   </div>
 
@@ -353,7 +345,7 @@
   </div>
 
   <p class="footer-note">
-    2026-11-25 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 7.3.7) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
+    2026-11-27 기준 · <code>weedmo/skills</code> main 브랜치(weed-harness 8.0.0) · OMC / weed-cowork / document-skills / everything-claude-code, Codex 협업 스킬(refine-plan, goal-set, team-*), devlog, type-graph, context-budget, merge-resolve, deploy-verify와 관련 훅들은 정리되어 이 문서에 포함되지 않음. 미사용 플러그인(ouroboros, ralph-loop, mattpocock-skills, code-review, frontend-design)과 로컬 스킬 5개는 사용자 settings.json에서 비활성화됨. 위의 Orca 로컬 스킬 3개는 2026-07-30 머신 스냅샷이며 저장소 스킬이 아님.
   </p>
 </div>
 

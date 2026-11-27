@@ -12,9 +12,9 @@ Autonomous loop that improves one measurable metric of a codebase as fast as pos
 2. **Parallel where safe, serial where not.** Hypotheses with disjoint `touches` run concurrently, each in its own worktree. Measurement is a serial critical section because concurrent benchmarks contaminate each other.
 3. **Route by difficulty.** The strategist runs on the expensive tier; each experimenter on the cheapest tier its hypothesis needs. Keep/discard, scheduling, and merging are arithmetic — no model at all.
 
-Inspired by [autoresearch](https://github.com/karpathy/autoresearch). The run is visible the whole time on a live **experiment board** built by the shared `$loop-report` skill and published as an Artifact, republished on every state change (3I), and termination is backed by runnable [unlazy](https://github.com/Leonxlnx/unlazy) gates through the shared `$loop-gates` convention (2E). If a shared skill (`loop-report`, `loop-gates`, `autocode-board`) is missing, say `weed-harness 4.x required: <skill> missing` once and continue with the fallback it names.
+Inspired by [autoresearch](https://github.com/karpathy/autoresearch). The run is visible the whole time on a live **experiment board** built by the shared `$loop-report` skill and published as an Artifact, republished on every state change (3I), and termination is backed by runnable [unlazy](https://github.com/Leonxlnx/unlazy) gates through the shared `$loop-gates` convention (2E). If a shared skill (`loop-report`, `loop-gates`) is missing, say `weed-harness 8.0+ required: <skill> missing` once and continue with the fallback it names.
 
-Templates, schemas, verbatim prompts, the board view, and its data checks live in the shared `$autocode-board` skill (weed-harness); `<autocode-board's dir>` is the directory holding its SKILL.md. Read the named section of its `<autocode-board's dir>/assets/reference.md` only at the step that writes or sends that data.
+Templates, schemas, verbatim prompts, the board view, and its data checks live in the shared `$loop-report` skill (weed-harness) under `views/autocode/`; `<board>` below is that folder, `<loop-report's dir>/views/autocode`. Read the named section of `<board>/reference.md` only at the step that writes or sends that data.
 
 ## Subcommands
 
@@ -27,7 +27,7 @@ Templates, schemas, verbatim prompts, the board view, and its data checks live i
 
 ## Step 0: Paths
 
-`PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)`; `AUTOCODE_DIR=$PROJECT_ROOT/.autocode`. Under it: `PROGRAM_FILE=program.md`, `RESULTS_FILE=results.tsv`, `STATE_FILE=state.json`, `HYP_DIR=hypotheses/`, `WORKTREE_DIR=worktrees/`, `LESSONS_DIR=lessons/`, `LOGS_DIR=logs/`, `RETRO_DIR=retrospectives/`, `REPORT_DIR=report/` (autocode.data.json / autocode.html). Full tree: `<autocode-board's dir>/assets/reference.md` § File structure.
+`PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)`; `AUTOCODE_DIR=$PROJECT_ROOT/.autocode`. Under it: `PROGRAM_FILE=program.md`, `RESULTS_FILE=results.tsv`, `STATE_FILE=state.json`, `HYP_DIR=hypotheses/`, `WORKTREE_DIR=worktrees/`, `LESSONS_DIR=lessons/`, `LOGS_DIR=logs/`, `RETRO_DIR=retrospectives/`, `REPORT_DIR=report/` (autocode.data.json / autocode.html). Full tree: `<board>/reference.md` § File structure.
 
 ## Step 1: Parse Subcommand
 
@@ -47,7 +47,7 @@ Scan the repo before asking anything: language and build system, test command, e
 
 Without `--spec`, first suggest planning in `$matt-design` in its own session (`kind: optimize` or `research`); this interview is the fallback.
 
-Ask with `AskUserQuestion`, one question at a time, proposing the recon-derived answer as the recommended option; loop until every required field is filled. The fields — `target_files`, `metric_name`, `metric_command` (prints the metric as a single number on the last line), `metric_direction` (default lower), `guard_command` (default: detected test command), `worktree_setup`, `scope` (function / module / system, default module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (default: the current branch; `none` = no PR) — with their wording, defaults, and the five follow-ups (hot-path files, interface compatibility, external systems, typecheck/lint in the guard, optional `screen_command` when the metric runs > 60 s) are in `<autocode-board's dir>/assets/reference.md` § Interview fields.
+Ask with `AskUserQuestion`, one question at a time, proposing the recon-derived answer as the recommended option; loop until every required field is filled. The fields — `target_files`, `metric_name`, `metric_command` (prints the metric as a single number on the last line), `metric_direction` (default lower), `guard_command` (default: detected test command), `worktree_setup`, `scope` (function / module / system, default module), `forbidden_zones`, `max_experiments` (N or 20), `performance_target`, `parallel` (1–4, default 2), `pr_base` (default: the current branch; `none` = no PR) — with their wording, defaults, and the five follow-ups (hot-path files, interface compatibility, external systems, typecheck/lint in the guard, optional `screen_command` when the metric runs > 60 s) are in `<board>/reference.md` § Interview fields.
 
 With `--spec` there is no interview — the design discussion and user confirmation were it: the `metric` block fills its keys (§ Interview fields), the rest take their defaults, follow-ups are answered from recon or left at default, nothing is asked.
 
@@ -62,7 +62,7 @@ Classify **hard** when any of: scope is system-wide; the target spans more than 
 
 ### 2D: Generate `program.md`
 
-Template: `<autocode-board's dir>/assets/reference.md` § program.md (Target, Metric, Guard, Worktree, Constraints, Budget — including `pr_base` — Routing, Plateau — `consecutive_discard_threshold: 5`, `window: 8`, `unlazy_gates` — Strategy Hints); fill every field from 2B/2C. With `--spec`, set the template's `spec` line to the path and put the spec's `## 큰 틀` and `## 결정` table under Strategy Hints. Create `results.tsv` with header `seq\thypothesis\troute\tcommit\tmetric\tdelta\tstatus\tnote`, the directories from Step 0, and add `.autocode/` to `.gitignore` (ask first; worktrees live under it and must never be committed).
+Template: `<board>/reference.md` § program.md (Target, Metric, Guard, Worktree, Constraints, Budget — including `pr_base` — Routing, Plateau — `consecutive_discard_threshold: 5`, `window: 8`, `unlazy_gates` — Strategy Hints); fill every field from 2B/2C. With `--spec`, set the template's `spec` line to the path and put the spec's `## 큰 틀` and `## 결정` table under Strategy Hints. Create `results.tsv` with header `seq\thypothesis\troute\tcommit\tmetric\tdelta\tstatus\tnote`, the directories from Step 0, and add `.autocode/` to `.gitignore` (ask first; worktrees live under it and must never be committed).
 
 ### 2E: Runnable completion gates (unlazy, optional)
 
@@ -97,13 +97,13 @@ The session running this skill is the **coordinator**. It owns scheduling, measu
 
 Run the metric command **three times** on the unmodified code in `$WORKTREE_DIR/best`, serially. Validate each value is a finite number (abort with the raw output otherwise). Record `baseline` = median of the three and `noise_band` = max |run − median|, floored at 0.5% of |median|. A change counts as an improvement only when it beats `best_metric` by more than `noise_band` in the configured direction. This is the only keep/discard rule in the whole loop.
 
-Write `state.json` (`<autocode-board's dir>/assets/reference.md` § state.json: branch, base_branch, base_commit, pr_base, pr_url, baseline, noise_band, best_metric, best_commit, experiments_done, max_experiments, parallel, strategist_tier, strategist_agent_id, board_url, running, consecutive_discards, escalated, terminated_reason). Display the baseline, noise band, branch, PR base, parallelism, and strategist tier, then **publish the board for the first time** (3I) — `progress.state: running`, the metric strip, an empty frontier. From here on every state change republishes it.
+Write `state.json` (`<board>/reference.md` § state.json: branch, base_branch, base_commit, pr_base, pr_url, baseline, noise_band, best_metric, best_commit, experiments_done, max_experiments, parallel, strategist_tier, strategist_agent_id, board_url, running, consecutive_discards, escalated, terminated_reason). Display the baseline, noise band, branch, PR base, parallelism, and strategist tier, then **publish the board for the first time** (3I) — `progress.state: running`, the metric strip, an empty frontier. From here on every state change republishes it.
 
 ### 3C: Spawn the strategist (persistent)
 
 Spawn one strategist for the whole run (`auto-loop:strategist`, see 3H). Keep its agent id in `state.json` and continue the same conversation with `SendMessage` for every result — never respawn per event; its accumulated context is what makes replanning cheap.
 
-Its first prompt carries the **strategist brief** (`<autocode-board's dir>/assets/reference.md` § Strategist brief, verbatim), `program.md`, the baseline and noise band, the lessons, the target file paths, and the hypothesis schema (§ Hypothesis: id, claim, experiment, expected_delta, touches, depends_on, difficulty default|deep, if_confirmed, if_refuted, priority, status), and asks for the **initial frontier**: at least `2 × parallel` hypotheses, preferring disjoint `touches`. Hypothesis `status` moves `pending → running → measured → keep | discard | crash | conflict | interaction | cancelled`. On every result event the strategist replies with a frontier delta — `add`, `cancel`, `reprioritize`, `escalate`, `note` (§ Strategist reply) — never a new plan.
+Its first prompt carries the **strategist brief** (`<board>/reference.md` § Strategist brief, verbatim), `program.md`, the baseline and noise band, the lessons, the target file paths, and the hypothesis schema (§ Hypothesis: id, claim, experiment, expected_delta, touches, depends_on, difficulty default|deep, if_confirmed, if_refuted, priority, status), and asks for the **initial frontier**: at least `2 × parallel` hypotheses, preferring disjoint `touches`. Hypothesis `status` moves `pending → running → measured → keep | discard | crash | conflict | interaction | cancelled`. On every result event the strategist replies with a frontier delta — `add`, `cancel`, `reprioritize`, `escalate`, `note` (§ Strategist reply) — never a new plan.
 
 ### 3D: Scheduler loop (event-driven)
 
@@ -129,7 +129,7 @@ If the frontier is empty while nothing is running, ask the strategist for a refi
 #### 3D-1: Dispatch one hypothesis
 
 1. Worktree: `git worktree add "$WORKTREE_DIR/H{id}" -b "autocode/H{id}" "$best_commit"`. Run `worktree_setup` inside it if set (note the duration on the first run; if it dominates, say so in the final summary).
-2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the Agent tool and the **experimenter prompt** (`<autocode-board's dir>/assets/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. The completion notification is verified by reading the result file and the branch; it is a signal, not evidence.
+2. Route by `difficulty` (3H) and spawn the experimenter **in the background** with the Agent tool and the **experimenter prompt** (`<board>/reference.md` § Experimenter prompt, verbatim): edit only `touches`, never `forbidden_zones`, respect `immutable_constraints`; smallest change; guard with at most two fix-and-retry rounds; commit `experiment(H{id}): {short}`; write `.autocode/hypotheses/H{id}.result.json` (`status: implemented | crash | beyond_scope`, `commit`, `summary`, `observations`, `obstacle`) in the main checkout; never run the metric, merge, touch other worktrees, or install hooks. The completion notification is verified by reading the result file and the branch; it is a signal, not evidence.
 3. Set `H.status = running`, add to `state.running`, log the route in `results.tsv` later.
 
 #### 3D-2: Measure (serial)
@@ -160,13 +160,13 @@ else:                                                     # inside $WORKTREE_DIR
             git reset --hard; status = interaction        # kept changes cancelled each other
 ```
 
-One kept hypothesis is one commit on the experiment branch, its message carrying the measurement body (`<autocode-board's dir>/assets/reference.md` § Keep commit — metric before → after with delta, noise band, route, claim, board link). The experimenter's `experiment(H{id})` commit stays on `autocode/H{id}` as the squash's source and is deleted with the branch below; `reset --hard` after a failed re-measure discards the staged squash and leaves `best_commit` untouched.
+One kept hypothesis is one commit on the experiment branch, its message carrying the measurement body (`<board>/reference.md` § Keep commit — metric before → after with delta, noise band, route, claim, board link). The experimenter's `experiment(H{id})` commit stays on `autocode/H{id}` as the squash's source and is deleted with the branch below; `reset --hard` after a failed re-measure discards the staged squash and leaves `best_commit` untouched.
 
 Then: append `results.tsv` (`seq, H{id}, route, commit, metric, delta, status, note`), write a lesson to `$LESSONS_DIR/lesson_{seq}.json` (`{iteration, type, description, action, tags}`), `git worktree remove --force "$WORKTREE_DIR/H{id}"`, `git branch -D autocode/H{id}`, `experiments_done += 1`. `conflict` and `interaction` mean two hypotheses were not independent; both go to the strategist as such.
 
 #### 3D-4: Feed back one result
 
-Send the strategist a single message (`<autocode-board's dir>/assets/reference.md` § Result message: status, metric vs best and noise band, delta, experimenter summary and observations, consecutive discards, the frontier now, and the instruction to execute H{id}'s pre-committed `if_confirmed` / `if_refuted` as concrete hypotheses or cancellations and reply with a frontier delta).
+Send the strategist a single message (`<board>/reference.md` § Result message: status, metric vs best and noise band, delta, experimenter summary and observations, consecutive discards, the frontier now, and the instruction to execute H{id}'s pre-committed `if_confirmed` / `if_refuted` as concrete hypotheses or cancellations and reply with a frontier delta).
 
 Apply the delta: write new hypothesis files, mark cancelled ones (a cancelled hypothesis already running is left to finish — its result is still evidence), update priorities. Go back to FILL immediately; never wait for other running experiments.
 
@@ -199,7 +199,7 @@ When `unlazy_gates: true`, run `node "$UNLAZY_DIR/scripts/gate-check.mjs" --reve
 
 Then **publish the board one last time** (3I) with `progress.state: "done"`, `run.terminatedReason` set, and the `outcome` block: `outcome.files` measured with `git diff --numstat <base_commit>..<best_commit>` / `--name-status` (`base_commit` from `state.json`, not the base branch — the user may have kept committing there), one Korean line per file, `.autocode/**` left out. That final page is the report the user keeps; the terminal summary points at it.
 
-**Final summary**: `<autocode-board's dir>/assets/reference.md` § Final summary — branch @ best_commit, baseline → best with improvement % and noise band, experiment tally by status, wall clock / experiments per hour / measurement time share, strategist tier and escalation, route tally and re-routes, `Gates caught: {n}`, termination reason, the PR line (URL, or why none), kept changes in commit order, refuted hypotheses worth remembering.
+**Final summary**: `<board>/reference.md` § Final summary — branch @ best_commit, baseline → best with improvement % and noise band, experiment tally by status, wall clock / experiments per hour / measurement time share, strategist tier and escalation, route tally and re-routes, `Gates caught: {n}`, termination reason, the PR line (URL, or why none), kept changes in commit order, refuted hypotheses worth remembering.
 
 ### 3G: Failure handling
 
@@ -225,7 +225,7 @@ Routing is the plugin's agent files, which fix model and effort — there is no 
 
 ### 3I: The experiment board
 
-The board is the run's status page and, at the end, its report — built by `$loop-report` with autocode's own view (`$autocode-board`'s `assets/view.html`, its data checks in `assets/validate.py` beside it) and published with the **Artifact tool**. autocode owns the data; loop-report owns the page; the Artifact tool owns the URL.
+The board is the run's status page and, at the end, its report — built by `$loop-report` with autocode's own view (`<board>/view.html`, its data checks in `validate.py` beside it) and published with the **Artifact tool**. autocode owns the data; loop-report owns the page; the Artifact tool owns the URL.
 
 **Publish** = write `$REPORT_DIR/autocode.data.json`, then:
 
@@ -233,18 +233,18 @@ The board is the run's status page and, at the end, its report — built by `$lo
 python3 <loop-report's dir>/assets/render.py \
   --data .autocode/report/autocode.data.json \
   --out  .autocode/report/autocode.html \
-  --view <autocode-board's dir>/assets/view.html
+  --view <board>/view.html
 ```
 
 then publish `.autocode/report/autocode.html` with the Artifact tool — the same file path every time, so every republish keeps the same URL. The first publish passes a `favicon`; later publishes omit it. Print the returned URL as the board link and record it in `state.json` `board_url`. This edition writes no `.autocode/report/autocode.delivery.json`. Publish first after the baseline (3B), then on every state change (3D), on plateau/escalation (3E), and last at termination (3F) with `progress.state: "done"` and the `outcome`.
 
-**Data** — the common keys follow loop-report's contract (`title`, `slug: "autocode"`, `generated`, `summary`, `progress`, `outcome`); the view's keys are `run` (including `run.pr { base, url }`) and `hypotheses`, with the JSON and its rules (Korean one-liners for claims/notes/obstacles, `terminatedReason` null until 3F, `progress.current` / `blockers`, never pre-sum what the page derives) in `<autocode-board's dir>/assets/reference.md` § Board data. Read it before the first publish.
+**Data** — the common keys follow loop-report's contract (`title`, `slug: "autocode"`, `generated`, `summary`, `progress`, `outcome`); the view's keys are `run` (including `run.pr { base, url }`) and `hypotheses`, with the JSON and its rules (Korean one-liners for claims/notes/obstacles, `terminatedReason` null until 3F, `progress.current` / `blockers`, never pre-sum what the page derives) in `<board>/reference.md` § Board data. Read it before the first publish.
 
 ---
 
 ## Step 4: Status (`/autocode status`)
 
-Read `state.json`, `results.tsv`, and `hypotheses/*.json`; display the block from `<autocode-board's dir>/assets/reference.md` § Status (branch and PR base, best vs baseline, experiment tally, kept commits, running, frontier, strategist, routes used, rate, the PR URL once opened, and the last published board URL from `state.json` `board_url`).
+Read `state.json`, `results.tsv`, and `hypotheses/*.json`; display the block from `<board>/reference.md` § Status (branch and PR base, best vs baseline, experiment tally, kept commits, running, frontier, strategist, routes used, rate, the PR URL once opened, and the last published board URL from `state.json` `board_url`).
 
 ## Step 5: Resume (`/autocode resume`)
 

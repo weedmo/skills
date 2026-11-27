@@ -17,7 +17,7 @@ Data lives in `gate-routes.json` (`families.grok`, `grok_priority`); the check i
 |---|---|---|
 | Lookup (`gate-route.mjs --role lookup --host <claude\|codex>`) | `grok-4.7-build-fast`, code and web | The host's lookup route: Claude Code `Explore` agent; Codex `matt-fast` |
 | QA triage (`qa-gate`) | `grok-4.7-build-fast` | Writer's other family |
-| Gemini quota exhausted (design-map / large-context slots) | Grok worker, then Codex | Codex continuation |
+| Gemini quota exhausted (design-page / large-context slots) | Grok worker, then Codex | Codex continuation |
 
 Grok never authors QA scenarios.
 

@@ -16,7 +16,7 @@ so there is no implementation or fix worker. Design sources:
 | 3 Delegate | None |
 | 4 Load design | No report page; pin spec path and hash in the log |
 | 5–8 Size · Tickets · Plan | One ticket written to the log (acceptance, verify commands); no `$to-tickets`, no publication |
-| 9 Implement | You, in this session: `$implement` (`$tdd` when acceptance names tests first) against the pinned spec; commit task-owned changes. Lookups whose path you do not need take the lookup route (`gate-route.mjs --role lookup --host <claude\|codex>`, this session's host) |
+| 9 Implement | You, in this session: build to the ticket's acceptance against the pinned spec, test-first with `$tdd` when acceptance names tests; `$review-gate` is the only review; commit task-owned changes. Lookups whose path you do not need take the lookup route (`gate-route.mjs --role lookup --host <claude\|codex>`, this session's host) |
 | 9 Verify | Same: you run the commands; a failure is yours to fix, at most twice more |
 | 9b QA | `$qa-gate` only when a runnable surface exists and an acceptance item is behavioural; otherwise record `N/A` and why |
 | 9b Review | `$review-gate` over `<baseline>..HEAD` with max cycles 1; you triage and fix its blocker/major findings in this session, then re-run verification; `/simplify` and `/security-review` only on user request |

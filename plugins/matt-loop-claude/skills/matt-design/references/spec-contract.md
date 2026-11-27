@@ -32,7 +32,7 @@ artifact: none
   is its benchmark, `guard` its differential harness, `forbidden` the frozen corpus
   and tests. The command is `$autocode init --spec <path>`; confirming this spec
   still does not launch that loop.
-- `artifact`: design-map's delivered page route, or `none`; no page is required.
+- `artifact`: the design page's delivered route (references/visualize.md), or `none`; no page is required.
 - `mode` (optional): `core` or `full`. It pins matt-auto's execution mode;
   omitted, matt-auto selects one from its mode table.
 

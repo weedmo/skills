@@ -1,6 +1,6 @@
 ---
 name: loop-report
-description: "Builds and delivers the live progress page of a long-running delegated loop (matt-auto, autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (the page opened once with the system opener, or the path), which keeps the route stable for the whole run. Callers run those two scripts and relay the answer; they never open the page themselves. Called by interview-report (matt-auto's decision graph) and autocode (the experiment board); do not trigger standalone."
+description: "Builds and delivers the live progress page of a long-running delegated loop (matt-auto, autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (the page opened once with the system opener, or the path), which keeps the route stable for the whole run. The loops' own views ship here too: `views/matt-auto` (the decision graph) and `views/autocode` (the experiment board, with autocode's templates). Callers run those two scripts and relay the answer; they never open the page themselves. Called by matt-auto and autocode; do not trigger standalone."
 ---
 
 # Loop report (the shared progress page)
@@ -18,7 +18,7 @@ Both live in `assets/` next to this file. `<this skill's dir>` is the directory 
 ```
 python3 <this skill's dir>/assets/render.py \
   --data <dir>/<slug>.data.json --out <dir>/<slug>.html \
-  --view <the loop's skill dir>/assets/view.html
+  --view <this skill's dir>/views/<loop>/view.html
 ```
 
 The script validates the common contract below, then the view's own `validate.py`, and refuses to write a page that would render wrong — so a regeneration is "edit the JSON, rerun the script". Never splice the shell or a view by hand (no `cp` + `sed`/`perl`): a hand-rolled substitution silently ate 30 KB of the shell in testing. Never edit the shell's or a view's CSS/JS. If `python3` is missing, say so and stop.
@@ -73,9 +73,18 @@ Loops that call these scripts require weed-harness ≥ 3.1 (the version that shi
 - `outcome` is the final regeneration only, together with `progress.state: "done"` (`render.py` refuses it otherwise). `status` ∈ added / modified / deleted / renamed; `kind` ∈ code / docs (`.md`/`.mdx`/`.txt`/`.rst` and docs directories) / other (lockfiles, generated output, binaries). `added` / `removed` come from `git diff --numstat <baseRef>..<headRef>` — never estimated; a binary gets `0`/`0` and a note. Leave the loop's own bookkeeping (its log folder, `.unlazy/**`, `.autocode/**`) out. `note` is one Korean line per file. Totals are computed in the page.
 - Every human-facing string is Korean; ids and JSON structure stay English.
 
+## The loops' views
+
+| View | Loop | Beside the view |
+|---|---|---|
+| `views/matt-auto/` | matt-auto full mode | `contract.md` — the data keys, regeneration points, the `<slug>.edits.json` round-trip |
+| `views/autocode/` | autocode | `reference.md` — interview fields, `program.md` / `state.json` templates, hypothesis schema, verbatim prompts, commit and summary templates, board data |
+
+The loop reads only the section its step names. Each folder also holds `view.html` and the `validate.py` that `render.py` loads from the view's directory.
+
 ## The view interface (for loop authors)
 
-A view is one file, `assets/view.html` in the loop's skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views (`interview-report`, `autocode`) before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake opener — run it after touching the script.
+A view is one file, `views/<loop>/view.html` in this skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake opener and `tests/test_matt_auto_view.mjs` the decision renderer — run them after touching either.
 
 ## Red flags
 

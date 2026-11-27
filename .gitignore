@@ -75,7 +75,6 @@ sessions/
 # Backups & research (local only)
 *.backup.*
 research/
-!plugins/*/skills/research/
 skills/learned/
 skills/skill-stocktake/
 

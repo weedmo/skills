@@ -99,7 +99,7 @@ if [ -d "$MPC" ] && [ -d "$DST" ] && [ ! -d "$HOME/.codex/plugins/cache/weed-plu
     [ -d "$SRC" ] || continue
     for d in "$SRC"/*/; do
       s="$(basename "$d")"
-      case "$s" in setup|design-map) continue ;; esac
+      case "$s" in setup) continue ;; esac
       [ -f "$d/SKILL.md" ] || continue
       if ! diff -rq "$d" "$DST/$s" >/dev/null 2>&1; then
         rm -rf "${DST:?}/$s"
