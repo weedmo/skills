@@ -1,102 +1,90 @@
 # Execution core
 
-The **integration branch** is the working branch, or the PR branch in ship mode.
+Both editions run matt-auto the same way: **this session implements, verifies,
+fixes and reports**. There are no implementation or fix workers, no decision
+delegate and no progress page. Subagents run only for the QA author and the
+reviewer (the other model family: Codex when this session is Claude, Claude
+when it is Codex), lookups whose path the session does not need, and the Codex
+As-Is / To-Be page. Design sources: `docs/design/matt-auto-core.md`,
+`docs/design/purpose-loops.md`.
 
-## Frontier dispatch
+## Tickets in the log
 
-The **frontier** is every ticket whose blockers are
-merged into the integration branch. Keep it running up to the concurrency cap:
-when a ticket merges, recompute it and dispatch what became ready. Hold a ready
-ticket back only while a running ticket touches the same files or section, its
-assumptions depend on that ticket, it is exploratory, or merging would collide.
-The plan's `waves` are the page's forecast of dependency layers, not a barrier.
+Write the tickets into `docs/agents/matt-auto-log/<slug>.md`, nowhere else: one
+ticket per implementation step of the spec, or one ticket for a brief, in the
+spec's order. Each ticket has its acceptance criteria as written, concrete
+verification commands with the expected result, and any manual criterion with
+the evidence it needs. No tracker and no publication.
+Implementation-level choices are yours: decide, then log one line.
 
-## Shared exploration (optional)
+## Implement and verify, one ticket at a time
 
-With three or more tickets, or tickets reading the same unfamiliar module, run
-one exploration worker first. It saves markdown notes outside the repo for later
-workers; record the path in the log. Brief every worker with **context
-pointers** (ticket ref, pinned spec, notes path, earlier commits), not restated
-content.
+For each ticket in order: build it to its acceptance against the pinned spec,
+test-first with `$tdd` when the acceptance names tests; commit task-owned
+changes; then run its verification commands yourself. A failure is yours to
+fix, at most twice more; then the run stops as `⛔` with the failing command
+and its output. A ticket is done when every command passed on your run and each
+manual criterion has explicit evidence. After the last ticket, re-run every
+ticket's commands once on HEAD.
 
-## Worker contract
+## QA and review, in parallel on the other family
 
-Every implementation worker also:
+On that verified, committed HEAD start both gates at once, as two background
+runs launched together, each writing its own files:
 
-- before any change, confirms its worktree is based on the integration branch
-  tip and resets onto it if not;
-- before reporting, merges the integration branch tip into its own branch,
-  resolves any conflict there, and re-runs the ticket's verification commands;
-- never merges into the integration branch itself.
+- `$qa-gate` — its QA author is the route `gate-route.mjs --role qa-author`
+  returns (Codex for a Claude session); you run the scenarios yourself. Library-only work is `N/A` with the
+  reason, and review runs alone.
+- `$review-gate` over `<baseline>..HEAD` with `--cycles 2`, `writer` this
+  session's family, `deep` when any spec step is tagged `[deep]`, the pinned spec
+  as fidelity reference. Its rule table picks the reviewer (Codex for a Claude session) and tier, never you.
 
-## Coordinator merge
-
-When a worker reports, run the ticket's verification commands yourself in its
-worktree, then `git merge --no-ff <branch>` into the integration branch. If the
-tip moved after the worker merged it, re-run that ticket's commands on the
-merged branch. A conflict returns to the same worker once; a second goes to
-pr-babysit's
-[merge conflicts](../../pr-babysit/references/merge-conflicts.md) on the Deep route. Then complete the ticket, remove
-its worktree and recompute the frontier. Earlier tickets' commands re-run once, below, not
-per merge.
-
-## Final candidate, QA and review
-
-After the last ticket merges, re-run every ticket's verification commands once
-on the integrated candidate; a failure goes to a fix worker before any gate.
-Commit task-owned implementation and later fixes before every range review.
-First `$qa-gate` on the candidate (scenarios from the pinned spec's acceptance
-criteria; library-only work is N/A), then `$review-gate` over `<baseline>..HEAD`
-(not per ticket) with `writer` from the actual implementation/retry history,
-`deep` when any ticket is `[deep]`, and the pinned spec as the fidelity
-reference. Its rule table picks the other-family reviewer and tier, never you.
-Both gates go in the run's ledger; record each pass as a `review.passes` entry
-with its finding count.
-
-**In full mode, fixes go to one fresh implementation worker, not the coordinator**
-(core fixes in-session). Hand it
-the pass's confirmed findings by pointer, on Deep when any ticket was `[deep]`,
-otherwise Default. Then re-run the affected tickets' commands and the QA scripts
-yourself and repeat independent review, at most two fix/review cycles.
-Unresolved confirmed findings at the bound stop the run with the findings and
-evidence; never mark it done. Completion requires clean independent review and
-passing coordinator verification on the final integrated candidate.
+Wait for both, then triage once: QA failures plus the review's blocker/major
+findings. Fix them in this session, commit, re-run the verification commands,
+then start the next cycle with both gates in parallel again: the QA scenarios
+re-run, and the next review round's prompt also carries `.qa/<unit>/scenarios/`
+so weak assertions get reviewed. At most two cycles. Findings still open at the
+bound stop the run with the findings and evidence; never mark it done. Done
+means verification passed on HEAD, `qa-gate: PASS` (or `N/A`), and
+`review-gate: PASS` bound to that HEAD. With unlazy installed both gates go in
+the run's ledger.
 
 ## PR body and retro candidates
 
-In ship mode first run `$pr-visual` (change-point page shown before the PR, its text section
-added to the body), then write the PR body with `$pr`: Summary from the spec and tickets,
-Evidence from measured results (`gateList`, the QA run, `git diff --numstat`),
-Merge Danger from the spec's externally visible changes.
+In ship mode first run `$pr-visual` (the As-Is / To-Be change-point page shown
+before the PR, its text section added to the body), then write the PR body with
+`$pr`: Summary from the spec and tickets, Evidence from measured results (each
+command, the QA run, the review verdict, `git diff --numstat`), Merge Danger
+from the spec's externally visible changes.
 
-The final report lists every ticket that needed a retry, stopped as `⛔`,
-escalated, or drew confirmed review findings, with its checkable fact, as
-candidates for `$retro`. List only; the user runs it.
+The final report lists every ticket that needed a retry or stopped as `⛔`, and
+every confirmed review finding, with its checkable fact, as candidates for
+`$retro`. List only; the user runs it.
+
+## Stops
+
+| During the run | Action |
+|---|---|
+| Verification still fails after two retries | `⛔` handoff with the failing command |
+| Findings open after review cycle 2 | STOP handoff with the findings and evidence |
+| A design choice, or a change to acceptance, scope, external interface or data meaning | Stop; show the D-ids, evidence, recommendation and impact; return to `$matt-design` |
 
 ## Change control
 
-Routine implementation and ticket questions stay autonomous inside the confirmed
-contract. A proposed change to a settled decision, acceptance criterion, scope,
-external interface or data meaning is a design question: pause affected workers,
-show the D-ids, evidence, recommendation and impact to the user, and return the
-question to `$matt-design`. Do not edit the source spec or let a delegate approve
-its replacement. Continue independent unaffected work only when its assumptions
-remain valid. Resume affected work after the user confirms the revised spec and
-requests continuation; record the newly adopted revision/hash and invalidate
-stale ticket plans, verification and review as needed.
-
-User report edits/comments are change requests, not approval. Apply routine
-execution edits to affected tickets, the log/plan and active worker briefs; pause
-affected dispatch while updating instructions, and invalidate checks/review when
-their inputs change. Design edits follow the rule above. Preserve a
-pending edit until resolved, then mark it consumed so it is not applied twice.
-`--confirm` adds only the ticket/plan gate; it does not reopen settled design.
+Routine implementation questions stay autonomous inside the confirmed contract.
+A proposed change to a settled decision, acceptance criterion, scope, external
+interface or data meaning is a design question: stop the affected ticket, show
+the D-ids, evidence, recommendation and impact to the user, and return the
+question to `$matt-design`. Do not edit the source spec. Resume after the user
+confirms the revised spec and requests continuation; record the newly adopted
+revision/hash and invalidate stale verification and review.
+`--confirm` adds only the ticket-plan gate; it does not reopen settled design.
 
 ## Red flags — you are drifting off the flow
 
 - Interviewing or authoring a new spec here; treating design confirmation alone as execution authorization.
-- Dispatching on a draft or changed spec, guessing a design answer, or reversing a settled D-id without a user-confirmed revision.
-- Skipping ticket verification or independent review for small work, claiming completion with open findings, or trusting worker reports without running checks yourself.
-- Holding a ready ticket for a wave, fixing review findings yourself in full mode, or accepting a worker report without the integration tip merged.
-- Stale report state, edits silently consumed, or counts not measured from git.
+- Running on a draft or changed spec, guessing a design answer, or reversing a settled D-id without a user-confirmed revision.
+- Spawning an implementation or fix worker, or running QA and review one after the other instead of together.
+- Skipping verification or review for small work, or claiming completion with open findings.
+- Counts not measured from git.
 - A PR without a ship flag, before its measured conditions, or a merge, force-push or rebase of the PR branch.

@@ -1,15 +1,15 @@
 ---
 name: hc-workers
-description: "How the delegated loops (matt-auto, autocode, pr-babysit) run their subagents as Herdr workers: hc templates generated from the loop's role files, one visible tab per run, file-based reports sent with hc send, and a bounded wait loop. Used on Claude Code and Codex alike whenever hc is available. Reference skill, never invoked standalone."
+description: "How the delegated loops (autocode, pr-babysit) run their subagents as Herdr workers: hc templates generated from the loop's role files, one visible tab per run, file-based reports sent with hc send, and a bounded wait loop. Used on Claude Code and Codex alike whenever hc is available. Reference skill, never invoked standalone."
 ---
 
 # hc workers (shared)
 
 Herdr's core, `hc`, runs agents in terminals that stay alive, that a person can
 watch and take over. A loop that finds `hc` runs every worker it spawns —
-full-mode implementation and fix workers, experimenters, long-lived specialists —
+experimenters, babysitters, long-lived specialists —
 there instead of in its platform's hidden subagents. Work a loop does in its own
-session (matt-auto core) spawns nothing. `hc --skill` is the live manual and overrides any flag
+session (all of matt-auto) spawns nothing. `hc --skill` is the live manual and overrides any flag
 written here. `<this skill's dir>` is the directory holding this file.
 
 ## Probe (once, at the loop's probe step)

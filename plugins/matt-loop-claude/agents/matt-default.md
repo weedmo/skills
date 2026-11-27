@@ -1,6 +1,6 @@
 ---
 name: matt-default
-description: Handles ordinary implementation and analysis selected by matt-loop model routing — feature work, tests, moderate refactors, code-plus-doc tasks. Dispatched by matt-auto and pr-babysit (including its conflict resolution); not for direct invocation.
+description: Handles ordinary implementation and analysis selected by matt-loop model routing — feature work, tests, moderate refactors, code-plus-doc tasks. Dispatched by pr-babysit (including its conflict resolution); not for direct invocation.
 model: opus
 effort: medium
 ---

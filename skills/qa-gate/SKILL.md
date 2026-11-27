@@ -1,6 +1,6 @@
 ---
 name: qa-gate
-description: "Behavioural QA node: turn acceptance criteria into scenarios that drive the real app (Playwright for web, fetch for HTTP, shell for CLI, herdr hc for TUI), keep them as re-runnable scripts with evidence, and pass only when every scripted scenario passes on a fresh run. Library-only work is recorded as N/A. Called by matt-auto step 9 before review-gate; not for standalone feature work."
+description: "Behavioural QA node: turn acceptance criteria into scenarios that drive the real app (Playwright for web, fetch for HTTP, shell for CLI, herdr hc for TUI), keep them as re-runnable scripts with evidence, and pass only when every scripted scenario passes on a fresh run. Library-only work is recorded as N/A. Called by matt-auto in parallel with review-gate; not for standalone feature work."
 ---
 
 # qa-gate
@@ -50,12 +50,13 @@ CWD: <repo root relative to the ledger>
 
 plus one manual gate per judged scenario (`$loop-gates`), its evidence the user's answer
 after seeing `evidence/<id>/`. After review-gate fixes, re-run the CHECK. `.qa/` is not in
-the git diff, so hand `.qa/<unit>/scenarios/` to review-gate's reviewer prompt: weak
+the git diff, so hand `.qa/<unit>/scenarios/` to review-gate's reviewer prompt (matt-auto
+starts QA and review together, so its next review round gets them): weak
 assertions get reviewed like code.
 
 ## Report data
 
-Add one `review.passes` entry before review-gate's: `{"id": "qa", "name": "QA", "status",
+Add one `review.passes` entry beside review-gate's: `{"id": "qa", "name": "QA", "status",
 "findings": <failed scenarios>, "reviewer": "<surface> · <passed>/<total>[ · judged <n>]",
 "note": "<status line or N/A reason; evidence in .qa/<unit>/evidence>"}`.
 

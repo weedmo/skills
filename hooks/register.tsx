@@ -16,7 +16,7 @@ import type { BoardState, LoopData } from '../types'
 const PANE = 'board'
 const POLL_MS = 3000
 const DATA_FILE = /\.data\.json$/
-const DATA_DIRS = ['.autocode/report', 'docs/agents/matt-auto-log']
+const DATA_DIRS = ['.autocode/report']
 
 const board = atom({ plugin: 'weed-harness', key: 'board' } as const, {
   path: null,
@@ -116,7 +116,7 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'board',
-      description: 'Show the running loop (matt-auto, autocode) in a pane; /board <path> picks the data file',
+      description: 'Show the running loop (autocode) in a pane; /board <path> picks the data file',
     })
     return next(e)
   })

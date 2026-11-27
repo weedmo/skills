@@ -1,6 +1,6 @@
 ---
 name: pr-visual
-description: "As-Is / To-Be change-point page for every PR a loop opens, made by one headless Codex run: each change point side by side (code at the base commit and at HEAD, what and why), the As-Is / To-Be flow diagrams, and for web changes the base and HEAD recordings, all in one self-contained page shown as an Artifact before the PR. The PR body gets text only — no videos. Called by matt-auto and autocode right before `gh pr create`; also standalone as `pr-visual <base>` for any branch."
+description: "As-Is / To-Be change-point page for every PR a loop opens, made by one headless Codex run: each change point side by side (code at the base commit and at HEAD, what and why), the As-Is / To-Be flow diagrams, and for web changes the base and HEAD recordings, all in one self-contained page shown as an Artifact before the PR. The PR body gets text only — no videos. Called by matt-auto and autocode in ship mode right before `gh pr create`; also standalone as `pr-visual <base>` for any branch."
 ---
 
 # pr-visual

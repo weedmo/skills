@@ -1,6 +1,6 @@
 ---
 name: review-gate
-description: "Cross-model review node: one reviewer from the other model family (Codex; Claude for Codex-written code) reviews a diff, read-only and comment-only, the writer triages and fixes, the reviewer re-checks, at most N cycles. The verdict is a file bound to the reviewed commit and checked as one unlazy gate. Called by matt-auto step 9 and autocode before its PR; also runs standalone as `review-gate <base> [--spec PATH] [--cycles N]` for any branch."
+description: "Cross-model review node: one reviewer from the other model family (Codex; Claude for Codex-written code) reviews a diff, read-only and comment-only, the writer triages and fixes, the reviewer re-checks, at most N cycles. The verdict is a file bound to the reviewed commit and checked as one unlazy gate. Called by matt-auto (in parallel with qa-gate) and autocode before its PR; also runs standalone as `review-gate <base> [--spec PATH] [--cycles N]` for any branch."
 ---
 
 # review-gate

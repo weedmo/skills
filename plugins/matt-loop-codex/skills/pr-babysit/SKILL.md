@@ -52,7 +52,7 @@ For OpenCode large-context work, read model-routing's `references/gemini-priorit
 
 ## Running as an hc worker
 
-When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto's step 10 normally runs in-session), execute the workflow as usual with `ROUTED_EXECUTION=1`, and add the hc lifecycle: ask blocking questions with `hc send <coordinator> "QUESTION: …"` and end the turn, send material decisions as `ESCALATION: …` the same way, and finish exactly once by writing the result file (`outcome: succeeded|failed`, the merge-ready ledger tally and the stop condition) and sending `hc send <coordinator> "DONE|FAILED: <result_path>"`. A stop that is not merge-ready is `outcome: failed` with the unmet ids; never report it only in prose. The coordinator re-verifies its own ship ledger after your report.
+When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto's ship step normally runs in-session), execute the workflow as usual with `ROUTED_EXECUTION=1`, and add the hc lifecycle: ask blocking questions with `hc send <coordinator> "QUESTION: …"` and end the turn, send material decisions as `ESCALATION: …` the same way, and finish exactly once by writing the result file (`outcome: succeeded|failed`, the merge-ready ledger tally and the stop condition) and sending `hc send <coordinator> "DONE|FAILED: <result_path>"`. A stop that is not merge-ready is `outcome: failed` with the unmet ids; never report it only in prose. The coordinator re-verifies its own ship ledger after your report.
 
 ## Workflow
 

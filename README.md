@@ -6,13 +6,13 @@ for **Claude Code, Codex, opencode, and gemini-cli**.
 | Plugin | Where | What | Required |
 |--------|-------|------|----------|
 | `weed-harness` | repo root | The shared runtime every loop builds on — `loop-report` (live progress page and the loops' views; Artifact on Claude Code, local HTML elsewhere), `model-routing` (Codex-side model/effort tiers), `loop-gates` (unlazy-backed completion) — plus the Claude Code-only setup, hooks, and HUD | yes, every platform |
-| `matt-loop` | `plugins/matt-loop-claude/` · `plugins/matt-loop-codex/` | matt-design + matt-auto + vendored Matt Pocock skills; one edition per platform | optional, needs weed-harness 8.0+ |
+| `matt-loop` | `plugins/matt-loop-claude/` · `plugins/matt-loop-codex/` | matt-design + matt-auto + vendored Matt Pocock skills; one edition per platform | optional, needs weed-harness 9.0+ |
 | `auto-loop` | `plugins/auto-loop-claude/` · `plugins/auto-loop-codex/` | autocode hypothesis-driven parallel code improvement loop with a live experiment board; one edition per platform | optional, needs weed-harness 6.0+ |
 
 The split: **weed-harness is the loop runtime** (what every long delegated run
 needs — a page the user can watch, one routing table, gates that make "done"
-measurable), and each loop plugin is only its own graph (matt-auto's decision
-stages and ticket waves, autocode's hypothesis frontier). External loops
+measurable), and each loop plugin is only its own graph (matt-auto's in-session
+ticket sequence, autocode's hypothesis frontier). External loops
 (superpowers, graft, …) and the [unlazy](https://github.com/Leonxlnx/unlazy)
 skill are referenced, not vendored: the installer ensures unlazy with
 `npx skills add Leonxlnx/unlazy -g`, and the `auto-update.sh` SessionStart hook
@@ -32,15 +32,15 @@ renderer, views, delivery helpers, model routing, and completion gates.
 `matt-loop` and `auto-loop` each have separate Claude and Codex plugin roots,
 because their agent orchestration and delivery capabilities differ.
 
-Each loop family nevertheless has **one shared `view.html`**:
+autocode keeps **one shared `view.html`** for both editions (matt-auto has no
+progress page; its result is the As-Is / To-Be page from `pr-visual`):
 
 | Loop editions | Shared view | What it displays |
 |---------------|-------------|------------------|
-| `matt-loop-claude` + `matt-loop-codex` | [`loop-report/views/matt-auto/view.html`](skills/loop-report/views/matt-auto/view.html) | Decisions, stages, ticket waves, review and PR lanes |
 | `auto-loop-claude` + `auto-loop-codex` | [`loop-report/views/autocode/view.html`](skills/loop-report/views/autocode/view.html) | Hypotheses, experiments, metric trends and kept changes |
 
-A graph-edge fix in either shared view therefore reaches both editions of
-that loop when their runtime installation is updated and the page regenerated.
+A fix in the shared view therefore reaches both editions of
+the loop when their runtime installation is updated and the page regenerated.
 
 ### 2. Page pipeline
 
@@ -67,7 +67,6 @@ skills/                               # repository root = weed-harness plugin
 ├── .agents/plugins/marketplace.json   # Codex catalog → root + Codex loop roots
 ├── skills/
 │   ├── loop-report/assets/           # shell.html, render.py, deliver.py
-│   ├── loop-report/views/matt-auto/  # matt-auto view.html + validator + contract
 │   ├── loop-report/views/autocode/   # autocode view.html + validator + reference
 │   ├── model-routing/                # model / effort / review policies
 │   ├── loop-gates/                   # completion evidence via upstream unlazy
@@ -120,17 +119,17 @@ that CI workflow.**
 |--------------------|------:|----:|----------:|
 | `model-routing` | 700 | 700 | 0 |
 | `loop-gates` | 697 | 700 | 3 |
-| Codex `matt-auto` | 3,034 | 3,800 | 766 |
+| Codex `matt-auto` | 1,441 | 1,600 | 159 |
 | Codex `autocode` | 4,190 | 4,250 | 60 |
-| Claude `matt-auto` | 3,561 | 4,200 | 639 |
+| Claude `matt-auto` | 1,351 | 1,500 | 149 |
 | Claude `pr-babysit` | 1,100 | 1,100 | 0 |
 | Claude `autocode` | 4,173 | 4,200 | 27 |
-| Codex matt-auto read chain | 8,525 | 8,700 | 175 |
+| Codex matt-auto read chain | 5,103 | 5,300 | 197 |
 
 Counts come from [`bin/check-words.mjs`](bin/check-words.mjs), using
 whitespace-separated words. The chain includes Codex `matt-auto`, its
 [`execution-core.md`](plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md),
-the matt-auto view's `contract.md`, `loop-report`, `model-routing`, and `loop-gates`.
+`loop-report`, `model-routing`, and `loop-gates`.
 Keep additions within the applicable budgets; splitting design from execution
 reduces the execution read chain.
 
@@ -238,11 +237,11 @@ workflow guidance.
 
 | Skill | Platforms | Description |
 |-------|-----------|-------------|
-| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view (`views/matt-auto`, `views/autocode`) + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
+| `loop-report` | all | Builds the live progress page of a delegated run from `assets/shell.html` + the loop's view (`views/autocode`) + a data JSON (`assets/render.py`), and delivers it with `assets/deliver.py` (`probe` / `publish` / `show`): the page opened once with the system opener, or the path — route kept stable per run; `npm test` runs its tests against a fake opener |
 | `model-routing` | Codex · OpenCode · hc | Cost/time-efficient model and effort pairs, Astra question answering, independent review, dispatch, and escalation. Reference skill, never invoked standalone |
 | `loop-gates` | all | How the delegated loops (pr-babysit, autocode, matt-auto's ship step) use the upstream unlazy skill so "done" is a measured verdict: a runnable GATES.md ledger per unit, coordinator-approved, re-verified with gate-check.mjs, a retry bound, and hc boundaries. Reference skill, never invoked standalone |
 | `review-gate` | all | Cross-model review node for matt-auto, autocode, or any branch: one read-only, comment-only reviewer from the other family — Codex, or Claude for Codex-written code (models from `model-routing`'s `gate-route.mjs` rule table) — the writer triages and fixes, at most N cycles; `verdict.json` passes its unlazy gate only for the reviewed HEAD |
-| `qa-gate` | all | Behavioural QA node for matt-auto: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
+| `qa-gate` | all | Behavioural QA node for matt-auto, run in parallel with `review-gate`: acceptance criteria become re-runnable scenario scripts against the running app (Playwright / fetch / shell / `hc`), with evidence; judged criteria become manual gates; library-only work is N/A |
 | `pr-visual` | all | As-Is / To-Be change-point page before every loop PR, built by one headless Codex run: each change point side by side (code at base and HEAD, what and why), flow diagrams, and for web changes the base/HEAD recordings inlined; shown as a Claude Artifact (Codex: `deliver.py`, else locally). The PR body gets text only — no videos or media on GitHub |
 | `/setup` | Claude Code | Terminal UI + basic settings only: statusLine HUD, custom hooks (language-rule, auto-update) |
 | `rust-rewrite` | all | Rewrite or port a codebase or hot path to Rust from any language (Python/PyO3, C/C++, Go, JS/TS, Java/Kotlin, C#): profile-picked targets, frozen oracle tests before porting, FFI boundary design, differential equivalence gate, and 1-thread vs N-thread release benchmarks fed back as numbers. An optional `fast-anything` loop covers a few hot pure functions when that CLI is available; rust-rewrite gates it does not cover still apply. |
@@ -251,7 +250,7 @@ workflow guidance.
 
 `hooks/register.tsx` makes weed-harness a [Claude Code mod](https://code.claude.com/docs/en/plugins/mods/overview): a hooks module that runs inside Claude Code and can draw in the interface. It adds two things, both Claude Code-only; every other platform is untouched.
 
-- **`/board`** — a pane beside the transcript showing the running loop from its `<slug>.data.json` (loop-report's common contract: state, current step, elapsed, blockers, gates, outcome). It follows the newest file under `.autocode/report/` or `docs/agents/matt-auto-log/`, or the path given as `/board <path>`, polls it every 3 s while open, and opens by itself when a loop writes such a file. The Artifact page stays the shareable report; the pane is the in-terminal live view.
+- **`/board`** — a pane beside the transcript showing the running loop from its `<slug>.data.json` (loop-report's common contract: state, current step, elapsed, blockers, gates, outcome). It follows the newest file under `.autocode/report/`, or the path given as `/board <path>`, polls it every 3 s while open, and opens by itself when a loop writes such a file. The Artifact page stays the shareable report; the pane is the in-terminal live view.
 - **Guard** — a `tool.call` hook on Bash that refuses `git push --force` (not `--force-with-lease`), `git reset --hard`, `git clean -f`, `git checkout/restore -- .`, and `rm -rf` on `/`, `~`, `*`, `.` or `..`. The deny text tells the model to ask first; after the user confirms, `HARNESS_GUARD=off <command>` runs it.
 
 `claude plugin validate .` and `claude plugin test .` (the tests in `hooks/register.test.tsx`) check the mod; `claude --plugin-dir .` runs the working copy in place of the installed one.
@@ -259,15 +258,16 @@ workflow guidance.
 ### matt-loop
 
 Two editions share the same boundary: `matt-design` collaborates with the user;
-`matt-auto --spec <path>` executes the confirmed contract autonomously. Claude
-uses native agents/Workflow and reviews; Codex/OpenCode use model-routing and
-visible hc workers. Both retain coordinator verification and independent review.
-`--confirm` optionally adds a ticket/execution-plan gate on either platform.
+`matt-auto --spec <path>` executes the confirmed contract autonomously in the
+session itself: no workers, delegate or progress page. It implements and verifies
+each ticket in order, then runs QA and review by the other model family (Codex for
+a Claude session) in parallel, and in ship mode shows the As-Is / To-Be page before
+the PR. `--confirm` optionally adds a ticket-plan gate on either platform.
 
 Typical flow: `$matt-design` → iterate in chat (ask for a page when it
 helps; `references/visualize.md`) → confirm the local spec → separately invoke `$matt-auto --spec <path>`.
 Small work: `$matt-design --brief` writes a short confirmed brief (목표 · 수용 기준 ·
-비목표) and matt-auto runs it in `core` mode.
+비목표) and matt-auto runs it as one ticket.
 Confirming a design alone never starts implementation. Existing confirmed
 `design-map: 1` specs remain accepted. A design-changing implementation question
 returns to the user through matt-design; it cannot be settled by a delegate.
@@ -275,9 +275,9 @@ returns to the user through matt-design; it cannot be settled by a delegate.
 | Skill | Description |
 |-------|-------------|
 | `matt-design` | Matt Pocock grilling, domain modeling, module design, prototypes and local to-spec synthesis; decisions iterate with the user until confirmed. On request it renders the current design as an artifact page. `--brief` writes a three-section spec for small work. |
-| `matt-auto` | Confirmed spec → tickets → implementation → coordinator verification → independent review/fix cycles. Autonomous execution; optional PR shipping. Two modes from a rule table (`--core` / `--full` override): `core` is one ticket implemented and fixed in the session itself, with no worker, delegate or report page, keeping coordinator verification and one `review-gate` cycle, and promotes itself to `full` when the work outgrows it. QA via `qa-gate` (scripted scenarios on the running app), then cross-model `review-gate` (one reviewer: Codex, or Claude for Codex-written code; one CLI falls back to same-family; Sol medium / Sonnet by default, one step up on risk; models from a rule table). |
+| `matt-auto` | Confirmed spec → tickets in the log → this session implements and verifies each in order → `qa-gate` and `review-gate` in parallel (QA author and reviewer from the other family: Codex for a Claude session, Claude for Codex-written code; one CLI falls back to same-family; models from a rule table) → at most two fix cycles → optional PR with the `pr-visual` As-Is / To-Be page. No workers, delegate or progress page. |
 | `pr-babysit` | Shepherd one open GitHub PR through CI and review with automatic model/effort routing on Codex, OpenCode, and Claude Code; also resolves an active merge/rebase conflict (`references/merge-conflicts.md`) |
-| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `to-spec`, `to-tickets`, `tdd`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
+| vendored Matt Pocock skills | Upstream stage skills used by matt-design and matt-auto: `grilling`, `to-spec`, `tdd`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `prototype`, `improve-codebase-architecture`, `pr`, `retro`, `writing-for-agents`, `code-review` (Codex only; the Claude edition uses the built-in `/code-review`), `setup-matt-pocock-skills` |
 
 The vendored skills come from
 [mattpocock/skills](https://github.com/mattpocock/skills) and are auto-synced:

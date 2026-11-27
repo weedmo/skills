@@ -45,7 +45,7 @@ Default to `matt-default`; escalate to `matt-deep` only on a concrete limit. A c
 
 ## Running as an hc worker
 
-When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto step 10 usually stays in-session), run this workflow with `ROUTED_EXECUTION=1` and `$hc-workers`: `hc send` blocking `QUESTION:` / `ESCALATION:` lines, then finish once by writing the result file (`outcome: succeeded|failed`, ledger tally, stop condition) and `hc send <coordinator> "DONE|FAILED: <result_path>"`. A non-merge-ready stop is `outcome: failed` with unmet ids, never prose-only. The coordinator re-verifies its ship ledger after your report.
+When the prompt names a coordinator terminal and a result path (an explicit `hc run` launch; matt-auto's ship step usually stays in-session), run this workflow with `ROUTED_EXECUTION=1` and `$hc-workers`: `hc send` blocking `QUESTION:` / `ESCALATION:` lines, then finish once by writing the result file (`outcome: succeeded|failed`, ledger tally, stop condition) and `hc send <coordinator> "DONE|FAILED: <result_path>"`. A non-merge-ready stop is `outcome: failed` with unmet ids, never prose-only. The coordinator re-verifies its ship ledger after your report.
 
 ## Workflow
 

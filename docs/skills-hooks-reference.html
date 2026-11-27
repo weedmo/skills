@@ -232,17 +232,17 @@
   <table>
     <tr><th>스킬</th><th>분류</th><th>역할</th></tr>
     <tr><td class="name">loop-report</td><td><span class="tag blue">진행 페이지</span></td>
-      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 각 루프의 view(<code>views/matt-auto</code>는 결정 그래프와 데이터 계약, <code>views/autocode</code>는 실험 보드와 템플릿·프롬프트) + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
+      <td>긴 위임 루프의 진행 페이지를 만들고 전달. <code>assets/shell.html</code>(디자인 시스템, 진행 상황 헤더·퍼센트·ETA·막힘, 결과 패널, 자동 새로고침) + 루프의 view(<code>views/autocode</code>: 실험 보드와 템플릿·프롬프트) + 데이터 JSON을 <code>render.py</code>가 조립. 전달은 <code>deliver.py probe | publish | show</code> 스크립트가 맡는다: 시스템 열기(xdg-open/open) → 경로 순이며 한 실행 동안 고정, 상태는 delivery.json에 스크립트만 기록. 호출 스킬은 스크립트를 실행하고 답을 전달할 뿐이다.</td></tr>
     <tr><td class="name">model-routing</td><td><span class="tag blue">라우팅</span></td>
       <td>Fast / Default / Deep / Max 티어 표 하나 — Codex <code>spawn_agent</code>, Claude Code agent, OpenCode, hc 에이전트 명령별 정확한 model/effort 쌍, 디스패치 규칙, 에스컬레이션 사다리. 각 루프는 자기 역할을 이 티어에 매핑만 한다.</td></tr>
     <tr><td class="name">hc-workers</td><td><span class="tag blue">워커</span></td>
-      <td>위임 루프(matt-auto, autocode, pr-babysit)가 서브에이전트를 herdr <code>hc</code> 워커로 돌리는 규약 — 루프 role 파일에서 템플릿 생성, 실행당 보이는 탭, <code>hc send</code>로 파일 기반 보고, 대기 루프. Claude Code와 Codex 모두 <code>hc</code>가 있을 때 사용. 참조 스킬이라 단독 호출하지 않음.</td></tr>
+      <td>위임 루프(autocode, pr-babysit)가 서브에이전트를 herdr <code>hc</code> 워커로 돌리는 규약 — 루프 role 파일에서 템플릿 생성, 실행당 보이는 탭, <code>hc send</code>로 파일 기반 보고, 대기 루프. Claude Code와 Codex 모두 <code>hc</code>가 있을 때 사용. 참조 스킬이라 단독 호출하지 않음.</td></tr>
     <tr><td class="name">loop-gates</td><td><span class="tag blue">완료 게이트</span></td>
       <td>루프가 unlazy 스킬(Leonxlnx/unlazy, 벤더링하지 않고 npx로 설치)을 쓰는 규약 — 작업 단위별 GATES.md, 코디네이터가 직접 <code>--reverify</code>, 재시도 2회 후 핸드오프, hc 워커와의 경계.</td></tr>
     <tr><td class="name">review-gate</td><td><span class="tag blue">리뷰</span></td>
-      <td>크로스 모델 리뷰 노드. 작성자의 다른 모델 계열이 diff를 리뷰하고, 작성자가 분류·수정한 뒤 재검토하며 최대 N사이클. 판정은 리뷰한 커밋에 묶인 파일이며 unlazy 게이트 하나로 검사. matt-auto 9단계와 autocode의 PR 전에 호출되며, <code>review-gate &lt;base&gt;</code>로 단독 실행도 가능.</td></tr>
+      <td>크로스 모델 리뷰 노드. 작성자의 다른 모델 계열이 diff를 리뷰하고, 작성자가 분류·수정한 뒤 재검토하며 최대 N사이클. 판정은 리뷰한 커밋에 묶인 파일이며 unlazy 게이트 하나로 검사. matt-auto에서 qa-gate와 병렬로, autocode에서는 PR 전에 호출되며, <code>review-gate &lt;base&gt;</code>로 단독 실행도 가능.</td></tr>
     <tr><td class="name">qa-gate</td><td><span class="tag blue">QA</span></td>
-      <td>행동 QA 노드. 수락 기준을 실제 앱에 대해 재실행 가능한 시나리오 스크립트(웹은 Playwright, HTTP는 fetch, CLI는 shell, TUI는 herdr hc)와 증거로 남기고, 모든 스크립트 시나리오가 통과해야 함. 라이브러리 전용 작업은 N/A. matt-auto 9단계에서 review-gate 앞에 호출.</td></tr>
+      <td>행동 QA 노드. 수락 기준을 실제 앱에 대해 재실행 가능한 시나리오 스크립트(웹은 Playwright, HTTP는 fetch, CLI는 shell, TUI는 herdr hc)와 증거로 남기고, 모든 스크립트 시나리오가 통과해야 함. 라이브러리 전용 작업은 N/A. matt-auto에서 review-gate와 병렬로 호출.</td></tr>
   </table>
   </div>
 
@@ -274,7 +274,7 @@
     <tr><td class="name">matt-design</td><td><span class="tag brown">설계</span></td>
       <td>Matt Pocock의 grilling, domain-modeling, codebase-design, prototype, to-spec으로 기능·변경을 사용자와 함께 설계. 결정을 반복해 matt-auto가 쓸 로컬 확정 스펙을 작성. 구현 전 설계용이며, 요청하면 현재 설계를 아티팩트 페이지로 렌더한다(<code>references/visualize.md</code>). 설계 확정만으로 구현이 시작되지는 않는다.</td></tr>
     <tr><td class="name">matt-auto</td><td><span class="tag brown">Codex</span></td>
-      <td>Matt Pocock 메인 플로우(grilling 인터뷰 → spec → 티켓 → 티켓별 구현)를 처음부터 끝까지 지휘. 결정 위임자가 일상 질문에 답하고 인터뷰 게이트 하나만 사람이 승인. 모델은 model-routing 티어로 자동 라우팅, 결정 그래프와 티켓 보드는 loop-report의 <code>views/matt-auto</code>로 발행, 병렬 티켓은 hc 워커. <code>--spec &lt;path&gt;</code>로 확정된 matt-design spec을 받으면 그 결정은 읽기 전용 design 단계가 되고 인터뷰는 열린 질문만 묻는다.</td></tr>
+      <td>확정된 matt-design spec을 이 세션에서 직접 실행. 티켓을 로그에 적고 하나씩 구현·검증한 뒤, 다른 모델 계열(Claude 세션이면 Codex)의 QA(qa-gate)와 리뷰(review-gate)를 병렬로 돌리고 최대 2사이클 수정. 워커·결정 위임자·진행 페이지 없음. ship 플래그가 있으면 pr-visual의 As-Is / To-Be 페이지를 보여 준 뒤 PR을 연다(merge는 사람).</td></tr>
     <tr><td class="name">pr-babysit</td><td><span class="tag brown">PR</span></td>
       <td>열린 PR 하나를 격리된 worktree에서 CI와 리뷰가 완료될 때까지 관리. 진행 중인 merge/rebase 충돌 해결(<code>references/merge-conflicts.md</code>)도 맡는다. 명시적으로 요청하지 않으면 merge하지 않음.</td></tr>
   </table>

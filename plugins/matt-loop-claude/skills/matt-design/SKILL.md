@@ -65,9 +65,9 @@ owns tickets and implementation. A page of the design so far comes from
 
 ## Brief mode (`--brief`)
 
-For small work bound for matt-auto `core`. Skip steps 2–4: read the request and
+For small work bound for matt-auto. Skip steps 2–4: read the request and
 the relevant code, then write a brief per
-[references/spec-contract.md](references/spec-contract.md) (`mode: core`, sections
+[references/spec-contract.md](references/spec-contract.md) (sections
 목표 · 수용 기준 · 비목표 · 확인) and ask for one confirmation. Investigate facts
 yourself; do not ask the user what the repo can answer. The moment a choice needs
 the user, stop the brief and continue at step 2 with what you have. Step 6 applies
