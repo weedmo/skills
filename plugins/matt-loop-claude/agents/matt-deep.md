@@ -1,6 +1,6 @@
 ---
 name: matt-deep
-description: Handles difficult debugging, design, review, and refactoring selected by matt-loop model routing, and serves as matt-auto's decision delegate. Dispatched by matt-auto and pr-babysit (including its conflict resolution); not for direct invocation.
+description: Handles difficult debugging, design, review, and refactoring selected by matt-loop model routing. Dispatched by pr-babysit (including its conflict resolution) and by matt-auto's ship step for semantic merge conflicts; not for direct invocation.
 model: fable
 effort: high
 ---

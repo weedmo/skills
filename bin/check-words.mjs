@@ -11,22 +11,21 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CAPS = {
   "skills/model-routing/SKILL.md": 700,
   "skills/loop-gates/SKILL.md": 700,
-  "plugins/matt-loop-codex/skills/matt-auto/SKILL.md": 3800,
+  "plugins/matt-loop-codex/skills/matt-auto/SKILL.md": 1600,
   "plugins/auto-loop-codex/skills/autocode/SKILL.md": 4250,
   // Claude Code editions, measured after the 2026-09-07 regression (platform-split step 9).
-  "plugins/matt-loop-claude/skills/matt-auto/SKILL.md": 4200,
+  "plugins/matt-loop-claude/skills/matt-auto/SKILL.md": 1500,
   "plugins/matt-loop-claude/skills/pr-babysit/SKILL.md": 1100,
   "plugins/auto-loop-claude/skills/autocode/SKILL.md": 4200,
 };
 const CHAIN = [
   "plugins/matt-loop-codex/skills/matt-auto/SKILL.md",
   "plugins/matt-loop-codex/skills/matt-auto/references/execution-core.md",
-  "skills/loop-report/views/matt-auto/contract.md",
   "skills/loop-report/SKILL.md",
   "skills/model-routing/SKILL.md",
   "skills/loop-gates/SKILL.md",
 ];
-const CHAIN_CAP = 8700;
+const CHAIN_CAP = 5300;
 
 const words = (file) => fs.readFileSync(path.join(root, file), "utf8").split(/\s+/).filter(Boolean).length;
 

@@ -28,7 +28,7 @@ As-Is / To-Be visuals.
 
 | Purpose | Plan session | Build session |
 | :-- | :-- | :-- |
-| Feature | `matt-design` → `kind: feature` | `matt-auto --spec` (core implements in-session) |
+| Feature | `matt-design` → `kind: feature` | `matt-auto --spec` (implements in-session; QA ∥ review on Codex) |
 | Performance / Rust | `matt-design` + `rust-rewrite` steps 1–3 → `kind: optimize` | `autocode init --spec` → `run` |
 | Autoresearch | `matt-design` → `kind: research` (fixed evaluation) | `autocode init --spec` → `run` |
 
@@ -127,8 +127,7 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 `skills/`, installed on every platform):
 
 - **loop-report** — the live progress page of a run and its delivery (system opener →
-  path), plus each loop's view under `views/` (`matt-auto` with its data contract, `autocode`
-  with its templates and prompts)
+  path), plus autocode's view under `views/autocode` with its templates and prompts
 - **model-routing** — Codex · OpenCode · hc only: the Default / Deep task tiers plus the review/QA rule table (`gate-route.mjs`), with the model and
   reasoning-effort pair per platform (Codex `spawn_agent` by role name — the roles live in
   `~/.codex/agents/*.toml` and also pin tier and verbosity —, Claude Code agents, OpenCode, hc
@@ -154,12 +153,11 @@ Long-running delegated loops share one runtime, shipped in **weed-harness** (rep
 
 On top of it, two loops with different graphs:
 
-- **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit`): **matt-design** is the plan session (it also renders the current design as a page on request); **matt-auto** conducts Matt Pocock's main flow
-  (interview → spec → tickets → implementation → optional PR via `--dev`/`--main`; `--spec`
-  starts from a confirmed matt-design spec whose step tags fix the ticket tiers; a rule table picks
-  `full` or the one-ticket `core` mode, see `matt-auto/references/core-mode.md`), publishing
-  its decision graph through loop-report and running independent tickets as parallel hc
-  workers; Codex's final review axes run on Sol; **pr-babysit** shepherds one open PR without merging and
+- **matt-loop** (`plugins/matt-loop-claude/skills/` on Claude Code, `plugins/matt-loop-codex/skills/` elsewhere; the `antigravity` platform gets only `pr-babysit`): **matt-design** is the plan session (it also renders the current design as a page on request); **matt-auto** executes a confirmed
+  matt-design spec in the session itself (tickets in the log, implemented and verified in order,
+  then `qa-gate` and `review-gate` in parallel on the other family, at most two fix cycles, optional
+  PR via `--dev`/`--main` with the `pr-visual` As-Is / To-Be page; see
+  `matt-auto/references/execution-core.md`); **pr-babysit** shepherds one open PR without merging and
   resolves an active merge/rebase (`references/merge-conflicts.md`)
 - **auto-loop** (`plugins/auto-loop-claude/skills/` on Claude Code, `plugins/auto-loop-codex/skills/` elsewhere): **autocode** runs a hypothesis-driven parallel
   improvement loop (`init --spec` replaces its interview with a matt-design spec), publishing its

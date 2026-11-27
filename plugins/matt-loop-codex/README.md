@@ -5,13 +5,13 @@ This directory is the Codex · OpenCode root of the **matt loop**; the Claude Co
 ## Contents
 
 - `.codex-plugin/plugin.json` for Codex plugin metadata
-- `skills/matt-auto` — conductor that drives Matt Pocock's main flow end to end (grilling interview → spec → tracer-bullet tickets → per-ticket implementation); a decision delegate answers implementation-level questions, unresolved material decisions escalate to the human, and prior approval is reused (`--confirm` requests fresh review gates); with `--dev` / `--main` / `--pr <base>` it also opens a PR against that base and shepherds it to merge-ready (pr-babysit with its conflict resolution, push); when `hc` (herdr-core) is available, ready tickets automatically run as parallel visible hc workers, each starting as soon as its blockers merge (`--parallel N` / `--on <machine>` override concurrency and placement) in separate worktrees, optionally on another connected machine, while verification and merging stay with the coordinator
-- `skills/matt-auto/references/execution-core.md` — the execution rules both editions share (frontier dispatch, worker contract, QA/review, change control); the same file ships in `../matt-loop-claude` and `npm test` fails when the copies differ
+- `skills/matt-auto` — executes a confirmed spec in this session: tickets in the log, each implemented and verified in order, then QA and review by the other model family in parallel (at most two fix cycles); material decisions return to the user and `--confirm` adds a ticket-plan gate; with `--dev` / `--main` / `--pr <base>` it shows the As-Is / To-Be page (`pr-visual`), opens a PR against that base and shepherds it to merge-ready (a visible hc `pr-babysit` worker when available, with its conflict resolution)
+- `skills/matt-auto/references/execution-core.md` — the execution rules both editions share (tickets, implement and verify, parallel QA/review, stops, change control); the same file ships in `../matt-loop-claude` and `npm test` fails when the copies differ
 - `skills/pr-babysit` — shepherds one GitHub PR through review and CI without merging it; `references/merge-conflicts.md` is the routed conflict-resolution procedure
 - `skills/matt-design` — the plan session; `references/visualize.md` renders the current design as a page on request
-- Routing — questions select Astra low/xhigh per difficulty; implementation uses `model-routing`'s six Codex pairs and designated Gemini-priority slots with Codex quota fallback; QA and review run through weed-harness `qa-gate` / `review-gate`, whose rule table makes the writer's other model family review (Sol medium / Sonnet by default, one step up on risk)
+- Routing — pr-babysit and conflict work use `model-routing`'s six Codex pairs and designated Gemini-priority slots with Codex quota fallback; QA and review run through weed-harness `qa-gate` / `review-gate`, whose rule table makes the writer's other model family review (Sol medium / Sonnet by default, one step up on risk)
 - `codex/agents/` — Codex roles for `matt-fast`, `matt-default`, `matt-batch`, `matt-standard`, `matt-deep`, `matt-deep-max`, `matt-reviewer`, `matt-answer`, and `matt-answer-deep`, installed to `~/.codex/agents/`; each pins model and effort, while Default also pins standard service tier and low verbosity
-- matt-auto's decision-graph page — the view lives in weed-harness's shared `loop-report` skill (`views/matt-auto`, with `contract.md`), together with the page shell and its delivery (opened once with the system opener, or the path); completion gates follow `loop-gates` — matt-loop requires weed-harness 8.0+
+- Pages — matt-auto has no progress page; the As-Is / To-Be page and matt-design's design page are delivered with weed-harness `loop-report`'s `deliver.py` (opened once with the system opener, or the path); completion gates follow `loop-gates` — matt-loop requires weed-harness 9.0+
 - `opencode/agents/` — task-tier agents installed only for OpenCode; Codex execution uses six allowed pairs, with separate Astra low/xhigh answer roles; large context prioritizes strongest Gemini/max thinking, then Codex on quota exhaustion; unavailable allowed pairs stop dispatch
 - Remaining skill directories are vendored from [mattpocock/skills](https://github.com/mattpocock/skills) and remain directly invocable for partial work
 - `mattpocock.lock.json` — pinned upstream commit and the list of vendored skills
@@ -46,7 +46,7 @@ and verbosity. Two things they cannot carry belong in your own
 [agents]
 default_subagent_model = "gpt-6-luna"      # trivial work; select named roles for other tasks
 default_subagent_reasoning_effort = "low"
-max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; do not go below it
+max_concurrent_threads_per_session = 4       # parallel QA author + reviewer, lookups
 ```
 
 - Do not set a low `model_auto_compact_token_limit` for worker roles: compaction
@@ -63,13 +63,8 @@ max_concurrent_threads_per_session = 4       # matt-auto's --parallel ceiling; d
   medium; bounded background = Terra medium; moderate time-sensitive = Sol low;
   complex = Astra low; escalated = Astra xhigh; review = `review-gate`'s rule table (Sol medium, Sol high on risk). Never use Astra merely
   because a simple edit blocks the user.
-- Questions: `matt-answer` (Astra low) for ordinary explanations/local decisions;
-  `matt-answer-deep` (Astra xhigh) for difficult interacting constraints.
-  Select before each question, including follow-ups; start hard questions on
-  xhigh and return to low for the next easy question. Reuse matching delegates
-  and transfer the current decision log when switching. These roles are read-only.
-- This selects answer delegates, not the parent session's model or effort.
-  Implementation uses its own routes regardless of which model discussed it.
-  See `skills/matt-auto/references/answer-routing.md` for continuity and retries.
+- `matt-answer` / `matt-answer-deep` remain in `model-routing`'s table for
+  read-only question answering; matt-auto itself no longer runs a delegate and
+  answers implementation-level questions in its own session.
 - Legacy `-max` names mean Astra xhigh. Reviewers independently inspect source
   and never fix it. Failed dispatch cannot inherit unspecified defaults.

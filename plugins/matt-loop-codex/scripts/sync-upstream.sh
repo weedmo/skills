@@ -35,7 +35,6 @@ SKILLS=(
   setup-matt-pocock-skills
   tdd
   to-spec
-  to-tickets
   writing-for-agents
 )
 

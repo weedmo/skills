@@ -1,13 +1,13 @@
 ---
 name: loop-report
-description: "Builds and delivers the live progress page of a long-running delegated loop (matt-auto, autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (the page opened once with the system opener, or the path), which keeps the route stable for the whole run. The loops' own views ship here too: `views/matt-auto` (the decision graph) and `views/autocode` (the experiment board, with autocode's templates). Callers run those two scripts and relay the answer; they never open the page themselves. Called by matt-auto and autocode; do not trigger standalone."
+description: "Builds and delivers the live progress page of a long-running delegated loop (autocode, and any loop that runs for minutes to hours on the user's behalf) — one self-contained HTML the user can read while the loop runs and keep afterwards. The build is `assets/render.py` over `assets/shell.html` plus the calling loop's view; the delivery is `assets/deliver.py` (the page opened once with the system opener, or the path), which keeps the route stable for the whole run. The loops' own views ship here too: `views/autocode` (the experiment board, with autocode's templates). Callers run those two scripts and relay the answer; they never open the page themselves. Called by autocode; `deliver.py` also delivers other pages (pr-visual, matt-design's design page). Do not trigger standalone."
 ---
 
 # Loop report (the shared progress page)
 
 A delegated loop runs unattended for a long time. Two things make that bearable for the person who delegated it: they can see where it is without opening a terminal, and the page they are looking at keeps updating. This skill owns both — the page and how it reaches the user — for every loop in this harness, so no loop grows its own copy.
 
-The loop owns its *graph* (matt-auto's decision stages and ticket waves, autocode's hypothesis frontier and metric trend). This skill owns everything around it: the design system, the 진행 상황 header with percent, elapsed time and ETA, blockers, the 결과 panel measured from git, the auto-refresh poll, the theme toggle, the modal — and the delivery.
+The loop owns its *graph* (autocode's hypothesis frontier and metric trend). This skill owns everything around it: the design system, the 진행 상황 header with percent, elapsed time and ETA, blockers, the 결과 panel measured from git, the auto-refresh poll, the theme toggle, the modal — and the delivery.
 
 ## Two scripts, two verbs
 
@@ -25,7 +25,7 @@ The script validates the common contract below, then the view's own `validate.py
 
 **Deliver** — after every build. Which way depends on the platform:
 
-- **Claude Code** — publish the page with the **Artifact tool** on the same file path every time (same path, same URL; favicon on the first publish only) and relay the URL. No probe, no `deliver.py`; without the Artifact tool the page is a path, said once. The weed-harness mod's `/board` pane reads the same `<slug>.data.json` in the terminal (it opens by itself when the file is written under `.autocode/report/` or `docs/agents/matt-auto-log/`); nothing to run for it, and it never replaces the Artifact publish.
+- **Claude Code** — publish the page with the **Artifact tool** on the same file path every time (same path, same URL; favicon on the first publish only) and relay the URL. No probe, no `deliver.py`; without the Artifact tool the page is a path, said once. The weed-harness mod's `/board` pane reads the same `<slug>.data.json` in the terminal (it opens by itself when the file is written under `.autocode/report/`); nothing to run for it, and it never replaces the Artifact publish.
 - **Codex, OpenCode** — `deliver.py`, below.
 
 
@@ -77,14 +77,13 @@ Loops that call these scripts require weed-harness ≥ 3.1 (the version that shi
 
 | View | Loop | Beside the view |
 |---|---|---|
-| `views/matt-auto/` | matt-auto full mode | `contract.md` — the data keys, regeneration points, the `<slug>.edits.json` round-trip |
 | `views/autocode/` | autocode | `reference.md` — interview fields, `program.md` / `state.json` templates, hypothesis schema, verbatim prompts, commit and summary templates, board data |
 
-The loop reads only the section its step names. Each folder also holds `view.html` and the `validate.py` that `render.py` loads from the view's directory.
+The loop reads only the section its step names. The folder also holds `view.html` and the `validate.py` that `render.py` loads from the view's directory.
 
 ## The view interface (for loop authors)
 
-A view is one file, `views/<loop>/view.html` in this skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake opener and `tests/test_matt_auto_view.mjs` the decision renderer — run them after touching either.
+A view is one file, `views/<loop>/view.html` in this skill, with one `<style>` block and one `<script>` block, each tag at column 0. The script assigns `window.LoopView` with any of: `kind`, `meta(data, ctx)`, `progress(data, ctx) → { percent, remainingMin, count } | null`, `blockers(data, ctx)`, `renderProgress(host, ctx)` (inside the 진행 상황 card), `renderOutcome(host, ctx)` (inside 결과, above the file table), `render(host, ctx)` (the main area), `hasUnsavedEdits()`. `ctx` carries the data and the shell's helpers (`el`, `bar`, `stat`, `section`, `kvRow`, `modal`, `clickable`, `shortRef`, time formatters, `prefs`/`setPref`). A `validate.py` next to the view exposes `validate(data) → [errors]`. The shell's CSS classes (`.flow`, `.wcol`, `.tnode`, `.badge`, `.stat`, `.panel`, `.kv`) are the component set; a view adds only what the shell lacks. Read `assets/shell.html`'s header comment and the existing views before writing a new one. `tests/test_deliver.py` runs `deliver.py` against a fake opener — run it after touching the script.
 
 ## Red flags
 

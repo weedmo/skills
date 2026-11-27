@@ -14,17 +14,10 @@ jobs:
         run: python3 -m unittest skills/loop-report/tests/test_deliver.py
       - name: hc worker helper against a fake hc
         run: node --test skills/hc-workers/tests/test_hc_worker.mjs
-      - name: confirmed design decisions remain read-only
-        run: node --test skills/loop-report/tests/test_matt_auto_view.mjs
-      - name: render fixtures with both views
+      - name: render the autocode view fixture
         run: |
           python3 - <<'PY'
           import json, subprocess, sys
-          fx = {"title": "t", "slug": "s", "generated": "2026-01-01", "summary": "s",
-                "progress": {"state": "running", "updated": "2026-01-01T00:00:00Z"},
-                "stages": [{"id": "a", "name": "A", "status": "done", "decisions": []}]}
-          json.dump(fx, open("/tmp/m.json", "w"))
-          subprocess.check_call([sys.executable, "skills/loop-report/assets/render.py", "--data", "/tmp/m.json", "--out", "/tmp/m.html", "--view", "skills/loop-report/views/matt-auto/view.html"])
           fa = {"title": "t", "slug": "autocode", "generated": "2026-01-01", "summary": "s",
                 "progress": {"state": "running", "updated": "2026-01-01T00:00:00Z"},
                 "run": {"branch": "b", "metric": {"name": "m", "direction": "lower", "baseline": 1.0}, "budget": {"done": 0, "max": 4, "parallel": 1}, "strategist": {"tier": "deep"}, "terminatedReason": None},

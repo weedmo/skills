@@ -33,8 +33,6 @@ artifact: none
   and tests. The command is `$autocode init --spec <path>`; confirming this spec
   still does not launch that loop.
 - `artifact`: the design page's delivered route (references/visualize.md), or `none`; no page is required.
-- `mode` (optional): `core` or `full`. It pins matt-auto's execution mode;
-  omitted, matt-auto selects one from its mode table.
 
 Required sections:
 
@@ -47,16 +45,16 @@ Required sections:
 - `## 검토 로그`: questions/critiques, evidence, user corrections, and their effects.
 - `## 수용 기준`: externally observable outcomes the implementation must satisfy.
 - `## 구현 순서`: ordered steps tagged `[deep]` or `[default]`, dependencies, and
-  concrete verify commands with expected results. State manual checks honestly
+  concrete verify commands with expected results. matt-auto turns each step into
+  one ticket and implements them in order; a `[deep]` step raises the review tier. State manual checks honestly
   where no command can decide the result. Deep covers invariants, concurrency,
   core interfaces and logic; default covers bounded implementation and mechanical work.
 - `## 확인`: the user's confirmation and which revision/content it covers.
 
 ## Brief (`--brief`)
 
-A brief is a confirmed spec for small work that matt-auto runs in `core` mode.
-Same frontmatter with `mode: core` always; matt-auto also runs a spec with no
-`## 결정` as a brief in core. The body has only these sections:
+A brief is a confirmed spec for small work: one ticket in matt-auto. Same
+frontmatter; matt-auto also runs a spec with no `## 결정` as a brief. The body has only these sections:
 
 - `## 목표`: what and why, three to five sentences.
 - `## 수용 기준`: numbered; each item names its verify command and expected result.
@@ -66,8 +64,7 @@ Same frontmatter with `mode: core` always; matt-auto also runs a spec with no
 A brief has no `## 결정`. When a choice needs the user (two or more real options),
 it is no longer a brief: continue with the full workflow and the sections above.
 
-Do not copy transient execution routes, terminal handles, or worker ids into the
-contract. `matt-auto` chooses execution details within the confirmed constraints.
+Do not copy transient execution routes or terminal handles into the contract. `matt-auto` chooses execution details within the confirmed constraints.
 Existing `design-map: 1` specs remain valid legacy inputs: keep their decisions,
 `status`, and `metric`; a missing revision is pinned by content hash at execution.
 Do not rewrite an old spec merely to rename its authoring skill.
